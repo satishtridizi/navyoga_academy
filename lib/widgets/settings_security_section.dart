@@ -92,7 +92,13 @@ class SettingsSecuritySection extends StatelessWidget {
 
             style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
 
-            child: const Text("Update Password"),
+            child: const Text(
+              "Update Password",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
 
           const SizedBox(height: 20),
