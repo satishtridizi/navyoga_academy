@@ -1,0 +1,200 @@
+import 'package:flutter/material.dart';
+import '../models/event_model.dart';
+
+class EventCard extends StatelessWidget {
+  final EventModel event;
+  final VoidCallback? onTap;
+  final bool isCompact;
+
+  const EventCard({
+    super.key,
+    required this.event,
+    this.onTap,
+    this.isCompact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _image(),
+
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// TITLE + PRICE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          event.title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        event.price,
+                        style: const TextStyle(
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  /// SEATS
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _chip("${event.seats} registered"),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  /// DESCRIPTION (hide in compact)
+                  if (!isCompact)
+                    Text(
+                      event.description,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+
+                  const SizedBox(height: 10),
+
+                  /// INFO
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 6,
+                    children: [
+                      _info(Icons.calendar_today, event.date),
+                      _info(Icons.location_on, event.location),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 🔹 IMAGE
+  Widget _image() {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          child: Image.network(
+            event.image,
+            height: isCompact ? 140 : 200,
+            width: double.infinity,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 12,
+          left: 12,
+          child: Row(
+            children: event.tags.map((tag) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _tagChip(tag),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 🔹 CHIP
+  Widget _chip(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(text),
+    );
+  }
+
+  Widget _tagChip(String tag) {
+    final isFeatured = tag.toLowerCase() == "featured";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: isFeatured ? Colors.white : _getTagColor(tag),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isFeatured)
+            const Icon(Icons.auto_awesome, size: 14, color: Colors.black),
+          if (isFeatured) const SizedBox(width: 4),
+
+          Text(
+            tag,
+            style: TextStyle(
+              color: isFeatured ? Colors.black : Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getTagColor(String tag) {
+    switch (tag.toLowerCase()) {
+      case "retreat":
+        return Colors.green;
+      case "workshop":
+        return Colors.orange;
+      case "masterclass":
+        return Colors.purple;
+      case "webinar":
+        return Colors.blue;
+      case "special event":
+        return Colors.deepOrange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  /// 🔹 INFO
+  Widget _info(IconData icon, String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: Colors.purple),
+        const SizedBox(width: 4),
+        Text(text),
+      ],
+    );
+  }
+}
