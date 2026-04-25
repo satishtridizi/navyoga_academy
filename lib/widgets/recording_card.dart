@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import '../models/recording_model.dart';
 
 class RecordingCard extends StatelessWidget {
@@ -11,131 +12,146 @@ class RecordingCard extends StatelessWidget {
     final Color color = recording.color;
     final bool isCompleted = recording.isCompleted;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RecordingPlayerScreen(recording: recording),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
 
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
 
-        boxShadow: [BoxShadow(color: color.withOpacity(0.2), blurRadius: 10)],
-      ),
+          boxShadow: [BoxShadow(color: color.withOpacity(0.2), blurRadius: 10)],
+        ),
 
-      child: Column(
-        children: [
-          /// THUMBNAIL
-          Stack(
-            children: [
-              Container(
-                height: 120,
-
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
-                  ),
-
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                ),
-
-                child: const Center(
-                  child: Icon(Icons.videocam, size: 40, color: Colors.white70),
-                ),
-              ),
-
-              const Positioned(
-                right: 10,
-                top: 10,
-
-                child: CircleAvatar(
-                  radius: 14,
-                  backgroundColor: Colors.white,
-
-                  child: Icon(Icons.favorite, size: 16, color: Colors.red),
-                ),
-              ),
-
-              Positioned(
-                right: 10,
-                bottom: 10,
-
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
+        child: Column(
+          children: [
+            /// THUMBNAIL
+            Stack(
+              children: [
+                Container(
+                  height: 120,
 
                   decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      colors: [color, color.withOpacity(0.7)],
+                    ),
+
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                   ),
 
-                  child: Text(
-                    recording.duration,
-
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          /// DETAILS
-          Padding(
-            padding: const EdgeInsets.all(14),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                Text(
-                  recording.title,
-
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                  child: const Center(
+                    child: Icon(
+                      Icons.videocam,
+                      size: 40,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
 
-                const SizedBox(height: 4),
+                const Positioned(
+                  right: 10,
+                  top: 10,
 
-                Text(
-                  recording.trainer,
+                  child: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: Colors.white,
 
-                  style: const TextStyle(color: Colors.blueGrey),
+                    child: Icon(Icons.favorite, size: 16, color: Colors.red),
+                  ),
                 ),
 
-                const SizedBox(height: 10),
+                Positioned(
+                  right: 10,
+                  bottom: 10,
 
-                Row(
-                  children: [
-                    chip(recording.category, color.withOpacity(0.2), color),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
 
-                    const SizedBox(width: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
 
-                    if (isCompleted)
-                      chip("Completed", Colors.green.shade100, Colors.green),
-                  ],
-                ),
+                    child: Text(
+                      recording.duration,
 
-                const SizedBox(height: 10),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("👁 ${recording.views}"),
-
-                    Text("⭐ ${recording.rating}"),
-
-                    Text(recording.date),
-                  ],
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+
+            /// DETAILS
+            Padding(
+              padding: const EdgeInsets.all(14),
+
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Text(
+                    recording.title,
+
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    recording.trainer,
+
+                    style: const TextStyle(color: Colors.blueGrey),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      chip(recording.category, color.withOpacity(0.2), color),
+
+                      const SizedBox(width: 8),
+
+                      if (isCompleted)
+                        chip("Completed", Colors.green.shade100, Colors.green),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                    children: [
+                      Text("👁 ${recording.views}"),
+
+                      Text("⭐ ${recording.rating}"),
+
+                      Text(recording.date),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

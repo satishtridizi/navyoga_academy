@@ -7,29 +7,35 @@ import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
+import 'package:navyoga_academy/screens/log_in.dart';
 
 class DashboardButton extends StatelessWidget {
   const DashboardButton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 70,
-      width: 70,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.dashboard, color: Colors.deepPurple),
-          SizedBox(height: 2),
-          Text("Dashboard", style: TextStyle(fontSize: 10)),
-        ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, AppRoutes.dashboard);
+      },
+      child: Container(
+        height: 70,
+        width: 70,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.dashboard, color: Colors.deepPurple),
+            SizedBox(height: 2),
+            Text("Dashboard", style: TextStyle(fontSize: 10)),
+          ],
+        ),
       ),
     );
   }
@@ -75,13 +81,38 @@ class BottomItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: Colors.deepPurple),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
+    return InkWell(
+      onTap: () {
+        if (label == "My Classes") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MyClassesScreen()),
+          );
+        } else if (label == "Recordings") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const RecordingsDashboard()),
+          );
+        } else if (label == "Attendance") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AttendanceScreen()),
+          );
+        } else if (label == "Profile") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          );
+        }
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.deepPurple),
+          const SizedBox(height: 4),
+          Text(label, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
     );
   }
 }
@@ -187,7 +218,7 @@ class CustomDrawer extends StatelessWidget {
                       Navigator.pop(context);
 
                       if (item["title"] == "Dashboard") {
-                        Navigator.pushNamed(context, AppRoutes.home);
+                        Navigator.pushNamed(context, AppRoutes.dashboard);
                       } else if (item["title"] == "My Classes") {
                         Navigator.push(
                           context,
@@ -256,13 +287,13 @@ class CustomDrawer extends StatelessWidget {
             leading: const Icon(Icons.logout, color: Colors.blueGrey),
             title: const Text("Logout"),
             onTap: () {
-              Navigator.pop(context); // close drawer first
+              Navigator.pop(context); // close drawer
 
-              // if (item["title"] == "Dashboard") {
-              //   // already on dashboard or navigate home
-              // } else if (item["title"] == "My Classes") {
-              //   Navigator.pushNamed(context, AppRoutes.myClasses);
-              // }
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false, // removes all previous routes
+              );
             },
           ),
 

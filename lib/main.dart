@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-//import 'package:navyoga_academy/routes/dashboard_routes.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/dashboard.dart';
@@ -13,9 +12,9 @@ import 'package:navyoga_academy/screens/referrals.dart';
 
 import 'package:navyoga_academy/screens/settings.dart';
 import 'package:navyoga_academy/screens/admin_signin.dart';
-import 'package:navyoga_academy/screens/sign_in.dart';
-import 'package:navyoga_academy/screens/super_admin_signin.dart';
-import 'package:navyoga_academy/screens/sign_in.dart';
+import 'package:navyoga_academy/screens/log_in.dart';
+import 'package:navyoga_academy/screens/sign_up.dart';
+import 'package:navyoga_academy/screens/log_in.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.home,
+      initialRoute: AppRoutes.login,
       routes: AppRoutes.routes,
     );
   }

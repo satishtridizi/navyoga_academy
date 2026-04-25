@@ -1,29 +1,13 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SignInScreen(),
-    );
-  }
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
-
-  @override
-  State<SignInScreen> createState() => _SignInScreenState();
-}
-
-class _SignInScreenState extends State<SignInScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   bool rememberMe = false;
 
   final emailController = TextEditingController();
@@ -95,7 +79,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         const SizedBox(height: 18),
 
                         const Text(
-                          "Sign In",
+                          "Sign up",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -175,7 +159,37 @@ class _SignInScreenState extends State<SignInScreen> {
                             ],
                           ),
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              final email = emailController.text.trim();
+                              final password = passwordController.text.trim();
+
+                              /// ✅ Validation
+                              if (email.isEmpty || password.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Please enter email & password",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              /// ✅ Success message
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Account created successfully"),
+                                ),
+                              );
+
+                              /// ✅ Go back to Login screen
+                              Future.delayed(
+                                const Duration(milliseconds: 500),
+                                () {
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,

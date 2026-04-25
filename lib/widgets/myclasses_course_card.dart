@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:navyoga_academy/routes/myclasses_app_routes.dart';
-import '../models/myclasses_class_model.dart';
-import '../routes/app_routes.dart' hide AppRoutes;
+import 'package:navyoga_academy/models/class_model.dart';
+
+import '../routes/app_routes.dart';
 
 class CourseCard extends StatelessWidget {
   final ClassModel data;
@@ -167,7 +167,7 @@ class CourseCard extends StatelessWidget {
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
-                      AppRoutes.myClasses,
+                      AppRoutes.liveClass,
                       arguments: data,
                     );
                   },

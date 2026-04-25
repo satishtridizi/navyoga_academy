@@ -29,42 +29,76 @@ class InsightCard extends StatelessWidget {
 
   Widget _simpleInsightCard() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
 
       decoration: BoxDecoration(
         color: const Color(0xffFCFBFA),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(color: Colors.grey.shade300),
       ),
 
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// 🔝 TITLE + ICON
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(data.title),
+              Text(
+                data.title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xff64748B),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
 
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: data.color.withOpacity(.14),
-                  borderRadius: BorderRadius.circular(18),
+                  color: data.color.withOpacity(.18),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(data.icon, color: data.color),
+                child: Icon(data.icon, color: data.color, size: 20),
               ),
             ],
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
 
+          /// 🔻 SUBTITLE + VALUE
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(data.subtitle),
+              /// LEFT (subtitle + icon)
+              Row(
+                children: [
+                  Icon(
+                    Icons.trending_up,
+                    size: 16,
+                    color: Colors.green.shade600,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    data.subtitle,
+                    style: const TextStyle(
+                      color: Color(0xff64748B),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+
+              /// RIGHT (value)
               Text(
-                data.value,
-                style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                data.value + (data.unit.isNotEmpty ? " ${data.unit}" : ""),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff1E1B39),
+                ),
               ),
             ],
           ),

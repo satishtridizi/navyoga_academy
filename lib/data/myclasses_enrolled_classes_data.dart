@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/myclasses_class_model.dart';
+import 'package:navyoga_academy/models/class_model.dart';
 
 List<ClassModel> enrolledClasses = [
   ClassModel(

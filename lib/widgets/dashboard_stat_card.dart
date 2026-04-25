@@ -5,7 +5,6 @@ class StatCard extends StatelessWidget {
   final String value;
   final String subtitle;
   final Color color;
-
   final VoidCallback? onTap;
 
   const StatCard(
@@ -21,50 +20,70 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
 
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
 
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
 
+          /// 🌈 SOFT GRADIENT BACKGROUND
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-
-            colors: [color.withOpacity(.16), color.withOpacity(.07)],
+            colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
           ),
+
+          /// 🌫 SOFT SHADOW (NEUMORPHIC FEEL)
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.6),
+              blurRadius: 8,
+              offset: const Offset(-2, -2),
+            ),
+          ],
         ),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// TOP ROW
+            /// 🔝 TOP ROW
             Row(
               children: [
+                /// 🔥 ICON BOX (FLOATING STYLE)
                 Container(
                   padding: const EdgeInsets.all(10),
-
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                    borderRadius: BorderRadius.circular(14),
 
-                  child: Icon(_getIcon(title), color: Colors.white, size: 14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(_getIcon(title), color: Colors.white, size: 16),
                 ),
 
                 const SizedBox(width: 10),
 
+                /// TITLE
                 Expanded(
                   child: Text(
                     title,
-                    maxLines: 2,
-
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xff64748B),
-                      height: 1.4,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -73,19 +92,20 @@ class StatCard extends StatelessWidget {
 
             const Spacer(),
 
-            /// BOTTOM ROW
+            /// 🔻 VALUE + SUBTITLE
             Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Color(0xff1E1B39),
                   ),
                 ),
 
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
 
                 Expanded(
                   child: Text(
@@ -93,7 +113,7 @@ class StatCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: color,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -105,7 +125,12 @@ class StatCard extends StatelessWidget {
     );
   }
 
+  /// 🎯 ICON MAPPING (UPDATED LIKE IMAGE)
   IconData _getIcon(String title) {
+    if (title.contains("Enrolled")) return Icons.menu_book;
+    if (title.contains("Hours")) return Icons.access_time;
+    if (title.contains("Recordings")) return Icons.videocam;
+    if (title.contains("Attendance")) return Icons.trending_up;
     return Icons.star;
   }
 }

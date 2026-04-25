@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/routes/dashboard_routes.dart';
+import 'package:navyoga_academy/models/recording_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_ReferralCode_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_Referral_card.dart';
@@ -130,7 +133,9 @@ class HomeScreen extends StatelessWidget {
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.55,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+              childAspectRatio: 1.3,
 
               children: [
                 StatCard(
@@ -180,49 +185,185 @@ class HomeScreen extends StatelessWidget {
             /// 📅 UPCOMING
             sectionHeader(Icons.calendar_today, "Upcoming Classes"),
 
-            const ClassCard(
+            ClassCard(
               "Advanced Hatha Yoga",
               "Priya Sharma • Today at 6:00 PM",
               "60 min",
+              onJoin: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.liveClass,
+                  arguments: ClassModel(
+                    title: "Advanced Hatha Yoga",
+                    trainer: "Priya Sharma",
+                    rating: "4.8",
+                    level: "Advanced",
+                    duration: "60 min",
+                    students: "24/30",
+                    progress: 0.7,
+                    schedule: "Today at 6:00 PM",
+                    next: "Now",
+                    color: Colors.orange,
+                  ),
+                );
+              },
             ),
-            const ClassCard(
+
+            ClassCard(
               "Pranayama Basics",
               "Rahul Kumar • Tomorrow at 7:00 AM",
               "45 min",
+              onJoin: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.liveClass,
+                  arguments: ClassModel(
+                    title: "Pranayama Basics",
+                    trainer: "Rahul Kumar",
+                    rating: "4.9",
+                    level: "Beginner",
+                    duration: "45 min",
+                    students: "18/25",
+                    progress: 0.5,
+                    schedule: "Tomorrow at 7:00 AM",
+                    next: "Upcoming",
+                    color: Colors.green,
+                  ),
+                );
+              },
             ),
-            const ClassCard(
+
+            ClassCard(
               "Meditation & Mindfulness",
               "Anita Verma • Mar 12",
               "30 min",
+              onJoin: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.liveClass,
+                  arguments: ClassModel(
+                    title: "Meditation & Mindfulness",
+                    trainer: "Anita Verma",
+                    rating: "5.0",
+                    level: "All Levels",
+                    duration: "30 min",
+                    students: "32/40",
+                    progress: 0.8,
+                    schedule: "Mar 12",
+                    next: "Upcoming",
+                    color: Colors.purple,
+                  ),
+                );
+              },
             ),
-            const ClassCard(
+
+            ClassCard(
               "Power Yoga Flow",
               "Vikram Singh • Mar 13",
               "75 min",
+              onJoin: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.liveClass,
+                  arguments: ClassModel(
+                    title: "Power Yoga Flow",
+                    trainer: "Vikram Singh",
+                    rating: "4.7",
+                    level: "Intermediate",
+                    duration: "75 min",
+                    students: "20/25",
+                    progress: 0.4,
+                    schedule: "Mar 13",
+                    next: "Upcoming",
+                    color: Colors.deepOrange,
+                  ),
+                );
+              },
             ),
-
             const SizedBox(height: 30),
 
             /// 🎥 RECORDINGS
             sectionHeader(Icons.videocam, "Recent Recordings"),
 
-            const VideoCard(
+            VideoCard(
               "Introduction to Ashtanga",
               "Priya Sharma • 45:30",
               "234 views",
               "Mar 8",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecordingPlayerScreen(
+                      recording: RecordingModel(
+                        title: "Introduction to Ashtanga",
+                        trainer: "Priya Sharma",
+                        category: "Yoga",
+                        duration: "45:30",
+                        rating: "4.8",
+                        views: "234 views",
+                        date: "Mar 8",
+                        color: Colors.purple,
+                        isCompleted: false,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-            const VideoCard(
+
+            VideoCard(
               "Breathing Techniques",
               "Rahul Kumar • 30:15",
               "189 views",
               "Mar 7",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecordingPlayerScreen(
+                      recording: RecordingModel(
+                        title: "Breathing Techniques",
+                        trainer: "Rahul Kumar",
+                        category: "Pranayama",
+                        duration: "30:15",
+                        rating: "4.9",
+                        views: "189 views",
+                        date: "Mar 7",
+                        color: Colors.green,
+                        isCompleted: false,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
-            const VideoCard(
+
+            VideoCard(
               "Morning Stretch Routine",
               "Anita Verma • 25:00",
               "312 views",
               "Mar 6",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RecordingPlayerScreen(
+                      recording: RecordingModel(
+                        title: "Morning Stretch Routine",
+                        trainer: "Anita Verma",
+                        category: "Yoga",
+                        duration: "25:00",
+                        rating: "5.0",
+                        views: "312 views",
+                        date: "Mar 6",
+                        color: Colors.purple,
+                        isCompleted: true,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 30),

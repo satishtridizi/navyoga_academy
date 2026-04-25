@@ -2,8 +2,14 @@ import 'package:flutter/material.dart';
 
 class ClassCard extends StatelessWidget {
   final String title, subtitle, duration;
-
-  const ClassCard(this.title, this.subtitle, this.duration, {super.key});
+  final VoidCallback? onJoin;
+  const ClassCard(
+    this.title,
+    this.subtitle,
+    this.duration, {
+    super.key,
+    this.onJoin,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +101,7 @@ class ClassCard extends StatelessWidget {
 
           /// JOIN BUTTON
           ElevatedButton(
-            onPressed: () {},
+            onPressed: onJoin,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 91, 0, 111),
               shape: RoundedRectangleBorder(

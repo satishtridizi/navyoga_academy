@@ -1,33 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/Sign_up.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: NavaYugaSigninScreen(),
-    );
-  }
+  State<LoginScreen> createState() => _NavaYugaSigninScreen();
 }
 
-class NavaYugaSigninScreen extends StatefulWidget {
-  const NavaYugaSigninScreen({super.key});
-
-  @override
-  State<NavaYugaSigninScreen> createState() => _NavaYugaSigninScreen();
-}
-
-class _NavaYugaSigninScreen extends State<NavaYugaSigninScreen> {
+class _NavaYugaSigninScreen extends State<LoginScreen> {
   bool rememberMe = false;
   bool obscurePassword = true;
 
-  final emailController = TextEditingController(text: "you@navyoga.com");
+  final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   @override
@@ -92,7 +78,7 @@ class _NavaYugaSigninScreen extends State<NavaYugaSigninScreen> {
                 const SizedBox(height: 6),
                 buildInput(
                   controller: emailController,
-                  hint: "you@navyoga.com",
+                  hint: "Enter your email",
                   icon: Icons.email_outlined,
                 ),
 
@@ -155,7 +141,34 @@ class _NavaYugaSigninScreen extends State<NavaYugaSigninScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final email = emailController.text.trim();
+                      final password = passwordController.text.trim();
+
+                      /// 🔹 Basic validation
+                      if (email.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Please enter email and password"),
+                          ),
+                        );
+                        return;
+                      }
+
+                      /// 🔹 Fake authentication (replace later with API)
+                      if (email == "navyoga@gmail.com" &&
+                          password == "123456") {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          AppRoutes.dashboard,
+                          (route) => false,
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Invalid credentials")),
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6A1A),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -167,7 +180,7 @@ class _NavaYugaSigninScreen extends State<NavaYugaSigninScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Sign In",
+                          "Log In",
                           style: TextStyle(fontSize: 16, color: Colors.white),
                         ),
                         SizedBox(width: 6),
@@ -224,19 +237,27 @@ class _NavaYugaSigninScreen extends State<NavaYugaSigninScreen> {
                 const SizedBox(height: 30),
 
                 /// SIGN UP
-                RichText(
-                  text: const TextSpan(
-                    style: TextStyle(color: Color.fromARGB(255, 66, 66, 66)),
-                    children: [
-                      TextSpan(text: "Don't have an account? "),
-                      TextSpan(
-                        text: "Sign up",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 56, 11, 84),
-                          fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupScreen()),
+                    );
+                  },
+                  child: RichText(
+                    text: const TextSpan(
+                      style: TextStyle(color: Color.fromARGB(255, 66, 66, 66)),
+                      children: [
+                        TextSpan(text: "Don't have an account? "),
+                        TextSpan(
+                          text: "Sign up",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 56, 11, 84),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 

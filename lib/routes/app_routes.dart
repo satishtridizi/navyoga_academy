@@ -3,16 +3,18 @@ import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/payments.dart';
+import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
-
+import 'package:navyoga_academy/screens/log_in.dart';
+import '../screens/live_class_screen.dart';
 import '../screens/dashboard.dart';
 import '../screens/settings.dart';
 import '../screens/myclasses_enroll_screen.dart';
 
 class AppRoutes {
-  static const home = "/";
+  static const dashboard = "/";
   static const settings = "/settings";
   static const enrollClass = "/enroll-class";
   static const myClasses = "/my-classes";
@@ -23,9 +25,12 @@ class AppRoutes {
   static const learning = "/learning";
   static const referral = "/referral";
   static const payments = "/payments";
+  static const liveClass = "/liveClass";
+  static const String login = '/login';
+  static const recordingPlayer = "/recordingPlayer";
   // THIS is what your main.dart is looking for
   static Map<String, WidgetBuilder> routes = {
-    home: (_) => HomeScreen(),
+    dashboard: (_) => HomeScreen(),
 
     settings: (_) => const SettingsScreen(),
 
@@ -44,5 +49,9 @@ class AppRoutes {
     referral: (_) => const ReferralScreen(),
 
     payments: (_) => const SubscriptionScreen(),
+
+    liveClass: (_) => const LiveClassScreen(),
+
+    login: (_) => const LoginScreen(),
   };
 }
