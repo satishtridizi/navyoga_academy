@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/myclasses_available_classes.dart';
 import 'package:navyoga_academy/data/myclasses_enrolled_classes_data.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
 import 'package:navyoga_academy/data/myclasses_stats_data.dart';
@@ -14,6 +15,18 @@ class MyClassesScreen extends StatefulWidget {
 }
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
+  String selectedSection = "enrolled";
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final arg = ModalRoute.of(context)?.settings.arguments;
+
+    if (arg != null && arg is String) {
+      selectedSection = arg;
+    }
+  }
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
@@ -94,55 +107,80 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
               itemBuilder: (context, index) {
                 final item = statsData[index];
 
-                return Container(
-                  margin: const EdgeInsets.all(8),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        (item.color).withOpacity(0.2),
-                        (item.color).withOpacity(0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: item.color,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              item.icon,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                          Text(
-                            item.value,
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                return GestureDetector(
+                  onTap: () {
+                    if (item.title.contains("Enrolled")) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.myClasses,
+                        arguments: "enrolled",
+                      );
+                    } else if (item.title.contains("Completed")) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.myClasses,
+                        arguments: "completed",
+                      );
+                    } else if (item.title.contains("Progress")) {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.myClasses,
+                        arguments: "progress",
+                      );
+                    } else if (item.title.contains("Attendance")) {
+                      Navigator.pushNamed(context, AppRoutes.attendance);
+                    }
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          (item.color).withOpacity(0.2),
+                          (item.color).withOpacity(0.05),
                         ],
                       ),
-
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 30, 30, 30),
-                          fontSize: 14,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: item.color,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                item.icon,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                            Text(
+                              item.value,
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+
+                        Text(
+                          item.title,
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 30, 30, 30),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -214,11 +252,39 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
             const SizedBox(height: 16),
 
             /// 📦 COURSE LIST
-            Column(
-              children: enrolledClasses
-                  .map((e) => CourseCard(data: e))
-                  .toList(),
-            ),
+            /// 📦 COURSE LIST
+            if (selectedSection == "enrolled" ||
+                selectedSection == "completed" ||
+                selectedSection == "progress") ...[
+              Row(
+                children: const [
+                  Icon(Icons.auto_awesome),
+                  SizedBox(width: 10),
+                  Text("Enrolled Classes"),
+                ],
+              ),
+
+              Builder(
+                builder: (context) {
+                  final filteredEnrolled = enrolledClasses.where((e) {
+                    if (selectedSection == "completed") {
+                      return e.progress == 1.0;
+                    }
+                    if (selectedSection == "progress") {
+                      return e.progress > 0 && e.progress < 1;
+                    }
+                    return true;
+                  }).toList();
+
+                  return Column(
+                    children: filteredEnrolled
+                        .map((e) => CourseCard(data: e))
+                        .toList(),
+                  );
+                },
+              ),
+            ],
+
             const SizedBox(height: 24),
 
             /// 🆕 AVAILABLE CLASSES HEADER

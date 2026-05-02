@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/models/profile_field_model.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
 import '../data/profile_data.dart';
 import '../widgets/profile_stat_card.dart';
@@ -7,8 +8,36 @@ import '../widgets/profile_section.dart';
 import '../widgets/profile_field.dart';
 import '../widgets/achievement_card.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final addressController = TextEditingController();
+  List<TextEditingController> medicalControllers = [];
+  @override
+  void initState() {
+    super.initState();
+
+    medicalControllers = ProfileData.medicalInfo
+        .map((e) => TextEditingController(text: e.value))
+        .toList();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +110,66 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  ...ProfileData.personalInfo.map((e) => ProfileField(e)),
+                  Column(
+                    children: [
+                      ProfileField(ProfileData.personalInfo[0], nameController),
+                      ProfileField(
+                        ProfileData.personalInfo[1],
+                        emailController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[2],
+                        phoneController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[3],
+                        addressController,
+                      ),
+                    ],
+                  ),
 
                   const SizedBox(height: 12),
 
-                  _primaryButton("Update Profile", Colors.purple),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          ProfileData.personalInfo[0] = ProfileFieldModel(
+                            label: "Full Name",
+                            value: nameController.text,
+                          );
+
+                          ProfileData.personalInfo[1] = ProfileFieldModel(
+                            label: "Email Address",
+                            value: emailController.text,
+                          );
+
+                          ProfileData.personalInfo[2] = ProfileFieldModel(
+                            label: "Phone Number",
+                            value: phoneController.text,
+                          );
+
+                          ProfileData.personalInfo[3] = ProfileFieldModel(
+                            label: "Address",
+                            value: addressController.text,
+                            isMultiline: true,
+                          );
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        "Update Profile",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -99,7 +183,29 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
 
-                  _secondaryButton("Set New Goal"),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // future: open add goal screen
+                      },
+                      icon: const Icon(
+                        Icons.track_changes,
+                        color: Colors.purple,
+                      ),
+                      label: const Text("Set New Goal"),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.purple,
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -121,11 +227,20 @@ class ProfileScreen extends StatelessWidget {
               title: "Medical Information",
               child: Column(
                 children: [
-                  ...ProfileData.medicalInfo.map((e) => ProfileField(e)),
+                  Column(
+                    children: [
+                      ...ProfileData.medicalInfo.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var item = entry.value;
 
-                  const SizedBox(height: 12),
+                        return ProfileField(item, medicalControllers[index]);
+                      }).toList(),
 
-                  _secondaryButton("Update Medical Info"),
+                      const SizedBox(height: 12),
+
+                      _secondaryButton("Update Medical Info"),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -135,7 +250,23 @@ class ProfileScreen extends StatelessWidget {
               title: "Preferences",
               child: Column(
                 children: [
-                  ...ProfileData.preferences.map((e) => ProfileField(e)),
+                  Column(
+                    children: [
+                      ProfileField(ProfileData.personalInfo[0], nameController),
+                      ProfileField(
+                        ProfileData.personalInfo[1],
+                        emailController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[2],
+                        phoneController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[3],
+                        addressController,
+                      ),
+                    ],
+                  ),
 
                   const SizedBox(height: 12),
 

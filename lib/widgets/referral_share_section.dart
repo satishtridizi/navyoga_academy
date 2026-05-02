@@ -1,23 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ShareSection extends StatelessWidget {
   const ShareSection({super.key});
 
-  Widget _socialButton(String text, Color color, IconData icon) {
+  Widget _socialButton(
+    BuildContext context,
+    String text,
+    Color color,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [color.withOpacity(.9), color]),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: Colors.white, size: 18),
-            const SizedBox(width: 6),
-            Text(text, style: const TextStyle(color: Colors.white)),
-          ],
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [color.withOpacity(.9), color]),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 18),
+              const SizedBox(width: 6),
+              Text(text, style: const TextStyle(color: Colors.white)),
+            ],
+          ),
         ),
       ),
     );
@@ -66,20 +77,34 @@ class ShareSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.deepPurple, Colors.purple],
+              GestureDetector(
+                onTap: () {
+                  const code = "NAVYOGA-SARAH-2026";
+
+                  Clipboard.setData(const ClipboardData(text: code));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Referral code copied 🎉")),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
                   ),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: const Text(
-                  "Copy",
-                  style: TextStyle(color: Colors.white),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.deepPurple, Colors.purple],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy, color: Colors.white, size: 16),
+                      SizedBox(width: 6),
+                      Text("Copy", style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -106,16 +131,32 @@ class ShareSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 12,
+              GestureDetector(
+                onTap: () {
+                  const link = "https://navyoga.academy/join/NAVY";
+
+                  Clipboard.setData(const ClipboardData(text: link));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Referral link copied ✅")),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.deepPurple, Colors.purple],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Text(
+                    "Copy",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: const Text("Copy"),
               ),
             ],
           ),
@@ -128,9 +169,25 @@ class ShareSection extends StatelessWidget {
 
           Row(
             children: [
-              _socialButton("WhatsApp", Colors.green, Icons.chat),
+              _socialButton(
+                context,
+                "WhatsApp",
+                Colors.green,
+                Icons.chat,
+                () async {
+                  final url = Uri.parse(
+                    "https://wa.me/?text=Join NavYoga using my code NAVYOGA-SARAH-2026",
+                  );
+                  await launchUrl(url);
+                },
+              ),
               const SizedBox(width: 10),
-              _socialButton("Email", Colors.blue, Icons.email),
+              _socialButton(context, "Email", Colors.blue, Icons.email, () async {
+                final url = Uri.parse(
+                  "mailto:?subject=Join NavYoga&body=Use my referral code NAVYOGA-SARAH-2026",
+                );
+                await launchUrl(url);
+              }),
             ],
           ),
 
@@ -138,9 +195,31 @@ class ShareSection extends StatelessWidget {
 
           Row(
             children: [
-              _socialButton("Facebook", Colors.blueAccent, Icons.facebook),
+              _socialButton(
+                context,
+                "Facebook",
+                Colors.blueAccent,
+                Icons.facebook,
+                () async {
+                  final url = Uri.parse(
+                    "https://www.facebook.com/sharer/sharer.php?u=https://navyoga.academy/join/NAVY",
+                  );
+                  await launchUrl(url);
+                },
+              ),
               const SizedBox(width: 10),
-              _socialButton("Twitter", Colors.lightBlue, Icons.flutter_dash),
+              _socialButton(
+                context,
+                "Twitter",
+                Colors.lightBlue,
+                Icons.flutter_dash,
+                () async {
+                  final url = Uri.parse(
+                    "https://twitter.com/intent/tweet?text=Join NavYoga using my code NAVYOGA-SARAH-2026",
+                  );
+                  await launchUrl(url);
+                },
+              ),
             ],
           ),
         ],

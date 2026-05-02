@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/models/settings_security_field_model.dart';
 
 class SettingsSecuritySection extends StatelessWidget {
-  final List<Map<String, String>> securityFields;
+  final List<SecurityField> securityFields;
 
   final bool twoFactorEnabled;
 
@@ -64,7 +65,7 @@ class SettingsSecuritySection extends StatelessWidget {
 
               children: [
                 Text(
-                  field["label"]!,
+                  field.label,
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
 
@@ -74,7 +75,7 @@ class SettingsSecuritySection extends StatelessWidget {
                   obscureText: true,
 
                   decoration: InputDecoration(
-                    hintText: field["hint"],
+                    hintText: field.hint,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),

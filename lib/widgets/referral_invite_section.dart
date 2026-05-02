@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:share_plus/share_plus.dart';
 
 class InviteSection extends StatelessWidget {
   const InviteSection({super.key});
@@ -38,17 +40,25 @@ class InviteSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            alignment: Alignment.center,
-            child: const Text(
-              "Share Now",
-              style: TextStyle(color: Colors.deepPurple),
+          InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () {
+              Share.share(
+                "Join NavYoga Academy using my referral code NAVYOGA-SARAH-2026\n\nhttps://navyoga.academy/join/NAVY",
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                "Share Now",
+                style: TextStyle(color: Colors.deepPurple),
+              ),
             ),
           ),
         ],

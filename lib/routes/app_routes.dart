@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
+import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
+import 'package:navyoga_academy/screens/redeem_screen.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
@@ -28,7 +30,9 @@ class AppRoutes {
   static const liveClass = "/liveClass";
   static const String login = '/login';
   static const recordingPlayer = "/recordingPlayer";
-  // THIS is what your main.dart is looking for
+  static const profile = "/profile";
+  static const redeem = "/redeem";
+
   static Map<String, WidgetBuilder> routes = {
     dashboard: (_) => HomeScreen(),
 
@@ -53,5 +57,9 @@ class AppRoutes {
     liveClass: (_) => const LiveClassScreen(),
 
     login: (_) => const LoginScreen(),
+
+    profile: (_) => const ProfileScreen(),
+
+    redeem: (_) => const RedeemScreen(),
   };
 }

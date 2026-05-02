@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/models/profile_field_model.dart';
 
 class ProfileField extends StatelessWidget {
-  final Map<String, dynamic> item;
+  final ProfileFieldModel item;
+  final TextEditingController controller;
 
-  const ProfileField(this.item, {super.key});
+  const ProfileField(this.item, this.controller, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    final multi = (item["isMultiline"] ?? false) as bool;
+    final multi = item.isMultiline;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
@@ -16,7 +18,7 @@ class ProfileField extends StatelessWidget {
         children: [
           /// LABEL
           Text(
-            item["label"] as String,
+            item.label,
             style: const TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 15,
@@ -26,38 +28,25 @@ class ProfileField extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          /// FIELD
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: multi ? 22 : 14,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xffEEF1F5),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.orange.withOpacity(.25)),
-            ),
-            child: Row(
-              crossAxisAlignment: multi
-                  ? CrossAxisAlignment.start
-                  : CrossAxisAlignment.center,
-              children: [
-                if (item["icon"] != null) ...[
-                  Icon(item["icon"], size: 18, color: Colors.blueGrey),
-                  const SizedBox(width: 8),
-                ],
+          /// TEXT FIELD
+          TextField(
+            controller: controller,
+            maxLines: multi ? 3 : 1,
+            decoration: InputDecoration(
+              hintText: item.helperText, // ✅ HERE
+              prefixIcon: item.icon != null ? Icon(item.icon) : null,
 
-                Expanded(
-                  child: Text(
-                    item["value"] as String,
-                    style: const TextStyle(
-                      color: Color(0xff64748B),
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
+              filled: true,
+              fillColor: const Color(0xffEEF1F5),
+
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
+              ),
             ),
           ),
         ],

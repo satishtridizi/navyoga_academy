@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
@@ -98,27 +99,43 @@ class HomeScreen extends StatelessWidget {
                   Positioned(
                     bottom: 16,
                     left: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.auto_awesome_motion, color: Colors.purple),
-                          SizedBox(width: 6),
-                          Text(
-                            "Claim Offer Now",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 89, 0, 105),
-                              fontWeight: FontWeight.bold,
-                            ),
+                    child: GestureDetector(
+                      onTap: () {
+                        const offerText = "NAVYOGA20"; // better real coupon
+
+                        Clipboard.setData(const ClipboardData(text: offerText));
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Coupon copied: NAVYOGA20 🎉"),
                           ),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(
+                              Icons.auto_awesome_motion,
+                              color: Colors.purple,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "Claim Offer Now",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 89, 0, 105),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -144,7 +161,7 @@ class HomeScreen extends StatelessWidget {
                   "+2 this month",
                   Color.fromARGB(255, 255, 89, 24),
                   onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.attendance);
+                    Navigator.pushNamed(context, AppRoutes.myClasses);
                   },
                 ),
 
@@ -154,7 +171,7 @@ class HomeScreen extends StatelessWidget {
                   "+18 this week",
                   Color.fromARGB(255, 169, 43, 191),
                   onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.attendance);
+                    Navigator.pushNamed(context, AppRoutes.selfPaced);
                   },
                 ),
 
@@ -164,7 +181,7 @@ class HomeScreen extends StatelessWidget {
                   "+8 this week",
                   Color.fromARGB(255, 43, 191, 117),
                   onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.attendance);
+                    Navigator.pushNamed(context, AppRoutes.recordings);
                   },
                 ),
 
@@ -376,74 +393,140 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            const AchievementCard(
-              "30-Day Streak",
-              "Attended classes for 30 consecutive days",
-              Color.fromARGB(255, 245, 135, 102),
-              true,
-            ),
-            const AchievementCard(
-              "Early Bird",
-              "Attended 10 morning classes",
-              Color.fromARGB(255, 48, 175, 52),
-              true,
-            ),
-            const AchievementCard(
-              "Meditation Master",
-              "Completed 20 sessions",
-              Colors.grey,
-              false,
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.profile,
+                  arguments: "achievements", // 👈 IMPORTANT
+                );
+              },
+              child: const AchievementCard(
+                "30-Day Streak",
+                "Attended classes for 30 consecutive days",
+                Color.fromARGB(255, 245, 135, 102),
+                true,
+              ),
             ),
 
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.profile,
+                  arguments: "achievements",
+                );
+              },
+              child: const AchievementCard(
+                "Early Bird",
+                "Attended 10 morning classes",
+                Color.fromARGB(255, 48, 175, 52),
+                true,
+              ),
+            ),
+
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.profile,
+                  arguments: "achievements",
+                );
+              },
+              child: const AchievementCard(
+                "Meditation Master",
+                "Completed 20 sessions",
+                Colors.grey,
+                false,
+              ),
+            ),
             const SizedBox(height: 30),
 
             /// ACTIONS
-            const ActionCard(
+            ActionCard(
               "Browse Classes",
               "Explore available courses",
               Colors.deepOrange,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.myClasses);
+              },
             ),
-            const ActionCard("Self-Paced", "Learn at your pace", Colors.purple),
-            const ActionCard(
+            ActionCard(
+              "Self-Paced",
+              "Learn at your pace",
+              Colors.purple,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.selfPaced);
+              },
+            ),
+
+            ActionCard(
               "Watch Recordings",
               "Catch up on sessions",
               Colors.pink,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.recordings);
+              },
             ),
-            const ActionCard(
+
+            ActionCard(
               "View Attendance",
               "Track your progress",
               Colors.green,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.attendance);
+              },
             ),
-            const ActionCard(
+
+            ActionCard(
               "My Profile",
               "Update your details",
               Colors.orange,
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.profile);
+              },
             ),
 
             const SizedBox(height: 30),
 
             /// REFERRAL
+            /// REFERRAL
             sectionHeader(Icons.card_giftcard, "Referral Program"),
 
-            const ReferralCard(
-              "12",
-              "Total Referrals",
-              Colors.orange,
-              "Active",
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.referral);
+              },
+              child: const ReferralCard(
+                "12",
+                "Total Referrals",
+                Colors.orange,
+                "Active",
+              ),
             ),
 
-            const ReferralCard(
-              "₹ 3600",
-              "Total Earned",
-              Colors.purple,
-              "Earned",
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.referral);
+              },
+              child: const ReferralCard(
+                "₹ 3600",
+                "Total Earned",
+                Colors.purple,
+                "Earned",
+              ),
             ),
 
-            const ReferralCard(
-              "3/6",
-              "Achievement Badges",
-              Colors.orange,
-              "Unlocked",
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, AppRoutes.referral);
+              },
+              child: const ReferralCard(
+                "3/6",
+                "Achievement Badges",
+                Colors.orange,
+                "Unlocked",
+              ),
             ),
             const SizedBox(height: 20),
 

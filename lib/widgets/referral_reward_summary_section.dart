@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 
 class RewardSummarySection extends StatelessWidget {
   const RewardSummarySection({super.key});
@@ -86,22 +87,28 @@ class RewardSummarySection extends StatelessWidget {
           const SizedBox(height: 16),
 
           /// 🔹 Button
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
+          InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.redeem);
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF6A1B9A), Color(0xFF8E24AA)],
+                ),
+                borderRadius: BorderRadius.circular(30),
               ),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text("Redeem Rewards", style: TextStyle(color: Colors.white)),
-              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text("Redeem Rewards", style: TextStyle(color: Colors.white)),
+                ],
+              ),
             ),
           ),
 

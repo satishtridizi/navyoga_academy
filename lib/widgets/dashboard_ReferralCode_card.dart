@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReferralCodeCard extends StatelessWidget {
   const ReferralCodeCard({super.key});
@@ -30,31 +32,53 @@ class ReferralCodeCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               /// SHARE ICON
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14),
+              GestureDetector(
+                onTap: () {
+                  print("SHARE CLICKED"); // 👈 DEBUG LINE
+
+                  const referralCode = "NAVYOGA-SARAH-2026";
+
+                  Share.share(
+                    "Join NavYoga Academy using my referral code: $referralCode\n\nGet discounts on your subscription 🎉",
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Icon(Icons.share, color: Colors.white),
                 ),
-                child: const Icon(Icons.share, color: Colors.white),
               ),
 
               /// COPY BUTTON
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.copy, color: Colors.white, size: 16),
-                    SizedBox(width: 6),
-                    Text("Copy", style: TextStyle(color: Colors.white)),
-                  ],
+              GestureDetector(
+                onTap: () {
+                  const code = "NAVYOGA20";
+
+                  Clipboard.setData(const ClipboardData(text: code));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Referral code copied 🎉")),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy, color: Colors.white, size: 16),
+                      SizedBox(width: 6),
+                      Text("Copy", style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -64,7 +88,7 @@ class ReferralCodeCard extends StatelessWidget {
 
           /// CODE
           const Text(
-            "NAVYOGA - SARAH - 2026",
+            "NAVYOGA20",
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,

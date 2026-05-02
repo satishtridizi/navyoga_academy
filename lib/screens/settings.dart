@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/models/settings_privacy_option_model.dart';
+import 'package:navyoga_academy/models/settings_security_field_model.dart';
+import 'package:navyoga_academy/services/settings_service.dart';
 import 'package:navyoga_academy/widgets/settings_notification_tile.dart';
 import 'package:navyoga_academy/widgets/settings_payment_section.dart';
 import 'package:navyoga_academy/widgets/settings_privacy_section.dart';
@@ -13,6 +16,46 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool isPrivacyLoading = true;
+  @override
+  void initState() {
+    super.initState();
+    loadSecurityFields();
+    loadPrivacyOptions();
+  }
+
+  void loadSecurityFields() {
+    /// simulate API (future-ready)
+    final apiResponse = [
+      SecurityField(label: "Current Password", hint: "Enter current password"),
+      SecurityField(label: "New Password", hint: "Enter new password"),
+      SecurityField(label: "Confirm Password", hint: "Re-enter password"),
+    ];
+
+    setState(() {
+      securityFields = apiResponse;
+    });
+  }
+
+  void loadPrivacyOptions() async {
+    try {
+      final data = await SettingsService().fetchPrivacyOptions();
+
+      setState(() {
+        privacyOptions = data;
+        isPrivacyLoading = false; // 👈 IMPORTANT
+      });
+    } catch (e) {
+      setState(() {
+        isPrivacyLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to load privacy settings")),
+      );
+    }
+  }
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   /// 🔥 Notification Settings
@@ -35,19 +78,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ];
 
   /// 🔐 Security Fields
-  final List<Map<String, String>> securityFields = [
-    {"label": "Current Password", "hint": "Enter current password"},
-    {"label": "New Password", "hint": "Enter new password"},
-    {"label": "Confirm New Password", "hint": "Confirm new password"},
-  ];
+  List<SecurityField> securityFields = [];
 
   /// 🔒 Privacy & Data Options
-  final List<Map<String, dynamic>> privacyOptions = [
-    {"title": "Download My Data", "isDanger": false},
-    {"title": "Privacy Policy", "isDanger": false},
-    {"title": "Terms of Service", "isDanger": false},
-    {"title": "Delete Account", "isDanger": true},
-  ];
+  List<PrivacyOption> privacyOptions = [];
 
   /// 💳 Payment Data
   Map<String, dynamic> paymentData = {
@@ -203,15 +237,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             const SizedBox(height: 20),
-            SettingsPrivacySection(
-              privacyOptions: privacyOptions,
-
-              onOptionTap: (title) {
-                if (title == "Delete Account") {
-                  // delete logic
-                }
-              },
-            ),
+            isPrivacyLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SettingsPrivacySection(
+                    privacyOptions: privacyOptions,
+                    onOptionTap: (title) {
+                      if (title == "Delete Account") {
+                        // delete logic
+                      }
+                    },
+                  ),
           ],
         ),
       ),

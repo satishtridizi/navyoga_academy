@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import '../models/recording_model.dart';
 import '../models/recording_stat_model.dart';
 
@@ -30,6 +31,7 @@ class RecordingsData {
       value: "23",
       color: Colors.pink,
       icon: Icons.favorite,
+      route: AppRoutes.attendance,
     ),
   ];
 

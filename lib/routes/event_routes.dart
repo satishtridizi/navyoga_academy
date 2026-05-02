@@ -1,3 +1,3 @@
-class Routes {
-  static const eventDetails = "/event-details";
-}
+// class Routes {
+//   static const eventDetails = "/event-details";
+// }

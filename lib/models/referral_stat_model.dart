@@ -7,6 +7,7 @@ class ReferralStatModel {
   final Color borderColor;
   final Color iconBg;
   final Color iconColor;
+  final String? route;
 
   const ReferralStatModel({
     required this.title,
@@ -15,5 +16,6 @@ class ReferralStatModel {
     required this.borderColor,
     required this.iconBg,
     required this.iconColor,
+    this.route,
   });
 }

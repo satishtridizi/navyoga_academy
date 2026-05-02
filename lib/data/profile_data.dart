@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/achievement_model.dart';
 import 'package:navyoga_academy/models/goal_model.dart';
+import 'package:navyoga_academy/models/profile_field_model.dart';
 import '../models/profile_stat_model.dart';
 
 class ProfileData {
+  /// 📊 STATS (keep as is)
   static const stats = [
     ProfileStat(
       title: "Member Since",
@@ -30,27 +32,37 @@ class ProfileData {
       color: Colors.amber,
     ),
   ];
-  static const personalInfo = [
-    {"label": "Full Name", "value": "Rajesh Kumar"},
-    {
-      "label": "Email Address",
-      "value": "rajesh.kumar@email.com",
-      "icon": Icons.email_outlined,
-    },
-    {
-      "label": "Phone Number",
-      "value": "+91 98765 43210",
-      "icon": Icons.phone_outlined,
-    },
-    {
-      "label": "Address",
-      "value": "Enter your address",
-      "icon": Icons.location_on_outlined,
-      "isMultiline": true,
-    },
+
+  /// 👤 PERSONAL INFO (dynamic + safe structure)
+  static List<ProfileFieldModel> personalInfo = [
+    ProfileFieldModel(
+      label: "Full Name",
+      value: "",
+      helperText: "Enter your full name",
+    ),
+    ProfileFieldModel(
+      label: "Email Address",
+      value: "",
+      icon: Icons.email_outlined,
+      helperText: "Enter your email address",
+    ),
+    ProfileFieldModel(
+      label: "Phone Number",
+      value: "",
+      icon: Icons.phone_outlined,
+      helperText: "Enter your phone number",
+    ),
+    ProfileFieldModel(
+      label: "Address",
+      value: "",
+      icon: Icons.location_on_outlined,
+      isMultiline: true,
+      helperText: "Enter your address",
+    ),
   ];
 
-  static const achievements = [
+  /// 🏆 ACHIEVEMENTS (keep model type)
+  static List<AchievementModel> achievements = [
     AchievementModel(
       emoji: "🔥",
       title: "30-Day Streak",
@@ -66,7 +78,7 @@ class ProfileData {
     AchievementModel(
       emoji: "🧘",
       title: "Meditation Master",
-      subtitle: "Completed 20 meditation sessions",
+      subtitle: "Completed 20 sessions",
       date: "Earned on Feb 28, 2026",
     ),
     AchievementModel(
@@ -88,7 +100,9 @@ class ProfileData {
       date: "Earned on Jan 30, 2026",
     ),
   ];
-  static const goals = [
+
+  /// 🎯 GOALS (keep model type)
+  static List<GoalModel> goals = [
     GoalModel(
       title: "Improve Flexibility",
       progress: 0.75,
@@ -110,29 +124,34 @@ class ProfileData {
       subtitle: "Reach ideal body weight",
     ),
   ];
-  static const medicalInfo = [
-    {"label": "Age", "value": "32"},
-    {"label": "Blood Group", "value": "O+"},
-    {"label": "Emergency Contact", "value": "+91 98765 12345"},
-    {
-      "label": "Medical Conditions (if any)",
-      "value": "List any medical conditions or allergies",
-      "isMultiline": true,
-    },
+
+  /// 🏥 MEDICAL INFO (ADD THIS)
+  static List<ProfileFieldModel> medicalInfo = [
+    ProfileFieldModel(label: "Age", value: "", helperText: "Enter your age"),
+    ProfileFieldModel(
+      label: "Blood Group",
+      value: "",
+      helperText: "Enter your blood group (e.g. O+)",
+    ),
+    ProfileFieldModel(
+      label: "Emergency Contact",
+      value: "",
+      icon: Icons.phone_outlined,
+      helperText: "Enter emergency contact number",
+    ),
+    ProfileFieldModel(
+      label: "Medical Conditions (if any)",
+      value: "",
+      isMultiline: true,
+      helperText: "List any medical conditions or allergies",
+    ),
   ];
 
-  static const preferences = [
-    {"label": "Yoga Experience", "value": "2 years"},
-    {"label": "Current Level", "value": "Intermediate"},
-    {
-      "label": "Areas of Interest",
-      "value": "Hatha, Vinyasa, Pranayama, etc.",
-      "isMultiline": true,
-    },
-    {
-      "label": "Fitness Goals",
-      "value": "What do you want to achieve?",
-      "isMultiline": true,
-    },
+  /// ⚙️ PREFERENCES (convert to model — not Map)
+  static List<ProfileFieldModel> preferences = [
+    ProfileFieldModel(label: "Yoga Experience", value: ""),
+    ProfileFieldModel(label: "Current Level", value: ""),
+    ProfileFieldModel(label: "Areas of Interest", value: "", isMultiline: true),
+    ProfileFieldModel(label: "Fitness Goals", value: "", isMultiline: true),
   ];
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 
 class ShareEarnCard extends StatelessWidget {
   const ShareEarnCard({super.key});
@@ -68,7 +69,9 @@ class ShareEarnCard extends StatelessWidget {
           /// BUTTON
           Center(
             child: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.referral);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple,
                 padding: const EdgeInsets.symmetric(

@@ -1,21 +1,21 @@
-class AppRoutes {
-  static const home = '/';
+// class AppRoutes {
+//   static const home = '/';
 
-  static const myClasses = '/my-classes';
+//   static const myClasses = '/my-classes';
 
-  static const selfPaced = '/self-paced';
+//   static const selfPaced = '/self-paced';
 
-  static const recordings = '/recordings';
+//   static const recordings = '/recordings';
 
-  static const attendance = '/attendance';
+//   static const attendance = '/attendance';
 
-  static const events = '/events';
+//   static const events = '/events';
 
-  static const referrals = '/referrals';
+//   static const referrals = '/referrals';
 
-  static const profile = '/profile';
+//   static const profile = '/profile';
 
-  static const payments = '/payments';
+//   static const payments = '/payments';
 
-  static const settings = '/settings';
-}
+//   static const settings = '/settings';
+// }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/models/settings_privacy_option_model.dart';
 
 class SettingsPrivacySection extends StatelessWidget {
-  final List<Map<String, dynamic>> privacyOptions;
+  final List<PrivacyOption> privacyOptions;
 
   final Function(String title)? onOptionTap;
 
@@ -49,7 +50,7 @@ class SettingsPrivacySection extends StatelessWidget {
             return GestureDetector(
               onTap: () {
                 if (onOptionTap != null) {
-                  onOptionTap!(item["title"]);
+                  onOptionTap!(item.title);
                 }
               },
 
@@ -72,13 +73,13 @@ class SettingsPrivacySection extends StatelessWidget {
                 ),
 
                 child: Text(
-                  item["title"],
+                  item.title,
 
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
 
-                    color: item["isDanger"] ? Colors.red : Colors.black87,
+                    color: item.isDanger ? Colors.red : Colors.black87,
                   ),
                 ),
               ),

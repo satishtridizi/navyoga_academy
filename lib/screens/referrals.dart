@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import '../models/badge_model.dart';
 import 'package:navyoga_academy/widgets/referral_badge_card.dart';
 import 'package:navyoga_academy/widgets/referral_how_it_works_section.dart';
 import 'package:navyoga_academy/widgets/referral_invite_section.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
-import '../models/myclasses_class_model.dart';
 import '../routes/app_routes.dart';
 
 class AvailableClassCard extends StatelessWidget {
