@@ -7,28 +7,28 @@ class AppData {
   /// EVENT STATS
   static const List<StatModel> stats = [
     StatModel(
-      label: "Upcoming Events",
+      label: "Total Events",
       count: "6",
       icon: Icons.event,
       color: Colors.orange,
     ),
 
     StatModel(
-      label: "Workshops",
+      label: "Registered",
       count: "3",
       icon: Icons.school,
       color: Colors.green,
     ),
 
     StatModel(
-      label: "Retreats",
+      label: "Upcoming",
       count: "5",
       icon: Icons.self_improvement,
       color: Colors.purple,
     ),
 
     StatModel(
-      label: "Participants",
+      label: "Feature",
       count: "23",
       icon: Icons.people,
       color: Colors.blue,

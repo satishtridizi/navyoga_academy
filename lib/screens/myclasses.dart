@@ -15,7 +15,10 @@ class MyClassesScreen extends StatefulWidget {
 }
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
+  String selectedLevel = "All Levels";
+  String selectedStatus = "All Status";
   String selectedSection = "enrolled";
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -27,7 +30,36 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
     }
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List getFilteredClasses() {
+    return enrolledClasses.where((e) {
+      /// STATUS FILTER
+      if (selectedStatus == "Completed" && e.progress != 1.0) {
+        return false;
+      }
+
+      if (selectedStatus == "In Progress" &&
+          (e.progress == 0 || e.progress == 1.0)) {
+        return false;
+      }
+
+      /// LEVEL FILTER
+      if (selectedLevel != "All Levels" && e.level != selectedLevel) {
+        return false;
+      }
+
+      /// SECTION FILTER
+      if (selectedSection == "completed") {
+        return e.progress == 1.0;
+      }
+
+      if (selectedSection == "progress") {
+        return e.progress > 0 && e.progress < 1;
+      }
+
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -215,9 +247,26 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                   const SizedBox(height: 14),
                   Row(
                     children: [
-                      Expanded(child: filterBox("All Levels")),
+                      Expanded(
+                        child: filterBox(
+                          selectedLevel,
+                          [
+                            "All Levels",
+                            "Beginner",
+                            "Intermediate",
+                            "Advanced",
+                          ],
+                          (val) => setState(() => selectedLevel = val),
+                        ),
+                      ),
                       const SizedBox(width: 10),
-                      Expanded(child: filterBox("All Status")),
+                      Expanded(
+                        child: filterBox(
+                          selectedStatus,
+                          ["All Status", "Completed", "In Progress"],
+                          (val) => setState(() => selectedStatus = val),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -252,30 +301,12 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
             const SizedBox(height: 16),
 
             /// 📦 COURSE LIST
-            /// 📦 COURSE LIST
             if (selectedSection == "enrolled" ||
                 selectedSection == "completed" ||
                 selectedSection == "progress") ...[
-              Row(
-                children: const [
-                  Icon(Icons.auto_awesome),
-                  SizedBox(width: 10),
-                  Text("Enrolled Classes"),
-                ],
-              ),
-
               Builder(
                 builder: (context) {
-                  final filteredEnrolled = enrolledClasses.where((e) {
-                    if (selectedSection == "completed") {
-                      return e.progress == 1.0;
-                    }
-                    if (selectedSection == "progress") {
-                      return e.progress > 0 && e.progress < 1;
-                    }
-                    return true;
-                  }).toList();
-
+                  final filteredEnrolled = getFilteredClasses();
                   return Column(
                     children: filteredEnrolled
                         .map((e) => CourseCard(data: e))
@@ -323,21 +354,49 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
     );
   }
 
-  Widget filterBox(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(text),
-          const SizedBox(width: 6),
-          const Icon(Icons.keyboard_arrow_down, size: 18),
-        ],
+  Widget filterBox(
+    String value,
+    List<String> options,
+    Function(String) onSelected,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        final selected = await showModalBottomSheet<String>(
+          context: context,
+          builder: (_) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: options
+                  .map(
+                    (e) => ListTile(
+                      title: Text(e),
+                      onTap: () => Navigator.pop(context, e),
+                    ),
+                  )
+                  .toList(),
+            );
+          },
+        );
+
+        if (selected != null) {
+          onSelected(selected);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(value),
+            const SizedBox(width: 6),
+            const Icon(Icons.keyboard_arrow_down, size: 18),
+          ],
+        ),
       ),
     );
   }

@@ -149,9 +149,27 @@ class ProfileData {
 
   /// ⚙️ PREFERENCES (convert to model — not Map)
   static List<ProfileFieldModel> preferences = [
-    ProfileFieldModel(label: "Yoga Experience", value: ""),
-    ProfileFieldModel(label: "Current Level", value: ""),
-    ProfileFieldModel(label: "Areas of Interest", value: "", isMultiline: true),
-    ProfileFieldModel(label: "Fitness Goals", value: "", isMultiline: true),
+    ProfileFieldModel(
+      label: "Yoga Experience",
+      value: "2 years",
+      helperText: "Enter your yoga experience",
+    ),
+    ProfileFieldModel(
+      label: "Current Level",
+      value: "Intermediate",
+      helperText: "Select your level",
+    ),
+    ProfileFieldModel(
+      label: "Areas of Interest",
+      value: "Hatha, Vinyasa, Pranayama, etc.",
+      isMultiline: true,
+      helperText: "Enter your interests",
+    ),
+    ProfileFieldModel(
+      label: "Fitness Goals",
+      value: "",
+      isMultiline: true,
+      helperText: "What do you want to achieve?",
+    ),
   ];
 }

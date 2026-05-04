@@ -1,12 +1,14 @@
 class VideoModel {
   final String title;
-  final String subtitle;
+  final String trainer;
+  final String duration;
   final String views;
   final String date;
 
   const VideoModel({
     required this.title,
-    required this.subtitle,
+    required this.trainer,
+    required this.duration,
     required this.views,
     required this.date,
   });

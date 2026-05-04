@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +16,71 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMe();
+  }
+
+  Future<void> _loadRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('remember_me') ?? false;
+      emailController.text = prefs.getString('saved_email') ?? '';
+    });
+  }
+
+  Future<void> _toggleRememberMe(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('remember_me', value);
+
+    setState(() {
+      rememberMe = value;
+    });
+  }
+
+  Future<void> _handleForgotPassword() async {
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showSnack("Enter your email first");
+      return;
+    }
+
+    _showLoader();
+
+    try {
+      await Future.delayed(const Duration(seconds: 2)); // replace with API
+      Navigator.pop(context);
+      _showSnack("Reset link sent to $email");
+    } catch (e) {
+      Navigator.pop(context);
+      _showSnack("Something went wrong");
+    }
+  }
+
+  void _handleGoogleLogin() {
+    _showSnack("Google login coming soon");
+    // Future: FirebaseAuth.instance.signInWithGoogle()
+  }
+
+  void _handleFacebookLogin() {
+    _showSnack("Facebook login coming soon");
+    // Future: FacebookAuth.instance.login()
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  void _showLoader() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,23 +179,29 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                   children: [
                     Row(
                       children: [
-                        // Checkbox(
-                        //   value: rememberMe,
-                        //   activeColor: const Color(0xFFFF6A1A),
-                        //   onChanged: (val) {
-                        //     setState(() {
-                        //       rememberMe = val!;
-                        //     });
-                        //   },
-                        // ),
-                        const Text("Remember me"),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: rememberMe,
+                              activeColor: const Color(0xFFFF6A1A),
+                              onChanged: (val) {
+                                if (val != null) _toggleRememberMe(val);
+                              },
+                            ),
+                            const Text("Remember me"),
+                          ],
+                        ),
                       ],
                     ),
-                    const Text(
-                      "Forgot password?",
-                      style: TextStyle(
-                        color: Color(0xFFFF6A1A),
-                        fontWeight: FontWeight.w500,
+                    GestureDetector(
+                      onTap: _handleForgotPassword,
+                      child: const Text(
+                        "Forgot password?",
+                        style: TextStyle(
+                          color: Color(0xFFFF6A1A),
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ],
@@ -141,7 +213,8 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      // 👈 make async
                       final email = emailController.text.trim();
                       final password = passwordController.text.trim();
 
@@ -155,9 +228,19 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                         return;
                       }
 
-                      /// 🔹 Fake authentication (replace later with API)
+                      /// 🔹 Fake authentication
                       if (email == "navyoga@gmail.com" &&
                           password == "123456") {
+                        /// ✅ ADD THIS BLOCK HERE
+                        if (rememberMe) {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('saved_email', email);
+                        } else {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.remove('saved_email');
+                        }
+
+                        /// 🔹 Navigate
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           AppRoutes.dashboard,
@@ -222,6 +305,7 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                       child: socialButton(
                         icon: Icons.g_mobiledata,
                         text: "Google",
+                        onTap: _handleGoogleLogin,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -229,6 +313,7 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                       child: socialButton(
                         icon: Icons.facebook,
                         text: "Facebook",
+                        onTap: _handleFacebookLogin,
                       ),
                     ),
                   ],
@@ -317,20 +402,27 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
   }
 
   /// SOCIAL BUTTON
-  Widget socialButton({required IconData icon, required String text}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.black54),
-          const SizedBox(width: 6),
-          Text(text),
-        ],
+  Widget socialButton({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.black54),
+            const SizedBox(width: 6),
+            Text(text),
+          ],
+        ),
       ),
     );
   }

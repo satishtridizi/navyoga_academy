@@ -1,4 +1,4 @@
-import '../models/referral_course_model.dart';
+import '../models/selfpaces_course_model.dart';
 
 class SelfPacedData {
   static List<CourseModel> courses = [
@@ -80,7 +80,7 @@ class SelfPacedData {
 
       rating: "5",
 
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+      image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
       enrolled: true,
       completed: false,
@@ -110,7 +110,7 @@ class SelfPacedData {
 
       rating: "4.9",
 
-      image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+      image: "https://images.unsplash.com/photo-1526401485004-2fda9f3f1c9b",
 
       enrolled: false,
       completed: false,
@@ -139,7 +139,7 @@ class SelfPacedData {
 
       rating: "4.7",
 
-      image: "https://images.unsplash.com/photo-1518611012118-f8474c7f9d55",
+      image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
 
       enrolled: false,
       completed: false,
@@ -169,7 +169,7 @@ class SelfPacedData {
 
       rating: "4.9",
 
-      image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438",
+      image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
       enrolled: false,
       completed: false,

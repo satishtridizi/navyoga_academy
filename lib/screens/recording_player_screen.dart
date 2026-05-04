@@ -91,7 +91,7 @@ class _RecordingPlayerScreenState extends State<RecordingPlayerScreen> {
               /// 🔹 PROGRESS CARD
               Positioned(
                 right: 16,
-                bottom: 110,
+                bottom: 160,
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(

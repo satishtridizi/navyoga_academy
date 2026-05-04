@@ -1,4 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -8,10 +11,126 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final _formKey = GlobalKey<FormState>();
   bool rememberMe = false;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  Future<void> _handleForgotPassword() async {
+    final email = emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showSnack("Enter your email first");
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showSnack("Enter a valid email");
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+
+      Navigator.pop(context);
+
+      _showSnack("Password reset link sent to $email");
+    } catch (e) {
+      Navigator.pop(context);
+      _showSnack("Something went wrong. Try again.");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberMe();
+  }
+
+  Future<void> _loadRememberMe() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      rememberMe = prefs.getBool('remember_me') ?? false;
+    });
+  }
+
+  Future<void> _toggleRememberMe(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('remember_me', value);
+
+    setState(() {
+      rememberMe = value;
+    });
+  }
+
+  void _handleContactAdmin() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Contact Admin",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 20),
+
+              ListTile(
+                leading: const Icon(Icons.email),
+                title: const Text("Email Support"),
+                onTap: () {
+                  Navigator.pop(context);
+                  launchUrl(Uri.parse("mailto:support@navyoga.com"));
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.phone),
+                title: const Text("Call Admin"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSnack("Call feature coming soon");
+                },
+              ),
+
+              ListTile(
+                leading: const Icon(Icons.chat),
+                title: const Text("Chat Support"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSnack("Chat support coming soon");
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  bool _isValidEmail(String email) {
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,218 +160,272 @@ class _SignupScreenState extends State<SignupScreen> {
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  Container(
-                    width: 380,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 25,
-                          color: Colors.black.withValues(alpha: 0.08),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color.fromARGB(255, 255, 174, 0),
-                                Color(0xFF6A11CB),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(18),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 380,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 25,
+                            color: Colors.black.withValues(alpha: 0.08),
                           ),
-                          child: const Icon(
-                            Icons.auto_awesome_outlined,
-                            color: Colors.white,
-                            size: 35,
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        const Text(
-                          "Sign up",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 67, 0, 119),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        const Text(
-                          "Enter your credentials to access your account",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Color.fromARGB(255, 45, 45, 45),
-                          ),
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        buildLabel("Email Address", Icons.email_outlined),
-                        const SizedBox(height: 8),
-                        buildField(
-                          controller: emailController,
-                          hint: "your.email@navyoga.com",
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        buildLabel("Password", Icons.lock_outline),
-                        const SizedBox(height: 8),
-                        buildField(
-                          controller: passwordController,
-                          hint: "Enter your password",
-                          obscure: true,
-                        ),
-
-                        const SizedBox(height: 14),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(children: [const Text("Remember me")]),
-                            const Text(
-                              "Forgot password?",
-                              style: TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.w500,
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 255, 174, 0),
+                                  Color(0xFF6A11CB),
+                                ],
                               ),
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color.fromARGB(255, 246, 103, 1),
-                                Color.fromARGB(255, 85, 0, 177),
-                              ],
+                            child: const Icon(
+                              Icons.auto_awesome_outlined,
+                              color: Colors.white,
+                              size: 35,
                             ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(
-                                  255,
-                                  0,
-                                  0,
-                                  0,
-                                ).withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
                           ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final email = emailController.text.trim();
-                              final password = passwordController.text.trim();
 
-                              /// ✅ Validation
-                              if (email.isEmpty || password.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Please enter email & password",
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
+                          const SizedBox(height: 18),
 
-                              /// ✅ Success message
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Account created successfully"),
-                                ),
-                              );
+                          const Text(
+                            "Sign up",
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 67, 0, 119),
+                            ),
+                          ),
 
-                              /// ✅ Go back to Login screen
-                              Future.delayed(
-                                const Duration(milliseconds: 500),
-                                () {
-                                  Navigator.pop(context);
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
+                          const SizedBox(height: 10),
+
+                          const Text(
+                            "Enter your credentials to access your account",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Color.fromARGB(255, 45, 45, 45),
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          buildLabel("Email Address", Icons.email_outlined),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              hintText: "your.email@navyoga.com",
+                              border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: const Text(
-                              "Sign In",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Email is required";
+                              }
+
+                              final emailRegex = RegExp(
+                                r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+                              );
+
+                              if (!emailRegex.hasMatch(value)) {
+                                return "Enter a valid email address";
+                              }
+
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          buildLabel("Password", Icons.lock_outline),
+                          const SizedBox(height: 8),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              hintText: "Enter 6-digit password",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return "Password is required";
+                              }
+
+                              if (!RegExp(r'^[0-9]{6}$').hasMatch(value)) {
+                                return "Password must be exactly 6 digits";
+                              }
+
+                              return null;
+                            },
                           ),
-                        ),
 
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 14),
 
-                        /// DIVIDER
-                        Container(
-                          height: 1,
-                          width: double.infinity,
-                          color: Colors.orange.withValues(alpha: 0.3),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        /// FOOTER TEXT
-                        RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 39, 39, 39),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              TextSpan(text: "Don't have an account? "),
-                              TextSpan(
-                                text: "Contact Admin",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 50, 0, 104),
-                                  fontWeight: FontWeight.w600,
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: rememberMe,
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        _toggleRememberMe(value);
+                                      }
+                                    },
+                                  ),
+                                  const Text("Remember me"),
+                                ],
+                              ),
+                              GestureDetector(
+                                onTap: _handleForgotPassword,
+                                child: const Text(
+                                  "Forgot password?",
+                                  style: TextStyle(
+                                    color: Colors.deepOrange,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
 
-                  const SizedBox(height: 20),
+                          const SizedBox(height: 18),
 
-                  /// © COPYRIGHT
-                  const Text(
-                    "© 2026 NavYoga Academy. All rights reserved.",
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 47, 47, 47),
-                      fontSize: 12,
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 246, 103, 1),
+                                  Color.fromARGB(255, 85, 0, 177),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    0,
+                                    0,
+                                    0,
+                                  ).withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                /// ✅ Validate form
+                                if (!_formKey.currentState!.validate()) {
+                                  return;
+                                }
+
+                                /// ✅ Success
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Account created successfully",
+                                    ),
+                                  ),
+                                );
+
+                                /// ✅ Navigate back
+                                Future.delayed(
+                                  const Duration(milliseconds: 500),
+                                  () {
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: const Text(
+                                "Sign In",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// DIVIDER
+                          Container(
+                            height: 1,
+                            width: double.infinity,
+                            color: Colors.orange.withValues(alpha: 0.3),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// FOOTER TEXT
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 39, 39, 39),
+                              ),
+                              children: [
+                                TextSpan(text: "Don't have an account? "),
+                                TextSpan(
+                                  text: "Contact Admin",
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 50, 0, 104),
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = _handleContactAdmin,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 20),
+
+                    /// © COPYRIGHT
+                    const Text(
+                      "© 2026 NavYoga Academy. All rights reserved.",
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 47, 47, 47),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

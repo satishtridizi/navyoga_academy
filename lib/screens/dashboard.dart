@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/data/dashboard_data.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/models/class_model.dart';
@@ -15,9 +16,17 @@ import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool showAllUpcoming = false;
+  bool showAllVideos = false;
+  bool showAllReferral = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -200,189 +209,97 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 30),
 
             /// 📅 UPCOMING
-            sectionHeader(Icons.calendar_today, "Upcoming Classes"),
-
-            ClassCard(
-              "Advanced Hatha Yoga",
-              "Priya Sharma • Today at 6:00 PM",
-              "60 min",
-              onJoin: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.liveClass,
-                  arguments: ClassModel(
-                    title: "Advanced Hatha Yoga",
-                    trainer: "Priya Sharma",
-                    rating: "4.8",
-                    level: "Advanced",
-                    duration: "60 min",
-                    students: "24/30",
-                    progress: 0.7,
-                    schedule: "Today at 6:00 PM",
-                    next: "Now",
-                    color: Colors.orange,
-                  ),
-                );
+            sectionHeader(
+              Icons.calendar_today,
+              "Upcoming Classes",
+              onViewAllTap: () {
+                setState(() {
+                  showAllUpcoming = !showAllUpcoming; // 👈 TOGGLE
+                });
               },
             ),
 
-            ClassCard(
-              "Pranayama Basics",
-              "Rahul Kumar • Tomorrow at 7:00 AM",
-              "45 min",
-              onJoin: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.liveClass,
-                  arguments: ClassModel(
-                    title: "Pranayama Basics",
-                    trainer: "Rahul Kumar",
-                    rating: "4.9",
-                    level: "Beginner",
-                    duration: "45 min",
-                    students: "18/25",
-                    progress: 0.5,
-                    schedule: "Tomorrow at 7:00 AM",
-                    next: "Upcoming",
-                    color: Colors.green,
-                  ),
-                );
-              },
-            ),
+            const SizedBox(height: 10),
 
-            ClassCard(
-              "Meditation & Mindfulness",
-              "Anita Verma • Mar 12",
-              "30 min",
-              onJoin: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.liveClass,
-                  arguments: ClassModel(
-                    title: "Meditation & Mindfulness",
-                    trainer: "Anita Verma",
-                    rating: "5.0",
-                    level: "All Levels",
-                    duration: "30 min",
-                    students: "32/40",
-                    progress: 0.8,
-                    schedule: "Mar 12",
-                    next: "Upcoming",
-                    color: Colors.purple,
-                  ),
-                );
-              },
-            ),
+            Column(
+              children: List.generate(
+                showAllUpcoming ? HomeData.classes.length : 2,
+                (index) {
+                  final c = HomeData.classes[index];
 
-            ClassCard(
-              "Power Yoga Flow",
-              "Vikram Singh • Mar 13",
-              "75 min",
-              onJoin: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.liveClass,
-                  arguments: ClassModel(
-                    title: "Power Yoga Flow",
-                    trainer: "Vikram Singh",
-                    rating: "4.7",
-                    level: "Intermediate",
-                    duration: "75 min",
-                    students: "20/25",
-                    progress: 0.4,
-                    schedule: "Mar 13",
-                    next: "Upcoming",
-                    color: Colors.deepOrange,
-                  ),
-                );
-              },
+                  return ClassCard(
+                    c.title,
+                    "${c.trainer} • ${c.schedule}",
+                    c.duration,
+                    onJoin: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.liveClass,
+                        arguments: c, // pass model if needed
+                      );
+                    },
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 30),
 
             /// 🎥 RECORDINGS
-            sectionHeader(Icons.videocam, "Recent Recordings"),
-
-            VideoCard(
-              "Introduction to Ashtanga",
-              "Priya Sharma • 45:30",
-              "234 views",
-              "Mar 8",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RecordingPlayerScreen(
-                      recording: RecordingModel(
-                        title: "Introduction to Ashtanga",
-                        trainer: "Priya Sharma",
-                        category: "Yoga",
-                        duration: "45:30",
-                        rating: "4.8",
-                        views: "234 views",
-                        date: "Mar 8",
-                        color: Colors.purple,
-                        isCompleted: false,
-                      ),
-                    ),
-                  ),
-                );
+            sectionHeader(
+              Icons.videocam,
+              "Recent Recordings",
+              onViewAllTap: () {
+                setState(() {
+                  showAllVideos = !showAllVideos;
+                });
               },
+              viewAllText: showAllVideos ? "Show Less ↑" : "View All →",
             ),
 
-            VideoCard(
-              "Breathing Techniques",
-              "Rahul Kumar • 30:15",
-              "189 views",
-              "Mar 7",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RecordingPlayerScreen(
-                      recording: RecordingModel(
-                        title: "Breathing Techniques",
-                        trainer: "Rahul Kumar",
-                        category: "Pranayama",
-                        duration: "30:15",
-                        rating: "4.9",
-                        views: "189 views",
-                        date: "Mar 7",
-                        color: Colors.green,
-                        isCompleted: false,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+            const SizedBox(height: 10),
 
-            VideoCard(
-              "Morning Stretch Routine",
-              "Anita Verma • 25:00",
-              "312 views",
-              "Mar 6",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RecordingPlayerScreen(
-                      recording: RecordingModel(
-                        title: "Morning Stretch Routine",
-                        trainer: "Anita Verma",
-                        category: "Yoga",
-                        duration: "25:00",
-                        rating: "5.0",
-                        views: "312 views",
-                        date: "Mar 6",
-                        color: Colors.purple,
-                        isCompleted: true,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+            Column(
+              children: List.generate(
+                showAllVideos ? HomeData.videos.length : 2,
+                (index) {
+                  final v = HomeData.videos[index];
 
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: VideoCard(
+                      v.title,
+                      "${v.trainer} • ${v.duration}",
+                      v.views,
+                      v.date,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RecordingPlayerScreen(
+                              recording: RecordingModel(
+                                title: v.title,
+                                trainer: "${v.trainer} • ${v.duration}".split(
+                                  " • ",
+                                )[0], // quick extract
+                                category: "Yoga",
+                                duration: "${v.trainer} • ${v.duration}".split(
+                                  " • ",
+                                )[1],
+                                rating: "4.8",
+                                views: v.views,
+                                date: v.date,
+                                color: Colors.purple,
+                                isCompleted: false,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 30),
 
             /// 🏆 ACHIEVEMENTS
@@ -490,42 +407,35 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 30),
 
             /// REFERRAL
-            /// REFERRAL
-            sectionHeader(Icons.card_giftcard, "Referral Program"),
-
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.referral);
+            sectionHeader(
+              Icons.card_giftcard,
+              "Referral Program",
+              onViewAllTap: () {
+                setState(() {
+                  showAllReferral = !showAllReferral;
+                });
               },
-              child: const ReferralCard(
-                "12",
-                "Total Referrals",
-                Colors.orange,
-                "Active",
-              ),
+              viewAllText: showAllReferral ? "Show Less ↑" : "View All →",
             ),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.referral);
-              },
-              child: const ReferralCard(
-                "₹ 3600",
-                "Total Earned",
-                Colors.purple,
-                "Earned",
-              ),
-            ),
+            const SizedBox(height: 10),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.referral);
-              },
-              child: const ReferralCard(
-                "3/6",
-                "Achievement Badges",
-                Colors.orange,
-                "Unlocked",
+            Column(
+              children: List.generate(
+                showAllReferral ? HomeData.referrals.length : 2,
+                (index) {
+                  final r = HomeData.referrals[index];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, AppRoutes.referral);
+                      },
+                      child: ReferralCard(r.value, r.title, r.color, r.status),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),

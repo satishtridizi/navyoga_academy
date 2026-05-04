@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 
@@ -106,11 +107,25 @@ class EventCard extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
-          child: Image.network(
-            event.image,
+          child: CachedNetworkImage(
+            imageUrl: event.image,
             height: isCompact ? 140 : 200,
             width: double.infinity,
             fit: BoxFit.cover,
+
+            /// 🔄 Loading placeholder
+            placeholder: (context, url) => Container(
+              height: isCompact ? 140 : 200,
+              color: Colors.grey[300],
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+
+            /// ❌ Error fallback
+            errorWidget: (context, url, error) => Container(
+              height: isCompact ? 140 : 200,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image),
+            ),
           ),
         ),
         Positioned(

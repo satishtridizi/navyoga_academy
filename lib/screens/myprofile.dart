@@ -21,11 +21,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
   List<TextEditingController> medicalControllers = [];
+  List<TextEditingController> preferenceControllers = [];
   @override
   void initState() {
     super.initState();
 
     medicalControllers = ProfileData.medicalInfo
+        .map((e) => TextEditingController(text: e.value))
+        .toList();
+
+    preferenceControllers = ProfileData.preferences
         .map((e) => TextEditingController(text: e.value))
         .toList();
   }
@@ -252,19 +257,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Column(
                     children: [
-                      ProfileField(ProfileData.personalInfo[0], nameController),
-                      ProfileField(
-                        ProfileData.personalInfo[1],
-                        emailController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[2],
-                        phoneController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[3],
-                        addressController,
-                      ),
+                      ...ProfileData.preferences.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var item = entry.value;
+
+                        return ProfileField(item, preferenceControllers[index]);
+                      }).toList(),
                     ],
                   ),
 

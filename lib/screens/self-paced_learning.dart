@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/data/self_paced_data.dart';
+import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -10,6 +12,177 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
+  Widget _courseCard(CourseModel course) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.06),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// IMAGE
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+                child: Image.network(
+                  course.image,
+                  height: 220,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 220,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.broken_image, size: 40),
+                    );
+                  },
+                ),
+              ),
+
+              /// LEVEL
+              Positioned(
+                left: 14,
+                bottom: 14,
+                child: _pill(course.level, Colors.white, Colors.deepPurple),
+              ),
+
+              /// RATING
+              Positioned(
+                right: 14,
+                bottom: 14,
+                child: _pill("⭐ ${course.rating}", Colors.white, Colors.black),
+              ),
+
+              /// STATUS
+              if (course.enrolled)
+                Positioned(
+                  top: 16,
+                  right: 14,
+                  child: _pill(
+                    course.completed ? "✓ Completed" : "Enrolled",
+                    Colors.white,
+                    Colors.deepPurple,
+                    borderColor: Colors.deepPurple,
+                  ),
+                ),
+            ],
+          ),
+
+          /// CONTENT
+          Padding(
+            padding: const EdgeInsets.all(26),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  course.title,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  course.description,
+                  style: const TextStyle(color: Colors.blueGrey),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(course.instructor),
+                    Text("🕒 ${course.duration}"),
+                  ],
+                ),
+
+                /// PROGRESS
+                if (course.showProgress) ...[
+                  const SizedBox(height: 16),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(course.lessonsText ?? ""),
+                      Text(
+                        "${((course.progress ?? 0) * 100).toInt()}%",
+                        style: const TextStyle(
+                          color: Colors.deepPurple,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: course.progress ?? 0,
+                      minHeight: 10,
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 20),
+
+                /// CTA BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (course.showEnrollButton) {
+                        handleCTA("enroll");
+                      } else if (course.completed) {
+                        handleCTA("review");
+                      } else {
+                        handleCTA("continue");
+                      }
+                    },
+                    icon: const Icon(Icons.play_arrow),
+                    label: Text(
+                      course.showEnrollButton
+                          ? "Enroll Now"
+                          : course.actionText,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: course.showEnrollButton
+                          ? Colors.deepOrange
+                          : Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedCategory = "All";
 
@@ -22,6 +195,19 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     "Fitness",
     "Wellness",
   ];
+  void handleCTA(String type) {
+    if (type == "continue") {
+      Navigator.pushNamed(context, "/courseDetails");
+    } else if (type == "review") {
+      Navigator.pushNamed(context, "/courseReview");
+    } else if (type == "enroll") {
+      Navigator.pushNamed(context, "/enrollCourse");
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -312,31 +498,13 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
             const SizedBox(height: 50),
 
             Column(
-              children: [
-                _buildCourseCard(),
-
-                const SizedBox(height: 30),
-
-                _buildAdvancedCourseCard(),
-
-                const SizedBox(height: 30),
-
-                _buildPranayamaCourseCard(),
-
-                const SizedBox(height: 30),
-
-                _buildMeditationCourseCard(),
-
-                const SizedBox(height: 30),
-
-                _buildFlexibilityCourseCard(),
-
-                const SizedBox(height: 30),
-
-                _buildRestorativeCourseCard(),
-              ],
+              children: SelfPacedData.courses.map((course) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: _courseCard(course),
+                );
+              }).toList(),
             ),
-
             const SizedBox(height: 40),
           ],
         ),
@@ -406,7 +574,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildCourseCard() {
+  Widget _buildCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -551,7 +719,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("continue"),
 
                     icon: const Icon(Icons.play_arrow),
 
@@ -578,7 +746,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildAdvancedCourseCard() {
+  Widget _buildAdvancedCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -609,7 +777,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
+                  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
 
                   height: 220,
                   width: double.infinity,
@@ -733,7 +901,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("review"),
 
                     icon: const Icon(Icons.play_arrow),
 
@@ -760,7 +928,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildPranayamaCourseCard() {
+  Widget _buildPranayamaCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -791,7 +959,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
+                  "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
                   height: 220,
                   width: double.infinity,
@@ -905,7 +1073,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("continue"),
 
                     icon: const Icon(Icons.play_arrow),
 
@@ -932,7 +1100,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildMeditationCourseCard() {
+  Widget _buildMeditationCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -963,7 +1131,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
+                  "https://images.unsplash.com/photo-1526401485004-2fda9f3f1c9b",
 
                   height: 220,
                   width: double.infinity,
@@ -1030,7 +1198,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("enroll"),
 
                     icon: const Icon(Icons.menu_book_outlined),
 
@@ -1057,7 +1225,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildFlexibilityCourseCard() {
+  Widget _buildFlexibilityCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -1088,7 +1256,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
+                  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
 
                   height: 220,
                   width: double.infinity,
@@ -1155,7 +1323,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("enroll"),
 
                     icon: const Icon(Icons.menu_book_outlined),
 
@@ -1182,7 +1350,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  static Widget _buildRestorativeCourseCard() {
+  Widget _buildRestorativeCourseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 22),
 
@@ -1213,7 +1381,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
+                  "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
                   height: 220,
                   width: double.infinity,
@@ -1280,7 +1448,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   width: double.infinity,
 
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () => handleCTA("enroll"),
 
                     icon: const Icon(Icons.menu_book_outlined),
 

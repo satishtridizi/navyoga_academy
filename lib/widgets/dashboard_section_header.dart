@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 
-Widget sectionHeader(IconData icon, String title, {bool showViewAll = true}) {
+Widget sectionHeader(
+  IconData icon,
+  String title, {
+  bool showViewAll = true,
+  VoidCallback? onViewAllTap,
+  String viewAllText = "View All →",
+}) {
   return Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       Container(
         padding: const EdgeInsets.all(10),
@@ -15,6 +21,7 @@ Widget sectionHeader(IconData icon, String title, {bool showViewAll = true}) {
 
       const SizedBox(width: 10),
 
+      /// 👇 TEXTS TOGETHER
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,18 +34,18 @@ Widget sectionHeader(IconData icon, String title, {bool showViewAll = true}) {
             ),
           ),
 
-          /// 👇 SHOW ONLY WHEN NEEDED
-          if (showViewAll) ...[
-            const SizedBox(height: 4),
-            const Text(
-              "View All →",
-              style: TextStyle(
-                color: Colors.deepPurple,
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
+          if (showViewAll)
+            GestureDetector(
+              onTap: onViewAllTap,
+              child: Text(
+                viewAllText,
+                style: const TextStyle(
+                  color: Colors.deepPurple,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
               ),
             ),
-          ],
         ],
       ),
     ],

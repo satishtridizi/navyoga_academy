@@ -157,6 +157,7 @@ class EventsScreen extends StatelessWidget {
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
+              cacheExtent: 500,
               itemCount: AppData.allEvents.length,
               itemBuilder: (context, index) {
                 return EventCard(
