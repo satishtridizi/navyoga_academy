@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/data/payment_data.dart';
 import 'package:navyoga_academy/data/payments_service.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
+import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/widgets/payment_history_card.dart';
 import 'package:navyoga_academy/widgets/payment_method_card.dart';
 import 'package:navyoga_academy/widgets/payments_header_banner.dart';
 import 'package:navyoga_academy/widgets/payments_plan_card.dart';
 import 'package:navyoga_academy/widgets/payments_subscription_card.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -28,7 +31,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   @override
   Widget build(BuildContext context) {
     final plans = service.getPlans();
-    final cards = service.getPaymentMethods();
+
     final payments = service.getPayments();
 
     return Scaffold(
@@ -104,12 +107,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
                 const SizedBox(height: 20),
 
-                ...plans.map((p) => PlanCard(plan: p)),
+                ...plans.map(
+                  (p) => PlanCard(
+                    plan: p,
+                    currentPlanName: sub.planName, // ✅ pass current plan
+                  ),
+                ),
 
                 const SizedBox(height: 25),
 
-                /// ================= PAYMENT METHODS (FIXED) =================
-                /// ================= PAYMENT METHODS =================
                 /// ================= PAYMENT METHODS =================
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -167,14 +173,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       const SizedBox(height: 16),
 
                       /// CARDS
-                      ...cards.map((c) => paymentCard(c)),
+                      ...PaymentData.methods
+                          .map((c) => paymentCard(c))
+                          .toList(),
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 28),
 
-                /// ================= RECENT PAYMENTS =================
                 /// ================= RECENT PAYMENTS =================
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -203,24 +210,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           ),
 
                           /// 🔥 DOWNLOAD BUTTON
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              border: Border.all(
+                          OutlinedButton.icon(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
                                 color: Colors.deepOrange.withOpacity(0.3),
                               ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
                             ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.download, size: 18),
-                                SizedBox(width: 6),
-                                Text("Download All"),
-                              ],
-                            ),
+                            icon: const Icon(Icons.download, size: 18),
+                            label: const Text("Download All"),
                           ),
                         ],
                       ),
@@ -233,17 +238,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       const SizedBox(height: 20),
 
                       /// BUTTON
-                      Container(
+                      SizedBox(
                         width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 230, 227, 227),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Text(
-                          "View All Payment History",
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PaymentHistoryScreen(payments: payments),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          child: const Text(
+                            "View All Payment History",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 
 Widget paymentCard(PaymentMethod m) {
-  return Container(
+  return AnimatedContainer(
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
     margin: const EdgeInsets.only(bottom: 16),
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(

@@ -3,6 +3,7 @@ import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
+import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
@@ -32,6 +33,7 @@ class AppRoutes {
   static const recordingPlayer = "/recordingPlayer";
   static const profile = "/profile";
   static const redeem = "/redeem";
+  static const paymentHistory = "/paymentHistory";
 
   static Map<String, WidgetBuilder> routes = {
     dashboard: (_) => HomeScreen(),
@@ -61,5 +63,8 @@ class AppRoutes {
     profile: (_) => const ProfileScreen(),
 
     redeem: (_) => const RedeemScreen(),
+
+    AppRoutes.paymentHistory: (context) =>
+        const PaymentHistoryScreen(payments: []),
   };
 }

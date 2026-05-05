@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/models/payments_models.dart';
 import 'package:navyoga_academy/models/settings_privacy_option_model.dart';
 import 'package:navyoga_academy/models/settings_security_field_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/download_data_screen.dart';
+import 'package:navyoga_academy/screens/payment_history_screen.dart';
+import 'package:navyoga_academy/screens/privacy_policy_screen.dart';
+import 'package:navyoga_academy/screens/terms_screen.dart';
 import 'package:navyoga_academy/services/settings_service.dart';
 import 'package:navyoga_academy/widgets/settings_notification_tile.dart';
 import 'package:navyoga_academy/widgets/settings_payment_section.dart';
@@ -16,6 +22,10 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  List<PaymentHistory> paymentHistoryList = [
+    PaymentHistory(title: "Premium Plan", date: "May 2026", amount: "₹999"),
+    PaymentHistory(title: "Premium Plan", date: "April 2026", amount: "₹999"),
+  ];
   bool isPrivacyLoading = true;
   @override
   void initState() {
@@ -233,7 +243,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               onManagePayment: () {},
 
-              onViewPaymentDetails: () {},
+              onViewPaymentDetails: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PaymentHistoryScreen(
+                      payments: paymentHistoryList, // 👈 dynamic data
+                    ),
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 20),
@@ -242,8 +261,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : SettingsPrivacySection(
                     privacyOptions: privacyOptions,
                     onOptionTap: (title) {
-                      if (title == "Delete Account") {
-                        // delete logic
+                      if (title == "Privacy Policy") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
+                          ),
+                        );
+                      } else if (title == "Terms of Service") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TermsScreen(),
+                          ),
+                        );
+                      } else if (title == "Download My Data") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DownloadDataScreen(),
+                          ),
+                        );
+                      } else if (title == "Delete Account") {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Delete Account"),
+                            content: const Text(
+                              "Are you sure you want to delete your account? This action cannot be undone.",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "Cancel",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Account deleted (mock)"),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
                     },
                   ),

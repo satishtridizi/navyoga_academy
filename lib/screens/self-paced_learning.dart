@@ -42,6 +42,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   height: 220,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  cacheWidth: 800,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 220,
@@ -497,13 +498,17 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
             const SizedBox(height: 50),
 
-            Column(
-              children: SelfPacedData.courses.map((course) {
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: SelfPacedData.courses.length,
+              itemBuilder: (context, index) {
+                final course = SelfPacedData.courses[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 20),
                   child: _courseCard(course),
                 );
-              }).toList(),
+              },
             ),
             const SizedBox(height: 40),
           ],

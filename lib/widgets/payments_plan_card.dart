@@ -3,11 +3,16 @@ import 'package:navyoga_academy/models/payments_models.dart';
 
 class PlanCard extends StatelessWidget {
   final Plan plan;
+  final String currentPlanName;
 
-  const PlanCard({super.key, required this.plan});
-
+  const PlanCard({
+    super.key,
+    required this.plan,
+    required this.currentPlanName,
+  });
   @override
   Widget build(BuildContext context) {
+    final bool isCurrent = plan.name == currentPlanName;
     final bool isHighlighted = plan.isPopular;
 
     return Container(
@@ -120,7 +125,8 @@ class PlanCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: plan.isCurrent ? null : () {},
+              onPressed: () {},
+
               style: ElevatedButton.styleFrom(
                 backgroundColor: plan.isCurrent
                     ? Colors
@@ -134,8 +140,12 @@ class PlanCard extends StatelessWidget {
                 elevation: 0,
               ),
               child: Text(
-                plan.isCurrent ? "Current Plan" : "Upgrade Now",
-                style: const TextStyle(fontSize: 16),
+                isCurrent ? "Current Plan" : "Upgrade Now",
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

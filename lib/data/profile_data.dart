@@ -151,19 +151,19 @@ class ProfileData {
   static List<ProfileFieldModel> preferences = [
     ProfileFieldModel(
       label: "Yoga Experience",
-      value: "2 years",
-      helperText: "Enter your yoga experience",
+      value: "",
+      helperText: "Enter your experience (e.g. 2 years)",
     ),
     ProfileFieldModel(
       label: "Current Level",
-      value: "Intermediate",
-      helperText: "Select your level",
+      value: "",
+      helperText: "Beginner / Intermediate / Advanced",
     ),
     ProfileFieldModel(
       label: "Areas of Interest",
-      value: "Hatha, Vinyasa, Pranayama, etc.",
+      value: "",
       isMultiline: true,
-      helperText: "Enter your interests",
+      helperText: "Hatha, Vinyasa, Pranayama, etc.",
     ),
     ProfileFieldModel(
       label: "Fitness Goals",
