@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
+import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _NavaYugaSigninScreen extends State<LoginScreen> {
   bool rememberMe = false;
   bool obscurePassword = true;
+  double _scale = 1;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -146,6 +148,7 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                   controller: emailController,
                   hint: "Enter your email",
                   icon: Icons.email_outlined,
+                  index: 0,
                 ),
 
                 const SizedBox(height: 18),
@@ -169,110 +172,137 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                       });
                     },
                   ),
+                  index: 1,
                 ),
 
                 const SizedBox(height: 12),
 
                 /// REMEMBER + FORGOT
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: rememberMe,
-                              activeColor: const Color(0xFFFF6A1A),
-                              onChanged: (val) {
-                                if (val != null) _toggleRememberMe(val);
-                              },
-                            ),
-                            const Text("Remember me"),
-                          ],
-                        ),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: _handleForgotPassword,
-                      child: const Text(
-                        "Forgot password?",
-                        style: TextStyle(
-                          color: Color(0xFFFF6A1A),
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.underline,
+                AnimatedItem(
+                  index: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: rememberMe,
+                                activeColor: const Color(0xFFFF6A1A),
+                                onChanged: (val) {
+                                  if (val != null) _toggleRememberMe(val);
+                                },
+                              ),
+                              const Text("Remember me"),
+                            ],
+                          ),
+                        ],
+                      ),
+                      GestureDetector(
+                        onTap: _handleForgotPassword,
+                        child: const Text(
+                          "Forgot password?",
+                          style: TextStyle(
+                            color: Color(0xFFFF6A1A),
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 16),
 
-                /// 🔘 SIGN IN BUTTON
+                /// 🔘 log IN BUTTON
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      // 👈 make async
-                      final email = emailController.text.trim();
-                      final password = passwordController.text.trim();
+                  child: AnimatedItem(
+                    index: 3,
+                    child: GestureDetector(
+                      onTapDown: (_) => setState(() => _scale = 0.95),
+                      onTapUp: (_) => setState(() => _scale = 1),
+                      onTapCancel: () => setState(() => _scale = 1),
 
-                      /// 🔹 Basic validation
-                      if (email.isEmpty || password.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please enter email and password"),
+                      child: AnimatedScale(
+                        scale: _scale,
+                        duration: const Duration(milliseconds: 150),
+
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            // 👈 make async
+                            final email = emailController.text.trim();
+                            final password = passwordController.text.trim();
+
+                            /// 🔹 Basic validation
+                            if (email.isEmpty || password.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Please enter email and password",
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+
+                            /// 🔹 Fake authentication
+                            if (email == "navyoga@gmail.com" &&
+                                password == "123456") {
+                              /// ✅ ADD THIS BLOCK HERE
+                              if (rememberMe) {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.setString('saved_email', email);
+                              } else {
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                await prefs.remove('saved_email');
+                              }
+
+                              /// 🔹 Navigate
+                              Navigator.pushNamedAndRemoveUntil(
+                                context,
+                                AppRoutes.dashboard,
+                                (route) => false,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Invalid credentials"),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF6A1A),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                        );
-                        return;
-                      }
-
-                      /// 🔹 Fake authentication
-                      if (email == "navyoga@gmail.com" &&
-                          password == "123456") {
-                        /// ✅ ADD THIS BLOCK HERE
-                        if (rememberMe) {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('saved_email', email);
-                        } else {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.remove('saved_email');
-                        }
-
-                        /// 🔹 Navigate
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          AppRoutes.dashboard,
-                          (route) => false,
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Invalid credentials")),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6A1A),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Log In",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Log In",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                        SizedBox(width: 6),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ],
                     ),
                   ),
                 ),
@@ -380,22 +410,33 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
     required TextEditingController controller,
     required String hint,
     required IconData icon,
+    required int index, // 🔥 ADD THIS
     bool obscure = false,
     Widget? suffix,
   }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.grey),
-        suffixIcon: suffix,
-        hintText: hint,
-        filled: true,
-        fillColor: const Color(0xFFF1EFF5),
-        contentPadding: const EdgeInsets.symmetric(vertical: 14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
+    return AnimatedItem(
+      index: index, // ✅ dynamic index
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon, color: Colors.grey),
+          suffixIcon: suffix,
+          hintText: hint,
+          filled: true,
+          fillColor: const Color(0xFFF1EFF5),
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+
+          // 🔥 ADD FOCUS ANIMATION HERE
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: Color(0xFFFF6A1A), width: 2),
+          ),
         ),
       ),
     );

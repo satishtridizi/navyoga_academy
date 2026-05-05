@@ -67,6 +67,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           final sub = snap.data!;
 
           return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -28,6 +28,7 @@ class _DashboardMainScreenState extends State<DashboardMainScreen> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [

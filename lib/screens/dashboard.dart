@@ -6,6 +6,7 @@ import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
+import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_ReferralCode_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_Referral_card.dart';
@@ -58,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -164,44 +166,54 @@ class _HomeScreenState extends State<HomeScreen> {
               childAspectRatio: 1.3,
 
               children: [
-                StatCard(
-                  "Enrolled Classes",
-                  "8",
-                  "+2 this month",
-                  Color.fromARGB(255, 255, 89, 24),
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.myClasses);
-                  },
+                AnimatedItem(
+                  index: 0,
+                  child: StatCard(
+                    "Enrolled Classes",
+                    "8",
+                    "+2 this month",
+                    Color.fromARGB(255, 255, 89, 24),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.myClasses);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 1,
+                  child: StatCard(
+                    "Hours Completed",
+                    "124",
+                    "+18 this week",
+                    Color.fromARGB(255, 169, 43, 191),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.selfPaced);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 2,
+                  child: StatCard(
+                    "Recordings Watched",
+                    "45",
+                    "+8 this week",
+                    Color.fromARGB(255, 43, 191, 117),
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.recordings);
+                    },
+                  ),
                 ),
 
-                StatCard(
-                  "Hours Completed",
-                  "124",
-                  "+18 this week",
-                  Color.fromARGB(255, 169, 43, 191),
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.selfPaced);
-                  },
-                ),
-
-                StatCard(
-                  "Recordings Watched",
-                  "45",
-                  "+8 this week",
-                  Color.fromARGB(255, 43, 191, 117),
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.recordings);
-                  },
-                ),
-
-                StatCard(
-                  "Attendance Rate",
-                  "92%",
-                  "+5% improvement",
-                  Colors.orange,
-                  onTap: () {
-                    Navigator.pushNamed(context, AppRoutes.attendance);
-                  },
+                AnimatedItem(
+                  index: 3,
+                  child: StatCard(
+                    "Attendance Rate",
+                    "92%",
+                    "+5% improvement",
+                    Colors.orange,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.attendance);
+                    },
+                  ),
                 ),
               ],
             ),
@@ -227,17 +239,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 (index) {
                   final c = HomeData.classes[index];
 
-                  return ClassCard(
-                    c.title,
-                    "${c.trainer} • ${c.schedule}",
-                    c.duration,
-                    onJoin: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.liveClass,
-                        arguments: c, // pass model if needed
-                      );
-                    },
+                  return AnimatedItem(
+                    index: index,
+                    child: ClassCard(
+                      c.title,
+                      "${c.trainer} • ${c.schedule}",
+                      c.duration,
+                      onJoin: () {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.liveClass,
+                          arguments: c,
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -264,37 +279,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 (index) {
                   final v = HomeData.videos[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: VideoCard(
-                      v.title,
-                      "${v.trainer} • ${v.duration}",
-                      v.views,
-                      v.date,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => RecordingPlayerScreen(
-                              recording: RecordingModel(
-                                title: v.title,
-                                trainer: "${v.trainer} • ${v.duration}".split(
-                                  " • ",
-                                )[0], // quick extract
-                                category: "Yoga",
-                                duration: "${v.trainer} • ${v.duration}".split(
-                                  " • ",
-                                )[1],
-                                rating: "4.8",
-                                views: v.views,
-                                date: v.date,
-                                color: Colors.purple,
-                                isCompleted: false,
+                  return AnimatedItem(
+                    index: index,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: VideoCard(
+                        v.title,
+                        "${v.trainer} • ${v.duration}",
+                        v.views,
+                        v.date,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => RecordingPlayerScreen(
+                                recording: RecordingModel(
+                                  title: v.title,
+                                  trainer: "${v.trainer} • ${v.duration}".split(
+                                    " • ",
+                                  )[0], // quick extract
+                                  category: "Yoga",
+                                  duration: "${v.trainer} • ${v.duration}"
+                                      .split(" • ")[1],
+                                  rating: "4.8",
+                                  views: v.views,
+                                  date: v.date,
+                                  color: Colors.purple,
+                                  isCompleted: false,
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   );
                 },
@@ -310,98 +327,126 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.profile,
-                  arguments: "achievements", // 👈 IMPORTANT
-                );
-              },
-              child: const AchievementCard(
-                "30-Day Streak",
-                "Attended classes for 30 consecutive days",
-                Color.fromARGB(255, 245, 135, 102),
-                true,
-              ),
+            Column(
+              children: [
+                AnimatedItem(
+                  index: 0,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.profile,
+                        arguments: "achievements", // 👈 IMPORTANT
+                      );
+                    },
+                    child: const AchievementCard(
+                      "30-Day Streak",
+                      "Attended classes for 30 consecutive days",
+                      Color.fromARGB(255, 245, 135, 102),
+                      true,
+                    ),
+                  ),
+                ),
+                AnimatedItem(
+                  index: 1,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.profile,
+                        arguments: "achievements",
+                      );
+                    },
+                    child: const AchievementCard(
+                      "Early Bird",
+                      "Attended 10 morning classes",
+                      Color.fromARGB(255, 48, 175, 52),
+                      true,
+                    ),
+                  ),
+                ),
+                AnimatedItem(
+                  index: 2,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.profile,
+                        arguments: "achievements",
+                      );
+                    },
+                    child: const AchievementCard(
+                      "Meditation Master",
+                      "Completed 20 sessions",
+                      Colors.grey,
+                      false,
+                    ),
+                  ),
+                ),
+              ],
             ),
 
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.profile,
-                  arguments: "achievements",
-                );
-              },
-              child: const AchievementCard(
-                "Early Bird",
-                "Attended 10 morning classes",
-                Color.fromARGB(255, 48, 175, 52),
-                true,
-              ),
-            ),
-
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.profile,
-                  arguments: "achievements",
-                );
-              },
-              child: const AchievementCard(
-                "Meditation Master",
-                "Completed 20 sessions",
-                Colors.grey,
-                false,
-              ),
-            ),
             const SizedBox(height: 30),
 
             /// ACTIONS
-            ActionCard(
-              "Browse Classes",
-              "Explore available courses",
-              Colors.deepOrange,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.myClasses);
-              },
-            ),
-            ActionCard(
-              "Self-Paced",
-              "Learn at your pace",
-              Colors.purple,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.selfPaced);
-              },
-            ),
-
-            ActionCard(
-              "Watch Recordings",
-              "Catch up on sessions",
-              Colors.pink,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.recordings);
-              },
-            ),
-
-            ActionCard(
-              "View Attendance",
-              "Track your progress",
-              Colors.green,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.attendance);
-              },
-            ),
-
-            ActionCard(
-              "My Profile",
-              "Update your details",
-              Colors.orange,
-              onTap: () {
-                Navigator.pushNamed(context, AppRoutes.profile);
-              },
+            Column(
+              children: [
+                AnimatedItem(
+                  index: 0,
+                  child: ActionCard(
+                    "Browse Classes",
+                    "Explore available courses",
+                    Colors.deepOrange,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.myClasses);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 1,
+                  child: ActionCard(
+                    "Self-Paced",
+                    "Learn at your pace",
+                    Colors.purple,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.selfPaced);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 2,
+                  child: ActionCard(
+                    "Watch Recordings",
+                    "Catch up on sessions",
+                    Colors.pink,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.recordings);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 3,
+                  child: ActionCard(
+                    "View Attendance",
+                    "Track your progress",
+                    Colors.green,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.attendance);
+                    },
+                  ),
+                ),
+                AnimatedItem(
+                  index: 4,
+                  child: ActionCard(
+                    "My Profile",
+                    "Update your details",
+                    Colors.orange,
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.profile);
+                    },
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 30),
@@ -426,13 +471,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 (index) {
                   final r = HomeData.referrals[index];
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRoutes.referral);
-                      },
-                      child: ReferralCard(r.value, r.title, r.color, r.status),
+                  return AnimatedItem(
+                    index: index,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.referral);
+                        },
+                        child: ReferralCard(
+                          r.value,
+                          r.title,
+                          r.color,
+                          r.status,
+                        ),
+                      ),
                     ),
                   );
                 },

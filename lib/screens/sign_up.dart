@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -159,6 +160,7 @@ class _SignupScreenState extends State<SignupScreen> {
           ),
           Center(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Form(
                 key: _formKey,
@@ -223,89 +225,128 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           buildLabel("Email Address", Icons.email_outlined),
                           const SizedBox(height: 8),
-                          TextFormField(
-                            controller: emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              hintText: "your.email@navyoga.com",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
+                          Column(
+                            children: [
+                              AnimatedItem(
+                                index: 0,
+                                child: TextFormField(
+                                  controller: emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  decoration: InputDecoration(
+                                    labelText: "Email Address",
+                                    hintText: "your.email@navyoga.com",
+
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Colors.deepOrange,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Email is required";
+                                    }
+
+                                    final emailRegex = RegExp(
+                                      r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
+                                    );
+
+                                    if (!emailRegex.hasMatch(value)) {
+                                      return "Enter a valid email address";
+                                    }
+
+                                    return null;
+                                  },
+                                ),
                               ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Email is required";
-                              }
-
-                              final emailRegex = RegExp(
-                                r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$',
-                              );
-
-                              if (!emailRegex.hasMatch(value)) {
-                                return "Enter a valid email address";
-                              }
-
-                              return null;
-                            },
+                            ],
                           ),
 
                           const SizedBox(height: 20),
 
                           buildLabel("Password", Icons.lock_outline),
                           const SizedBox(height: 8),
-                          TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
-                            keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
-                              hintText: "Enter 6-digit password",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
+                          Column(
+                            children: [
+                              AnimatedItem(
+                                index: 1,
+                                child: TextFormField(
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    labelText: "Password",
+                                    hintText: "Enter 6-digit password",
+
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      borderSide: const BorderSide(
+                                        color: Colors.deepOrange,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Password is required";
+                                    }
+
+                                    if (!RegExp(
+                                      r'^[0-9]{6}$',
+                                    ).hasMatch(value)) {
+                                      return "Password must be exactly 6 digits";
+                                    }
+
+                                    return null;
+                                  },
+                                ),
                               ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Password is required";
-                              }
-
-                              if (!RegExp(r'^[0-9]{6}$').hasMatch(value)) {
-                                return "Password must be exactly 6 digits";
-                              }
-
-                              return null;
-                            },
+                            ],
                           ),
 
                           const SizedBox(height: 14),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: rememberMe,
-                                    onChanged: (value) {
-                                      if (value != null) {
-                                        _toggleRememberMe(value);
-                                      }
-                                    },
-                                  ),
-                                  const Text("Remember me"),
-                                ],
-                              ),
-                              GestureDetector(
-                                onTap: _handleForgotPassword,
-                                child: const Text(
-                                  "Forgot password?",
-                                  style: TextStyle(
-                                    color: Colors.deepOrange,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
+                          AnimatedItem(
+                            index: 2,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: rememberMe,
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          _toggleRememberMe(value);
+                                        }
+                                      },
+                                    ),
+                                    const Text("Remember me"),
+                                  ],
+                                ),
+                                GestureDetector(
+                                  onTap: _handleForgotPassword,
+                                  child: const Text(
+                                    "Forgot password?",
+                                    style: TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: TextDecoration.underline,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
 
                           const SizedBox(height: 18),
@@ -333,48 +374,57 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ],
                             ),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                /// ✅ Validate form
-                                if (!_formKey.currentState!.validate()) {
-                                  return;
-                                }
+                            child: Column(
+                              children: [
+                                AnimatedItem(
+                                  index: 3,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      /// ✅ Validate form
+                                      if (!_formKey.currentState!.validate()) {
+                                        return;
+                                      }
 
-                                /// ✅ Success
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Account created successfully",
+                                      /// ✅ Success
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Account created successfully",
+                                          ),
+                                        ),
+                                      );
+
+                                      /// ✅ Navigate back
+                                      Future.delayed(
+                                        const Duration(milliseconds: 500),
+                                        () {
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.transparent,
+                                      shadowColor: Colors.transparent,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 10,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      "Sign In",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
-                                );
-
-                                /// ✅ Navigate back
-                                Future.delayed(
-                                  const Duration(milliseconds: 500),
-                                  () {
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                              child: const Text(
-                                "Sign In",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              ],
                             ),
                           ),
 
@@ -390,25 +440,37 @@ class _SignupScreenState extends State<SignupScreen> {
                           const SizedBox(height: 12),
 
                           /// FOOTER TEXT
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 39, 39, 39),
-                              ),
-                              children: [
-                                TextSpan(text: "Don't have an account? "),
-                                TextSpan(
-                                  text: "Contact Admin",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 50, 0, 104),
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
+                          Column(
+                            children: [
+                              AnimatedItem(
+                                index: 4,
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 39, 39, 39),
+                                    ),
+                                    children: [
+                                      TextSpan(text: "Don't have an account? "),
+                                      TextSpan(
+                                        text: "Contact Admin",
+                                        style: TextStyle(
+                                          color: Color.fromARGB(
+                                            255,
+                                            50,
+                                            0,
+                                            104,
+                                          ),
+                                          fontWeight: FontWeight.w600,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = _handleContactAdmin,
+                                      ),
+                                    ],
                                   ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = _handleContactAdmin,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
