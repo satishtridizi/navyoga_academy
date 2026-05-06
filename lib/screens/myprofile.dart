@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/profile_field_model.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
 import '../data/profile_data.dart';
 import '../widgets/profile_stat_card.dart';
@@ -48,10 +48,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      currentIndex: 4,
       drawer: const CustomDrawer(),
-      backgroundColor: Colors.transparent,
 
+      //backgroundColor: Colors.transparent,
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
@@ -67,230 +68,222 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
 
-      body: AppBackground(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(16),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// 🔥 HEADER
-              AnimatedItem(
-                index: 0,
-                child: Text(
-                  "My Profile",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// 🔥 HEADER
+            AnimatedItem(
+              index: 0,
+              child: Text(
+                "My Profile",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            AnimatedItem(
+              index: 1,
+
+              child: const Text(
+                "Manage your personal information and track your progress",
+                style: TextStyle(color: Colors.blueGrey),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// 📊 STATS
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: ProfileData.stats.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.1,
+              ),
+              itemBuilder: (_, i) => ProfileStatCard(ProfileData.stats[i]),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// 👤 PERSONAL INFO
+            ProfileSection(
+              title: "Personal Information",
+              child: Column(
+                children: [
+                  _buildAvatar(),
+
+                  const SizedBox(height: 20),
+
+                  Column(
+                    children: [
+                      ProfileField(ProfileData.personalInfo[0], nameController),
+                      ProfileField(
+                        ProfileData.personalInfo[1],
+                        emailController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[2],
+                        phoneController,
+                      ),
+                      ProfileField(
+                        ProfileData.personalInfo[3],
+                        addressController,
+                      ),
+                    ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 6),
 
-              AnimatedItem(
-                index: 1,
+                  const SizedBox(height: 12),
 
-                child: const Text(
-                  "Manage your personal information and track your progress",
-                  style: TextStyle(color: Colors.blueGrey),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// 📊 STATS
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: ProfileData.stats.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.1,
-                ),
-                itemBuilder: (_, i) => ProfileStatCard(ProfileData.stats[i]),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// 👤 PERSONAL INFO
-              ProfileSection(
-                title: "Personal Information",
-                child: Column(
-                  children: [
-                    _buildAvatar(),
-
-                    const SizedBox(height: 20),
-
-                    Column(
-                      children: [
-                        ProfileField(
-                          ProfileData.personalInfo[0],
-                          nameController,
-                        ),
-                        ProfileField(
-                          ProfileData.personalInfo[1],
-                          emailController,
-                        ),
-                        ProfileField(
-                          ProfileData.personalInfo[2],
-                          phoneController,
-                        ),
-                        ProfileField(
-                          ProfileData.personalInfo[3],
-                          addressController,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            ProfileData.personalInfo[0] = ProfileFieldModel(
-                              label: "Full Name",
-                              value: nameController.text,
-                            );
-
-                            ProfileData.personalInfo[1] = ProfileFieldModel(
-                              label: "Email Address",
-                              value: emailController.text,
-                            );
-
-                            ProfileData.personalInfo[2] = ProfileFieldModel(
-                              label: "Phone Number",
-                              value: phoneController.text,
-                            );
-
-                            ProfileData.personalInfo[3] = ProfileFieldModel(
-                              label: "Address",
-                              value: addressController.text,
-                              isMultiline: true,
-                            );
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: const Text(
-                          "Update Profile",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              /// 🎯 HEALTH GOALS
-              ProfileSection(
-                title: "Health Goals",
-                child: Column(
-                  children: [
-                    ...ProfileData.goals.map((e) => GoalWidget(data: e)),
-
-                    const SizedBox(height: 16),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          // future: open add goal screen
-                        },
-                        icon: const Icon(
-                          Icons.track_changes,
-                          color: Colors.purple,
-                        ),
-                        label: const Text("Set New Goal"),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Colors.purple,
-                            width: 1.5,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
-              ProfileSection(
-                title: "Your Achievements",
-                child: Column(
-                  children: [
-                    ...ProfileData.achievements.map(
-                      (e) => AchievementCard(data: e),
-                    ),
-                  ],
-                ),
-              ),
-
-              /// 🏥 MEDICAL INFO
-              ProfileSection(
-                title: "Medical Information",
-                child: Column(
-                  children: [
-                    Column(
-                      children: [
-                        ...ProfileData.medicalInfo.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          var item = entry.value;
-
-                          return ProfileField(item, medicalControllers[index]);
-                        }).toList(),
-
-                        const SizedBox(height: 12),
-
-                        _secondaryButton("Update Medical Info"),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              /// ⚙️ PREFERENCES
-              ProfileSection(
-                title: "Preferences",
-                child: Column(
-                  children: [
-                    Column(
-                      children: [
-                        ...ProfileData.preferences.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          var item = entry.value;
-
-                          return ProfileField(
-                            item,
-                            preferenceControllers[index],
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          ProfileData.personalInfo[0] = ProfileFieldModel(
+                            label: "Full Name",
+                            value: nameController.text,
                           );
-                        }).toList(),
-                      ],
+
+                          ProfileData.personalInfo[1] = ProfileFieldModel(
+                            label: "Email Address",
+                            value: emailController.text,
+                          );
+
+                          ProfileData.personalInfo[2] = ProfileFieldModel(
+                            label: "Phone Number",
+                            value: phoneController.text,
+                          );
+
+                          ProfileData.personalInfo[3] = ProfileFieldModel(
+                            label: "Address",
+                            value: addressController.text,
+                            isMultiline: true,
+                          );
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        "Update Profile",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    _primaryButton("Update Preferences", Colors.deepOrange),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+
+            /// 🎯 HEALTH GOALS
+            ProfileSection(
+              title: "Health Goals",
+              child: Column(
+                children: [
+                  ...ProfileData.goals.map((e) => GoalWidget(data: e)),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        // future: open add goal screen
+                      },
+                      icon: const Icon(
+                        Icons.track_changes,
+                        color: Colors.purple,
+                      ),
+                      label: const Text("Set New Goal"),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Colors.purple,
+                          width: 1.5,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
+            ProfileSection(
+              title: "Your Achievements",
+              child: Column(
+                children: [
+                  ...ProfileData.achievements.map(
+                    (e) => AchievementCard(data: e),
+                  ),
+                ],
+              ),
+            ),
+
+            /// 🏥 MEDICAL INFO
+            ProfileSection(
+              title: "Medical Information",
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      ...ProfileData.medicalInfo.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var item = entry.value;
+
+                        return ProfileField(item, medicalControllers[index]);
+                      }).toList(),
+
+                      const SizedBox(height: 12),
+
+                      _secondaryButton("Update Medical Info"),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            /// ⚙️ PREFERENCES
+            ProfileSection(
+              title: "Preferences",
+              child: Column(
+                children: [
+                  Column(
+                    children: [
+                      ...ProfileData.preferences.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        var item = entry.value;
+
+                        return ProfileField(item, preferenceControllers[index]);
+                      }).toList(),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  _primaryButton("Update Preferences", Colors.deepOrange),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );

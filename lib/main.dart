@@ -26,10 +26,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      /// ✅ GLOBAL SCROLL FIX
       builder: (context, child) {
         return ScrollConfiguration(
-          behavior: NoGlowScrollBehavior(),
+          behavior: const MaterialScrollBehavior().copyWith(overscroll: false),
           child: child!,
         );
       },

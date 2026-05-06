@@ -4,6 +4,7 @@ import 'package:navyoga_academy/data/self_paced_data.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -234,11 +235,12 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      currentIndex: 2,
       key: _scaffoldKey,
       drawer: const CustomDrawer(),
-      backgroundColor: Colors.transparent,
 
+      // backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -260,342 +262,340 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         ),
       ),
 
-      body: AppBackground(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            children: [
-              /// TOP GRADIENT SECTION
-              /// TOP GRADIENT SECTION
-              Animate(
-                effects: const [
-                  FadeEffect(duration: Duration(milliseconds: 500)),
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          children: [
+            /// TOP GRADIENT SECTION
+            /// TOP GRADIENT SECTION
+            Animate(
+              effects: const [
+                FadeEffect(duration: Duration(milliseconds: 500)),
 
-                  SlideEffect(
-                    begin: Offset(0, -0.1),
-                    end: Offset(0, 0),
-                    duration: Duration(milliseconds: 500),
-                  ),
-                ],
+                SlideEffect(
+                  begin: Offset(0, -0.1),
+                  end: Offset(0, 0),
+                  duration: Duration(milliseconds: 500),
+                ),
+              ],
 
-                child: Container(
-                  width: double.infinity,
+              child: Container(
+                width: double.infinity,
 
-                  padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
+                padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
 
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
 
-                      colors: [Color(0xffF97316), Color(0xff7E22CE)],
-                    ),
-                  ),
-
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(18),
-
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(.15),
-
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-
-                            child: const Icon(
-                              Icons.school,
-                              color: Colors.white,
-                              size: 34,
-                            ),
-                          ),
-
-                          const SizedBox(width: 16),
-
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                Text(
-                                  "Self-Paced\nLearning",
-
-                                  style: TextStyle(
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.bold,
-
-                                    color: Colors.white,
-                                    height: 1.1,
-                                  ),
-                                ),
-
-                                SizedBox(height: 12),
-
-                                Text(
-                                  "Learn at your own pace,\nanytime, anywhere",
-
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 35),
-
-                      _statCard(
-                        icon: Icons.menu_book_outlined,
-                        title: "Enrolled Courses",
-                        count: "3",
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      _statCard(
-                        icon: Icons.trending_up,
-                        title: "In Progress",
-                        count: "2",
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      _statCard(
-                        icon: Icons.workspace_premium_outlined,
-                        title: "Completed",
-                        count: "1",
-                      ),
-
-                      const SizedBox(height: 10),
-                    ],
+                    colors: [Color(0xffF97316), Color(0xff7E22CE)],
                   ),
                 ),
-              ),
 
-              /// FLOATING SEARCH FILTER CARD
-              Animate(
-                delay: const Duration(milliseconds: 200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
-                effects: const [
-                  FadeEffect(duration: Duration(milliseconds: 500)),
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
 
-                  SlideEffect(
-                    begin: Offset(0, 0.15),
-                    end: Offset(0, 0),
-                    duration: Duration(milliseconds: 500),
-                  ),
-                ],
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(18),
 
-                child: Transform.translate(
-                  offset: const Offset(0, 25),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(.15),
 
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-
-                        borderRadius: BorderRadius.circular(28),
-
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.08),
-
-                            blurRadius: 18,
-
-                            offset: const Offset(0, 6),
+                            borderRadius: BorderRadius.circular(18),
                           ),
-                        ],
-                      ),
 
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                          child: const Icon(
+                            Icons.school,
+                            color: Colors.white,
+                            size: 34,
+                          ),
+                        ),
 
-                        children: [
-                          /// SEARCH
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
+                        const SizedBox(width: 16),
 
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
-                              border: Border.all(color: Colors.orange.shade100),
-                            ),
+                            children: [
+                              Text(
+                                "Self-Paced\nLearning",
 
-                            child: const Row(
-                              children: [
-                                Icon(Icons.search, color: Colors.blueGrey),
+                                style: TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
 
-                                SizedBox(width: 12),
+                                  color: Colors.white,
+                                  height: 1.1,
+                                ),
+                              ),
 
-                                Expanded(
+                              SizedBox(height: 12),
+
+                              Text(
+                                "Learn at your own pace,\nanytime, anywhere",
+
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 16,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 35),
+
+                    _statCard(
+                      icon: Icons.menu_book_outlined,
+                      title: "Enrolled Courses",
+                      count: "3",
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    _statCard(
+                      icon: Icons.trending_up,
+                      title: "In Progress",
+                      count: "2",
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    _statCard(
+                      icon: Icons.workspace_premium_outlined,
+                      title: "Completed",
+                      count: "1",
+                    ),
+
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ),
+
+            /// FLOATING SEARCH FILTER CARD
+            Animate(
+              delay: const Duration(milliseconds: 200),
+
+              effects: const [
+                FadeEffect(duration: Duration(milliseconds: 500)),
+
+                SlideEffect(
+                  begin: Offset(0, 0.15),
+                  end: Offset(0, 0),
+                  duration: Duration(milliseconds: 500),
+                ),
+              ],
+
+              child: Transform.translate(
+                offset: const Offset(0, 25),
+
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+
+                  child: Container(
+                    padding: const EdgeInsets.all(24),
+
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+
+                      borderRadius: BorderRadius.circular(28),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(.08),
+
+                          blurRadius: 18,
+
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+
+                      children: [
+                        /// SEARCH
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+
+                            border: Border.all(color: Colors.orange.shade100),
+                          ),
+
+                          child: const Row(
+                            children: [
+                              Icon(Icons.search, color: Colors.blueGrey),
+
+                              SizedBox(width: 12),
+
+                              Expanded(
+                                child: Text(
+                                  "Search courses, instructors...",
+
+                                  style: TextStyle(
+                                    color: Colors.blueGrey,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        /// FILTER
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+
+                            border: Border.all(color: Colors.orange.shade100),
+                          ),
+
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+
+                            children: [
+                              Icon(Icons.filter_alt_outlined),
+
+                              SizedBox(width: 10),
+
+                              Text(
+                                "All Courses",
+
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        /// CATEGORY CHIPS
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 12,
+
+                          children: categories.map((cat) {
+                            bool selected = cat == selectedCategory;
+
+                            return Animate(
+                              delay: Duration(
+                                milliseconds: 80 * categories.indexOf(cat),
+                              ),
+
+                              effects: const [
+                                FadeEffect(
+                                  duration: Duration(milliseconds: 400),
+                                ),
+
+                                ScaleEffect(
+                                  begin: Offset(0.9, 0.9),
+                                  end: Offset(1, 1),
+                                  duration: Duration(milliseconds: 400),
+                                ),
+                              ],
+
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedCategory = cat;
+                                  });
+                                },
+
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 10,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? Colors.deepOrange
+                                        : Colors.white,
+
+                                    borderRadius: BorderRadius.circular(24),
+
+                                    border: Border.all(
+                                      color: Colors.orange.shade100,
+                                    ),
+                                  ),
+
                                   child: Text(
-                                    "Search courses, instructors...",
+                                    cat,
 
                                     style: TextStyle(
-                                      color: Colors.blueGrey,
                                       fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
 
-                          const SizedBox(height: 20),
-
-                          /// FILTER
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-
-                              border: Border.all(color: Colors.orange.shade100),
-                            ),
-
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-
-                              children: [
-                                Icon(Icons.filter_alt_outlined),
-
-                                SizedBox(width: 10),
-
-                                Text(
-                                  "All Courses",
-
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 22),
-
-                          /// CATEGORY CHIPS
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 12,
-
-                            children: categories.map((cat) {
-                              bool selected = cat == selectedCategory;
-
-                              return Animate(
-                                delay: Duration(
-                                  milliseconds: 80 * categories.indexOf(cat),
-                                ),
-
-                                effects: const [
-                                  FadeEffect(
-                                    duration: Duration(milliseconds: 400),
-                                  ),
-
-                                  ScaleEffect(
-                                    begin: Offset(0.9, 0.9),
-                                    end: Offset(1, 1),
-                                    duration: Duration(milliseconds: 400),
-                                  ),
-                                ],
-
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedCategory = cat;
-                                    });
-                                  },
-
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 18,
-                                      vertical: 10,
-                                    ),
-
-                                    decoration: BoxDecoration(
                                       color: selected
-                                          ? Colors.deepOrange
-                                          : Colors.white,
-
-                                      borderRadius: BorderRadius.circular(24),
-
-                                      border: Border.all(
-                                        color: Colors.orange.shade100,
-                                      ),
-                                    ),
-
-                                    child: Text(
-                                      cat,
-
-                                      style: TextStyle(
-                                        fontSize: 16,
-
-                                        color: selected
-                                            ? Colors.white
-                                            : Colors.black87,
-                                      ),
+                                          ? Colors.white
+                                          : Colors.black87,
                                     ),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 50),
+            const SizedBox(height: 50),
 
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: SelfPacedData.courses.length,
-                itemBuilder: (context, index) {
-                  final course = SelfPacedData.courses[index];
-                  return Animate(
-                    delay: Duration(milliseconds: 150 * index),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: SelfPacedData.courses.length,
+              itemBuilder: (context, index) {
+                final course = SelfPacedData.courses[index];
+                return Animate(
+                  delay: Duration(milliseconds: 150 * index),
 
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
+                  effects: const [
+                    FadeEffect(duration: Duration(milliseconds: 500)),
 
-                      SlideEffect(
-                        begin: Offset(0, 0.12),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
-
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: _courseCard(course),
+                    SlideEffect(
+                      begin: Offset(0, 0.12),
+                      end: Offset(0, 0),
+                      duration: Duration(milliseconds: 500),
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 40),
-            ],
-          ),
+                  ],
+
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: _courseCard(course),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );

@@ -3,13 +3,12 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 import 'package:navyoga_academy/models/settings_privacy_option_model.dart';
 import 'package:navyoga_academy/models/settings_security_field_model.dart';
-import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/download_data_screen.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/screens/privacy_policy_screen.dart';
 import 'package:navyoga_academy/screens/terms_screen.dart';
 import 'package:navyoga_academy/services/settings_service.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/settings_notification_tile.dart';
 import 'package:navyoga_academy/widgets/settings_payment_section.dart';
 import 'package:navyoga_academy/widgets/settings_privacy_section.dart';
@@ -108,11 +107,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      currentIndex: 4,
       key: _scaffoldKey,
       drawer: const CustomDrawer(),
-      backgroundColor: Colors.transparent,
 
+      //backgroundColor: Colors.transparent,
       appBar: AppBar(
         leadingWidth: 72,
         backgroundColor: Colors.grey[200],
@@ -144,188 +144,183 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
 
-      body: AppBackground(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// 🔥 HEADER
-              const Text(
-                "Settings",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepOrange,
-                ),
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// 🔥 HEADER
+            const Text(
+              "Settings",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange,
               ),
+            ),
 
-              const SizedBox(height: 6),
+            const SizedBox(height: 6),
 
-              const Text(
-                "Manage your account preferences\nand security",
-                style: TextStyle(color: Colors.blueGrey),
+            const Text(
+              "Manage your account preferences\nand security",
+              style: TextStyle(color: Colors.blueGrey),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// ================= NOTIFICATION =================
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: Colors.deepOrange.withOpacity(0.2)),
               ),
-
-              const SizedBox(height: 20),
-
-              /// ================= NOTIFICATION =================
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(color: Colors.deepOrange.withOpacity(0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.notifications_none,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.notifications_none, color: Colors.deepOrange),
+                      SizedBox(width: 8),
+                      Text(
+                        "Notification Settings",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),
-                        SizedBox(width: 8),
-                        Text(
-                          "Notification Settings",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepOrange,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    ...settings.asMap().entries.map((entry) {
-                      return SettingsNotificationTile(
-                        title: entry.value["title"],
-
-                        subtitle: entry.value["subtitle"],
-
-                        value: entry.value["value"],
-
-                        onChanged: (val) {
-                          setState(() {
-                            settings[entry.key]["value"] = val;
-                          });
-                        },
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              /// ================= SECURITY =================
-              SettingsSecuritySection(
-                securityFields: securityFields,
-                twoFactorEnabled: twoFactorEnabled,
-                onTwoFactorChanged: (val) {
-                  setState(() {
-                    twoFactorEnabled = val;
-                  });
-                },
-                onUpdatePassword: () {},
-              ).animate().fade(duration: 400.ms).slideY(begin: 0.2),
-
-              const SizedBox(height: 20),
-              SettingsPaymentSection(
-                paymentData: paymentData,
-
-                onAutoRenewChanged: (val) {
-                  setState(() {
-                    paymentData["autoRenew"] = val;
-                  });
-                },
-
-                onManagePayment: () {},
-
-                onViewPaymentDetails: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PaymentHistoryScreen(
-                        payments: paymentHistoryList, // 👈 dynamic data
                       ),
-                    ),
-                  );
-                },
-              ),
+                    ],
+                  ),
 
-              const SizedBox(height: 20),
-              isPrivacyLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : SettingsPrivacySection(
-                      privacyOptions: privacyOptions,
-                      onOptionTap: (title) {
-                        if (title == "Privacy Policy") {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const PrivacyPolicyScreen(),
-                            ),
-                          );
-                        } else if (title == "Terms of Service") {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const TermsScreen(),
-                            ),
-                          );
-                        } else if (title == "Download My Data") {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const DownloadDataScreen(),
-                            ),
-                          );
-                        } else if (title == "Delete Account") {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Delete Account"),
-                              content: const Text(
-                                "Are you sure you want to delete your account? This action cannot be undone.",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text(
-                                    "Cancel",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
+                  const SizedBox(height: 16),
 
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Account deleted (mock)"),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text(
-                                    "Delete",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                  ...settings.asMap().entries.map((entry) {
+                    return SettingsNotificationTile(
+                      title: entry.value["title"],
+
+                      subtitle: entry.value["subtitle"],
+
+                      value: entry.value["value"],
+
+                      onChanged: (val) {
+                        setState(() {
+                          settings[entry.key]["value"] = val;
+                        });
                       },
+                    );
+                  }).toList(),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// ================= SECURITY =================
+            SettingsSecuritySection(
+              securityFields: securityFields,
+              twoFactorEnabled: twoFactorEnabled,
+              onTwoFactorChanged: (val) {
+                setState(() {
+                  twoFactorEnabled = val;
+                });
+              },
+              onUpdatePassword: () {},
+            ).animate().fade(duration: 400.ms).slideY(begin: 0.2),
+
+            const SizedBox(height: 20),
+            SettingsPaymentSection(
+              paymentData: paymentData,
+
+              onAutoRenewChanged: (val) {
+                setState(() {
+                  paymentData["autoRenew"] = val;
+                });
+              },
+
+              onManagePayment: () {},
+
+              onViewPaymentDetails: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PaymentHistoryScreen(
+                      payments: paymentHistoryList, // 👈 dynamic data
                     ),
-            ],
-          ),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+            isPrivacyLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SettingsPrivacySection(
+                    privacyOptions: privacyOptions,
+                    onOptionTap: (title) {
+                      if (title == "Privacy Policy") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
+                          ),
+                        );
+                      } else if (title == "Terms of Service") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const TermsScreen(),
+                          ),
+                        );
+                      } else if (title == "Download My Data") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DownloadDataScreen(),
+                          ),
+                        );
+                      } else if (title == "Delete Account") {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Delete Account"),
+                            content: const Text(
+                              "Are you sure you want to delete your account? This action cannot be undone.",
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  "Cancel",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Account deleted (mock)"),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                  ),
+          ],
         ),
       ),
     );

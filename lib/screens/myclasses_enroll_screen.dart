@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class EnrollScreen extends StatelessWidget {
   const EnrollScreen({super.key});
@@ -10,9 +11,10 @@ class EnrollScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final classData = ModalRoute.of(context)!.settings.arguments as ClassModel;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
+    return AppScaffold(
+      currentIndex: 0,
 
+      //backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -26,143 +28,138 @@ class EnrollScreen extends StatelessWidget {
         ),
       ),
 
-      body: AppBackground(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(20),
+      body: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(20),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
 
-            children: [
-              AnimatedItem(
-                index: 0,
+          children: [
+            AnimatedItem(
+              index: 0,
 
-                child: Container(
-                  padding: const EdgeInsets.all(22),
+              child: Container(
+                padding: const EdgeInsets.all(22),
 
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        classData.color.withOpacity(0.15),
-                        classData.color.withOpacity(0.05),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      classData.color.withOpacity(0.15),
+                      classData.color.withOpacity(0.05),
+                    ],
+                  ),
+
+                  borderRadius: BorderRadius.circular(28),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: classData.color.withOpacity(0.15),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                  children: [
+                    Text(
+                      classData.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Text(
+                      classData.trainer,
+                      style: const TextStyle(color: Colors.blueGrey),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        _chip(classData.level),
+                        const SizedBox(width: 10),
+                        _chip(classData.duration),
                       ],
                     ),
+                  ],
+                ),
+              ),
+            ),
 
-                    borderRadius: BorderRadius.circular(28),
+            const SizedBox(height: 30),
 
-                    boxShadow: [
-                      BoxShadow(
-                        color: classData.color.withOpacity(0.15),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
+            AnimatedItem(
+              index: 1,
 
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              child: const Text(
+                "Confirm Enrollment",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ),
 
-                    children: [
-                      Text(
-                        classData.title,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+            const SizedBox(height: 14),
+
+            AnimatedItem(
+              index: 2,
+
+              child: const Text(
+                "By enrolling, you will gain access to live sessions, recordings, attendance tracking, and instructor guidance.",
+                style: TextStyle(color: Colors.blueGrey, height: 1.6),
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            AnimatedItem(
+              index: 3,
+
+              child: SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          "Successfully enrolled in ${classData.title} 🎉",
                         ),
                       ),
+                    );
+                  },
 
-                      const SizedBox(height: 10),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    elevation: 6,
 
-                      Text(
-                        classData.trainer,
-                        style: const TextStyle(color: Colors.blueGrey),
-                      ),
+                    padding: const EdgeInsets.symmetric(vertical: 18),
 
-                      const SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          _chip(classData.level),
-                          const SizedBox(width: 10),
-                          _chip(classData.duration),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              AnimatedItem(
-                index: 1,
-
-                child: const Text(
-                  "Confirm Enrollment",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              AnimatedItem(
-                index: 2,
-
-                child: const Text(
-                  "By enrolling, you will gain access to live sessions, recordings, attendance tracking, and instructor guidance.",
-                  style: TextStyle(color: Colors.blueGrey, height: 1.6),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              AnimatedItem(
-                index: 3,
-
-                child: SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Successfully enrolled in ${classData.title} 🎉",
-                          ),
-                        ),
-                      );
-                    },
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      elevation: 6,
-
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-
-                    icon: const Icon(Icons.check_circle),
-
-                    label: const Text(
-                      "Confirm Enrollment",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
                   ),
+
+                  icon: const Icon(Icons.check_circle),
+
+                  label: const Text(
+                    "Confirm Enrollment",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

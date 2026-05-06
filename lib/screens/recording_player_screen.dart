@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import '../models/recording_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -21,246 +22,245 @@ class _RecordingPlayerScreenState extends State<RecordingPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AppBackground(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF2E0F4F), Color(0xFF5A1E8A), Color(0xFF8E1C6F)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+    return AppScaffold(
+      currentIndex: 1,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF2E0F4F), Color(0xFF5A1E8A), Color(0xFF8E1C6F)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: SafeArea(
-            child: Stack(
-              children: [
-                /// 🔹 TOP INFO CARD
-                Positioned(
-                  top: 20,
-                  left: 16,
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              /// 🔹 TOP INFO CARD
+              Positioned(
+                top: 20,
+                left: 16,
 
-                  child: Animate(
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
+                child: Animate(
+                  effects: const [
+                    FadeEffect(duration: Duration(milliseconds: 500)),
 
-                      SlideEffect(
-                        begin: Offset(-0.2, 0),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
-
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const CircleAvatar(
-                                backgroundColor: Colors.white,
-                                child: Text("RK"),
-                              ),
-                              const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.recording.trainer,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const Text(
-                                    "Instructor",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.recording.category,
-                            style: const TextStyle(color: Colors.pinkAccent),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "⏱ ${widget.recording.duration}",
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                          Text(
-                            "⭐ ${widget.recording.rating}",
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ],
-                      ),
+                    SlideEffect(
+                      begin: Offset(-0.2, 0),
+                      end: Offset(0, 0),
+                      duration: Duration(milliseconds: 500),
                     ),
-                  ),
-                ),
+                  ],
 
-                /// 🔹 PROGRESS CARD
-                Positioned(
-                  right: 16,
-                  bottom: 160,
-
-                  child: Animate(
-                    delay: const Duration(milliseconds: 300),
-
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
-
-                      SlideEffect(
-                        begin: Offset(0.2, 0),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
-
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.purpleAccent,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Your Progress",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 6),
-                          SizedBox(
-                            width: 120,
-                            child: LinearProgressIndicator(
-                              value: currentProgress,
-                              color: Colors.white,
-                              backgroundColor: Colors.white30,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Text("RK"),
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "${(currentProgress * 100).toInt()}%",
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.recording.trainer,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Text(
+                                  "Instructor",
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.recording.category,
+                          style: const TextStyle(color: Colors.pinkAccent),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "⏱ ${widget.recording.duration}",
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                        Text(
+                          "⭐ ${widget.recording.rating}",
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+              ),
 
-                /// 🔻 PLAYER BAR
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
+              /// 🔹 PROGRESS CARD
+              Positioned(
+                right: 16,
+                bottom: 160,
 
-                  child: Animate(
-                    delay: const Duration(milliseconds: 500),
+                child: Animate(
+                  delay: const Duration(milliseconds: 300),
 
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 600)),
+                  effects: const [
+                    FadeEffect(duration: Duration(milliseconds: 500)),
 
-                      SlideEffect(
-                        begin: Offset(0, 0.3),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 600),
-                      ),
-                    ],
+                    SlideEffect(
+                      begin: Offset(0.2, 0),
+                      end: Offset(0, 0),
+                      duration: Duration(milliseconds: 500),
+                    ),
+                  ],
 
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 20),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF0F172A),
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(24),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.purpleAccent,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Your Progress",
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          /// SLIDER
-                          Row(
-                            children: [
-                              Text(
-                                currentTime,
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                              Expanded(
-                                child: Slider(
-                                  value: currentProgress,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      currentProgress = value;
-
-                                      int totalSeconds = 1800;
-                                      int currentSeconds =
-                                          (totalSeconds * value).toInt();
-
-                                      int minutes = currentSeconds ~/ 60;
-                                      int seconds = currentSeconds % 60;
-
-                                      currentTime =
-                                          "$minutes:${seconds.toString().padLeft(2, '0')}";
-                                    });
-                                  },
-                                  activeColor: Colors.white,
-                                  inactiveColor: Colors.white24,
-                                ),
-                              ),
-                              Text(
-                                totalTime,
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                            ],
+                        const SizedBox(height: 6),
+                        SizedBox(
+                          width: 120,
+                          child: LinearProgressIndicator(
+                            value: currentProgress,
+                            color: Colors.white,
+                            backgroundColor: Colors.white30,
                           ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "${(currentProgress * 100).toInt()}%",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
-                          const SizedBox(height: 10),
+              /// 🔻 PLAYER BAR
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
 
-                          /// BUTTONS
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _btn(Icons.skip_previous),
-                              GestureDetector(
-                                onTap: () {
+                child: Animate(
+                  delay: const Duration(milliseconds: 500),
+
+                  effects: const [
+                    FadeEffect(duration: Duration(milliseconds: 600)),
+
+                    SlideEffect(
+                      begin: Offset(0, 0.3),
+                      end: Offset(0, 0),
+                      duration: Duration(milliseconds: 600),
+                    ),
+                  ],
+
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 20),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF0F172A),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(24),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        /// SLIDER
+                        Row(
+                          children: [
+                            Text(
+                              currentTime,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            Expanded(
+                              child: Slider(
+                                value: currentProgress,
+                                onChanged: (value) {
                                   setState(() {
-                                    isPlaying = !isPlaying;
+                                    currentProgress = value;
+
+                                    int totalSeconds = 1800;
+                                    int currentSeconds = (totalSeconds * value)
+                                        .toInt();
+
+                                    int minutes = currentSeconds ~/ 60;
+                                    int seconds = currentSeconds % 60;
+
+                                    currentTime =
+                                        "$minutes:${seconds.toString().padLeft(2, '0')}";
                                   });
                                 },
-                                child: Animate(
-                                  effects: const [
-                                    ScaleEffect(
-                                      begin: Offset(0.8, 0.8),
-                                      end: Offset(1, 1),
-                                      duration: Duration(milliseconds: 300),
-                                    ),
-                                  ],
+                                activeColor: Colors.white,
+                                inactiveColor: Colors.white24,
+                              ),
+                            ),
+                            Text(
+                              totalTime,
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                          ],
+                        ),
 
-                                  child: _btn(
-                                    isPlaying ? Icons.pause : Icons.play_arrow,
-                                    isMain: true,
+                        const SizedBox(height: 10),
+
+                        /// BUTTONS
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _btn(Icons.skip_previous),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  isPlaying = !isPlaying;
+                                });
+                              },
+                              child: Animate(
+                                effects: const [
+                                  ScaleEffect(
+                                    begin: Offset(0.8, 0.8),
+                                    end: Offset(1, 1),
+                                    duration: Duration(milliseconds: 300),
                                   ),
+                                ],
+
+                                child: _btn(
+                                  isPlaying ? Icons.pause : Icons.play_arrow,
+                                  isMain: true,
                                 ),
                               ),
-                              _btn(Icons.skip_next),
-                              _btn(Icons.volume_up),
-                              _btn(Icons.settings),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                            _btn(Icons.skip_next),
+                            _btn(Icons.volume_up),
+                            _btn(Icons.settings),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

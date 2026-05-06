@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/payment_history_card.dart';
 
 class PaymentHistoryScreen extends StatelessWidget {
@@ -11,20 +11,19 @@ class PaymentHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      currentIndex: 4,
       appBar: AppBar(title: const Text("Payment History")),
-      body: AppBackground(
-        child: ListView.builder(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          itemCount: payments.length,
-          itemBuilder: (context, index) {
-            return AnimatedItem(
-              index: index,
-              child: paymentHistoryCard(payments[index]),
-            );
-          },
-        ),
+      body: ListView.builder(
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: payments.length,
+        itemBuilder: (context, index) {
+          return AnimatedItem(
+            index: index,
+            child: paymentHistoryCard(payments[index]),
+          );
+        },
       ),
     );
   }
