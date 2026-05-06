@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/profile_field_model.dart';
+import 'package:navyoga_academy/widgets/animatedItem.dart';
+import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
 import '../data/profile_data.dart';
 import '../widgets/profile_stat_card.dart';
@@ -48,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const CustomDrawer(),
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.transparent,
 
       appBar: AppBar(
         leading: Builder(
@@ -65,215 +67,230 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      body: AppBackground(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔥 HEADER
-            const Text(
-              "My Profile",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepOrange,
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            const Text(
-              "Manage your personal information and track your progress",
-              style: TextStyle(color: Colors.blueGrey),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 📊 STATS
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: ProfileData.stats.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
-              ),
-              itemBuilder: (_, i) => ProfileStatCard(ProfileData.stats[i]),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 👤 PERSONAL INFO
-            ProfileSection(
-              title: "Personal Information",
-              child: Column(
-                children: [
-                  _buildAvatar(),
-
-                  const SizedBox(height: 20),
-
-                  Column(
-                    children: [
-                      ProfileField(ProfileData.personalInfo[0], nameController),
-                      ProfileField(
-                        ProfileData.personalInfo[1],
-                        emailController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[2],
-                        phoneController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[3],
-                        addressController,
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// 🔥 HEADER
+              AnimatedItem(
+                index: 0,
+                child: Text(
+                  "My Profile",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
                   ),
+                ),
+              ),
+              const SizedBox(height: 6),
 
-                  const SizedBox(height: 12),
+              AnimatedItem(
+                index: 1,
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          ProfileData.personalInfo[0] = ProfileFieldModel(
-                            label: "Full Name",
-                            value: nameController.text,
-                          );
+                child: const Text(
+                  "Manage your personal information and track your progress",
+                  style: TextStyle(color: Colors.blueGrey),
+                ),
+              ),
 
-                          ProfileData.personalInfo[1] = ProfileFieldModel(
-                            label: "Email Address",
-                            value: emailController.text,
-                          );
+              const SizedBox(height: 20),
 
-                          ProfileData.personalInfo[2] = ProfileFieldModel(
-                            label: "Phone Number",
-                            value: phoneController.text,
-                          );
+              /// 📊 STATS
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: ProfileData.stats.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.1,
+                ),
+                itemBuilder: (_, i) => ProfileStatCard(ProfileData.stats[i]),
+              ),
 
-                          ProfileData.personalInfo[3] = ProfileFieldModel(
-                            label: "Address",
-                            value: addressController.text,
-                            isMultiline: true,
-                          );
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+              const SizedBox(height: 20),
+
+              /// 👤 PERSONAL INFO
+              ProfileSection(
+                title: "Personal Information",
+                child: Column(
+                  children: [
+                    _buildAvatar(),
+
+                    const SizedBox(height: 20),
+
+                    Column(
+                      children: [
+                        ProfileField(
+                          ProfileData.personalInfo[0],
+                          nameController,
+                        ),
+                        ProfileField(
+                          ProfileData.personalInfo[1],
+                          emailController,
+                        ),
+                        ProfileField(
+                          ProfileData.personalInfo[2],
+                          phoneController,
+                        ),
+                        ProfileField(
+                          ProfileData.personalInfo[3],
+                          addressController,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            ProfileData.personalInfo[0] = ProfileFieldModel(
+                              label: "Full Name",
+                              value: nameController.text,
+                            );
+
+                            ProfileData.personalInfo[1] = ProfileFieldModel(
+                              label: "Email Address",
+                              value: emailController.text,
+                            );
+
+                            ProfileData.personalInfo[2] = ProfileFieldModel(
+                              label: "Phone Number",
+                              value: phoneController.text,
+                            );
+
+                            ProfileData.personalInfo[3] = ProfileFieldModel(
+                              label: "Address",
+                              value: addressController.text,
+                              isMultiline: true,
+                            );
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          "Update Profile",
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      child: const Text(
-                        "Update Profile",
-                        style: TextStyle(color: Colors.white),
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            /// 🎯 HEALTH GOALS
-            ProfileSection(
-              title: "Health Goals",
-              child: Column(
-                children: [
-                  ...ProfileData.goals.map((e) => GoalWidget(data: e)),
+              /// 🎯 HEALTH GOALS
+              ProfileSection(
+                title: "Health Goals",
+                child: Column(
+                  children: [
+                    ...ProfileData.goals.map((e) => GoalWidget(data: e)),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // future: open add goal screen
-                      },
-                      icon: const Icon(
-                        Icons.track_changes,
-                        color: Colors.purple,
-                      ),
-                      label: const Text("Set New Goal"),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          // future: open add goal screen
+                        },
+                        icon: const Icon(
+                          Icons.track_changes,
                           color: Colors.purple,
-                          width: 1.5,
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+                        label: const Text("Set New Goal"),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(
+                            color: Colors.purple,
+                            width: 1.5,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
-            ProfileSection(
-              title: "Your Achievements",
-              child: Column(
-                children: [
-                  ...ProfileData.achievements.map(
-                    (e) => AchievementCard(data: e),
-                  ),
-                ],
+              /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
+              ProfileSection(
+                title: "Your Achievements",
+                child: Column(
+                  children: [
+                    ...ProfileData.achievements.map(
+                      (e) => AchievementCard(data: e),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            /// 🏥 MEDICAL INFO
-            ProfileSection(
-              title: "Medical Information",
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      ...ProfileData.medicalInfo.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var item = entry.value;
+              /// 🏥 MEDICAL INFO
+              ProfileSection(
+                title: "Medical Information",
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        ...ProfileData.medicalInfo.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var item = entry.value;
 
-                        return ProfileField(item, medicalControllers[index]);
-                      }).toList(),
+                          return ProfileField(item, medicalControllers[index]);
+                        }).toList(),
 
-                      const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                      _secondaryButton("Update Medical Info"),
-                    ],
-                  ),
-                ],
+                        _secondaryButton("Update Medical Info"),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            /// ⚙️ PREFERENCES
-            ProfileSection(
-              title: "Preferences",
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      ...ProfileData.preferences.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var item = entry.value;
+              /// ⚙️ PREFERENCES
+              ProfileSection(
+                title: "Preferences",
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        ...ProfileData.preferences.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          var item = entry.value;
 
-                        return ProfileField(item, preferenceControllers[index]);
-                      }).toList(),
-                    ],
-                  ),
+                          return ProfileField(
+                            item,
+                            preferenceControllers[index],
+                          );
+                        }).toList(),
+                      ],
+                    ),
 
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  _primaryButton("Update Preferences", Colors.deepOrange),
-                ],
+                    _primaryButton("Update Preferences", Colors.deepOrange),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -283,14 +300,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
 /// 🔥 AVATAR
 Widget _buildAvatar() {
   return Center(
-    child: Container(
-      height: 110,
-      width: 110,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.purple.withOpacity(.15),
+    child: TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.9, end: 1),
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeOutBack,
+
+      builder: (context, value, child) {
+        return Transform.scale(scale: value, child: child);
+      },
+
+      child: Container(
+        height: 115,
+        width: 115,
+
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+
+          gradient: LinearGradient(
+            colors: [
+              Colors.purple.withOpacity(.2),
+              Colors.deepOrange.withOpacity(.15),
+            ],
+          ),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(.25),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+
+        child: const Icon(Icons.person_outline, size: 52, color: Colors.purple),
       ),
-      child: const Icon(Icons.person_outline, size: 50, color: Colors.purple),
     ),
   );
 }

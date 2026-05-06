@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../models/attendance_stat_model.dart';
 
 class StatCard extends StatelessWidget {
@@ -8,61 +9,113 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-      decoration: BoxDecoration(
-        color: const Color(0xffFCFBFA),
-        borderRadius: BorderRadius.circular(26),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.03),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return Animate(
+      effects: const [
+        FadeEffect(duration: Duration(milliseconds: 500)),
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          /// Title
-          Text(
-            data.title,
-            style: const TextStyle(
-              fontSize: 17,
-              color: Color(0xff64748B),
-              fontWeight: FontWeight.w500,
+        SlideEffect(
+          begin: Offset(0, 0.15),
+          end: Offset(0, 0),
+          duration: Duration(milliseconds: 500),
+        ),
+      ],
+
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(26),
+
+          /// 🌈 SOFT GRADIENT
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [data.color.withOpacity(0.12), Colors.white],
+          ),
+
+          border: Border.all(color: data.color.withOpacity(0.15)),
+
+          /// 🌫 PREMIUM SHADOW
+          boxShadow: [
+            BoxShadow(
+              color: data.color.withOpacity(0.12),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
-          ),
 
-          const Spacer(),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.7),
+              blurRadius: 6,
+              offset: const Offset(-2, -2),
+            ),
+          ],
+        ),
 
-          /// Icon + Number
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: data.color.withOpacity(.15),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: Icon(data.icon, color: data.color, size: 26),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            /// 🔹 TITLE
+            Text(
+              data.title,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color(0xff64748B),
+                fontWeight: FontWeight.w500,
               ),
+            ),
 
-              Text(
-                data.value,
-                style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xff1E1B39),
-                  height: 1,
+            const Spacer(),
+
+            /// 🔹 ICON + VALUE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+
+              children: [
+                /// ICON BOX
+                Animate(
+                  effects: const [
+                    ScaleEffect(
+                      begin: Offset(0.7, 0.7),
+                      end: Offset(1, 1),
+                      duration: Duration(milliseconds: 600),
+                    ),
+                  ],
+
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+
+                    decoration: BoxDecoration(
+                      color: data.color.withOpacity(.15),
+                      borderRadius: BorderRadius.circular(18),
+
+                      boxShadow: [
+                        BoxShadow(
+                          color: data.color.withOpacity(0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+
+                    child: Icon(data.icon, color: data.color, size: 26),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+
+                /// VALUE
+                Text(
+                  data.value,
+                  style: const TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff1E1B39),
+                    height: 1,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

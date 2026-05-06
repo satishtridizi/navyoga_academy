@@ -53,11 +53,21 @@ class ProgressRow extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: data.progress,
-                    minHeight: 12,
-                    backgroundColor: Color(0xffD9DEE7),
-                    valueColor: const AlwaysStoppedAnimation(Color(0xff17B978)),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: data.progress),
+                    duration: const Duration(milliseconds: 1200),
+                    curve: Curves.easeOutCubic,
+
+                    builder: (context, value, _) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        minHeight: 12,
+                        backgroundColor: Color(0xffD9DEE7),
+                        valueColor: const AlwaysStoppedAnimation(
+                          Color(0xff17B978),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -69,7 +79,6 @@ class ProgressRow extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xff1E1B39),
                 ),
               ),
             ],

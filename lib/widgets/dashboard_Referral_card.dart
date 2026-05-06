@@ -31,9 +31,10 @@ class ReferralCard extends StatelessWidget {
         /// 🎯 SHADOW
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: color.withOpacity(0.25),
+            blurRadius: 20,
+            spreadRadius: 1,
+            offset: const Offset(0, 8),
           ),
         ],
       ),

@@ -58,15 +58,22 @@ class ClassProgressRow extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: data.progress,
-                    minHeight: 8,
-                    backgroundColor: Color(0xffD9DEE7),
-                    valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0, end: data.progress),
+                    duration: const Duration(milliseconds: 1200),
+                    curve: Curves.easeOutCubic,
+
+                    builder: (context, value, _) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        minHeight: 8,
+                        backgroundColor: Color(0xffD9DEE7),
+                        valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
+                      );
+                    },
                   ),
                 ),
               ),
-
               const SizedBox(width: 18),
 
               Text(

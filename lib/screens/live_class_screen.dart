@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
+import 'dart:async';
 
 class LiveClassScreen extends StatefulWidget {
   const LiveClassScreen({super.key});
@@ -13,7 +14,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   bool isCameraOn = true;
 
   int liveSeconds = 0;
-
+  late Timer timer;
   @override
   void initState() {
     super.initState();
@@ -21,15 +22,12 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   }
 
   void startTimer() {
-    Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted) return false;
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
 
       setState(() {
         liveSeconds++;
       });
-
-      return true;
     });
   }
 
@@ -37,6 +35,12 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
     int min = liveSeconds ~/ 60;
     int sec = liveSeconds % 60;
     return "$min:${sec.toString().padLeft(2, '0')}";
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 
   @override
@@ -50,7 +54,11 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xff2b0040), Color(0xff5a001f)],
+                colors: [
+                  Color(0xff1E0030),
+                  Color(0xff45002E),
+                  Color(0xff2B0040),
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -58,43 +66,84 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
           ),
 
           /// 👤 USER CARD
-          Positioned(
-            top: 80,
-            left: 20,
-            child: Container(
-              width: 220,
-              height: 150,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white24),
-                gradient: const LinearGradient(
-                  colors: [Color(0xff2c7be5), Color(0xff0b2545)],
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 20, end: 0),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, value),
+                child: child,
+              );
+            },
+
+            child: Positioned(
+              top: 80,
+              left: 20,
+              child: Container(
+                width: 220,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white24),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xff2c7be5), Color(0xff0b2545)],
+                  ),
                 ),
-              ),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.account_circle, size: 60, color: Colors.white70),
-                  SizedBox(height: 6),
-                  Text("You", style: TextStyle(color: Colors.white)),
-                ],
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.account_circle, size: 60, color: Colors.white70),
+                    SizedBox(height: 6),
+                    Text("You", style: TextStyle(color: Colors.white)),
+                  ],
+                ),
               ),
             ),
           ),
 
           /// 🔴 LIVE TIMER
+          /// 🔴 LIVE TIMER
           Positioned(
             bottom: 140,
             left: 20,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                "● LIVE • $formattedTime",
-                style: const TextStyle(color: Colors.white),
+
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.9, end: 1),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeInOut,
+
+              builder: (context, value, child) {
+                return Transform.scale(scale: value, child: child);
+              },
+
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(20),
+
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.5),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+
+                child: Text(
+                  "● LIVE • $formattedTime",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ),
@@ -106,7 +155,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                border: Border.all(color: Colors.white.withOpacity(0.12)),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -193,9 +242,38 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   Widget controlBtn(IconData icon, {bool isEnd = false, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: CircleAvatar(
-        radius: 26,
-        backgroundColor: isEnd ? Colors.red : Colors.white24,
+
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+
+        width: 58,
+        height: 58,
+
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+
+          gradient: isEnd
+              ? const LinearGradient(colors: [Colors.red, Colors.deepOrange])
+              : LinearGradient(
+                  colors: [
+                    Colors.white.withOpacity(0.18),
+                    Colors.white.withOpacity(0.08),
+                  ],
+                ),
+
+          border: Border.all(color: Colors.white.withOpacity(0.15)),
+
+          boxShadow: [
+            BoxShadow(
+              color: isEnd
+                  ? Colors.red.withOpacity(0.4)
+                  : Colors.black.withOpacity(0.15),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+
         child: Icon(icon, color: Colors.white),
       ),
     );

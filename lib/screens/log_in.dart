@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
+import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -87,303 +88,309 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F3F7),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Container(
-            width: 380,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9F7FB),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                /// 🔶 LOGO
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF6A1A),
-                    borderRadius: BorderRadius.circular(16),
+      backgroundColor: Colors.transparent,
+      body: AppBackground(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Container(
+              width: 380,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9F7FB),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 20,
                   ),
-                  child: const Icon(
-                    Icons.auto_awesome_outlined,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                /// TITLE
-                const Text(
-                  "NavYoga Academy",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 72, 0, 113),
-                  ),
-                ),
-
-                const SizedBox(height: 6),
-
-                const Text(
-                  "Welcome back",
-                  style: TextStyle(color: Color.fromARGB(255, 69, 69, 69)),
-                ),
-
-                const SizedBox(height: 24),
-
-                /// EMAIL
-                buildLabel("Email"),
-                const SizedBox(height: 6),
-                buildInput(
-                  controller: emailController,
-                  hint: "Enter your email",
-                  icon: Icons.email_outlined,
-                  index: 0,
-                ),
-
-                const SizedBox(height: 18),
-
-                /// PASSWORD
-                buildLabel("Password"),
-                const SizedBox(height: 6),
-                buildInput(
-                  controller: passwordController,
-                  hint: "Enter your password",
-                  icon: Icons.lock_outline,
-                  obscure: obscurePassword,
-                  suffix: IconButton(
-                    icon: Icon(
-                      obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
+                ],
+              ),
+              child: Column(
+                children: [
+                  /// 🔶 LOGO
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6A1A),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                  ),
-                  index: 1,
-                ),
-
-                const SizedBox(height: 12),
-
-                /// REMEMBER + FORGOT
-                AnimatedItem(
-                  index: 2,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: rememberMe,
-                                activeColor: const Color(0xFFFF6A1A),
-                                onChanged: (val) {
-                                  if (val != null) _toggleRememberMe(val);
-                                },
-                              ),
-                              const Text("Remember me"),
-                            ],
-                          ),
-                        ],
-                      ),
-                      GestureDetector(
-                        onTap: _handleForgotPassword,
-                        child: const Text(
-                          "Forgot password?",
-                          style: TextStyle(
-                            color: Color(0xFFFF6A1A),
-                            fontWeight: FontWeight.w500,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                /// 🔘 log IN BUTTON
-                SizedBox(
-                  width: double.infinity,
-                  child: AnimatedItem(
-                    index: 3,
-                    child: GestureDetector(
-                      onTapDown: (_) => setState(() => _scale = 0.95),
-                      onTapUp: (_) => setState(() => _scale = 1),
-                      onTapCancel: () => setState(() => _scale = 1),
-
-                      child: AnimatedScale(
-                        scale: _scale,
-                        duration: const Duration(milliseconds: 150),
-
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // 👈 make async
-                            final email = emailController.text.trim();
-                            final password = passwordController.text.trim();
-
-                            /// 🔹 Basic validation
-                            if (email.isEmpty || password.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Please enter email and password",
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-
-                            /// 🔹 Fake authentication
-                            if (email == "navyoga@gmail.com" &&
-                                password == "123456") {
-                              /// ✅ ADD THIS BLOCK HERE
-                              if (rememberMe) {
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setString('saved_email', email);
-                              } else {
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.remove('saved_email');
-                              }
-
-                              /// 🔹 Navigate
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                AppRoutes.dashboard,
-                                (route) => false,
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Invalid credentials"),
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6A1A),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Log In",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(width: 6),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    child: const Icon(
+                      Icons.auto_awesome_outlined,
+                      color: Colors.white,
+                      size: 28,
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 50),
+                  const SizedBox(height: 16),
 
-                /// DIVIDER WITH TEXT
-                Row(
-                  children: [
-                    const Expanded(child: Divider()),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 10),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
-                      ),
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                      child: const Text("or continue with"),
+                  /// TITLE
+                  const Text(
+                    "NavYoga Academy",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 72, 0, 113),
                     ),
-                    const Expanded(child: Divider()),
-                  ],
-                ),
+                  ),
 
-                const SizedBox(height: 18),
+                  const SizedBox(height: 6),
 
-                /// SOCIAL BUTTONS
-                Row(
-                  children: [
-                    Expanded(
-                      child: socialButton(
-                        icon: Icons.g_mobiledata,
-                        text: "Google",
-                        onTap: _handleGoogleLogin,
+                  const Text(
+                    "Welcome back",
+                    style: TextStyle(color: Color.fromARGB(255, 69, 69, 69)),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  /// EMAIL
+                  buildLabel("Email"),
+                  const SizedBox(height: 6),
+                  buildInput(
+                    controller: emailController,
+                    hint: "Enter your email",
+                    icon: Icons.email_outlined,
+                    index: 0,
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  /// PASSWORD
+                  buildLabel("Password"),
+                  const SizedBox(height: 6),
+                  buildInput(
+                    controller: passwordController,
+                    hint: "Enter your password",
+                    icon: Icons.lock_outline,
+                    obscure: obscurePassword,
+                    suffix: IconButton(
+                      icon: Icon(
+                        obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: socialButton(
-                        icon: Icons.facebook,
-                        text: "Facebook",
-                        onTap: _handleFacebookLogin,
-                      ),
-                    ),
-                  ],
-                ),
+                    index: 1,
+                  ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 12),
 
-                /// SIGN UP
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignupScreen()),
-                    );
-                  },
-                  child: RichText(
-                    text: const TextSpan(
-                      style: TextStyle(color: Color.fromARGB(255, 66, 66, 66)),
+                  /// REMEMBER + FORGOT
+                  AnimatedItem(
+                    index: 2,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextSpan(text: "Don't have an account? "),
-                        TextSpan(
-                          text: "Sign up",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 56, 11, 84),
-                            fontWeight: FontWeight.w600,
+                        Row(
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: rememberMe,
+                                  activeColor: const Color(0xFFFF6A1A),
+                                  onChanged: (val) {
+                                    if (val != null) _toggleRememberMe(val);
+                                  },
+                                ),
+                                const Text("Remember me"),
+                              ],
+                            ),
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: _handleForgotPassword,
+                          child: const Text(
+                            "Forgot password?",
+                            style: TextStyle(
+                              color: Color(0xFFFF6A1A),
+                              fontWeight: FontWeight.w500,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 40),
+                  const SizedBox(height: 16),
 
-                /// COPYRIGHT
-                const Text(
-                  "© 2026 NavYoga Academy. All rights reserved.",
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+                  /// 🔘 log IN BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: AnimatedItem(
+                      index: 3,
+                      child: GestureDetector(
+                        onTapDown: (_) => setState(() => _scale = 0.95),
+                        onTapUp: (_) => setState(() => _scale = 1),
+                        onTapCancel: () => setState(() => _scale = 1),
+
+                        child: AnimatedScale(
+                          scale: _scale,
+                          duration: const Duration(milliseconds: 150),
+
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              // 👈 make async
+                              final email = emailController.text.trim();
+                              final password = passwordController.text.trim();
+
+                              /// 🔹 Basic validation
+                              if (email.isEmpty || password.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Please enter email and password",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              /// 🔹 Fake authentication
+                              if (email == "navyoga@gmail.com" &&
+                                  password == "123456") {
+                                /// ✅ ADD THIS BLOCK HERE
+                                if (rememberMe) {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString('saved_email', email);
+                                } else {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.remove('saved_email');
+                                }
+
+                                /// 🔹 Navigate
+                                Navigator.pushNamedAndRemoveUntil(
+                                  context,
+                                  AppRoutes.dashboard,
+                                  (route) => false,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Invalid credentials"),
+                                  ),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF6A1A),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Log In",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 6),
+                                Icon(
+                                  Icons.arrow_forward,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 50),
+
+                  /// DIVIDER WITH TEXT
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 2,
+                        ),
+                        color: const Color.fromARGB(255, 255, 255, 255),
+                        child: const Text("or continue with"),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  /// SOCIAL BUTTONS
+                  Row(
+                    children: [
+                      Expanded(
+                        child: socialButton(
+                          icon: Icons.g_mobiledata,
+                          text: "Google",
+                          onTap: _handleGoogleLogin,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: socialButton(
+                          icon: Icons.facebook,
+                          text: "Facebook",
+                          onTap: _handleFacebookLogin,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  /// SIGN UP
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupScreen()),
+                      );
+                    },
+                    child: RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 66, 66, 66),
+                        ),
+                        children: [
+                          TextSpan(text: "Don't have an account? "),
+                          TextSpan(
+                            text: "Sign up",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 56, 11, 84),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  /// COPYRIGHT
+                  const Text(
+                    "© 2026 NavYoga Academy. All rights reserved.",
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

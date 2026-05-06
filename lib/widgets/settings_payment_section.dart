@@ -195,17 +195,20 @@ class SettingsPaymentSection extends StatelessWidget {
           const SizedBox(height: 16),
 
           /// 🔥 BOTTOM BUTTON (FULL WIDTH STYLE)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0xffF3F3F3),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.grey.withOpacity(0.3)),
-            ),
-            child: GestureDetector(
-              onTap: onViewPaymentDetails,
+          GestureDetector(
+            onTap: onViewPaymentDetails,
+
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              alignment: Alignment.center,
+
+              decoration: BoxDecoration(
+                color: const Color(0xffF3F3F3),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.grey.withOpacity(0.3)),
+              ),
+
               child: const Text(
                 "View Full Payment Details",
                 style: TextStyle(

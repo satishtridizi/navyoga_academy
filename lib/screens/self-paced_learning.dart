@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/self_paced_data.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/widgets/app_background.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -13,7 +15,9 @@ class SelfPacedLearningScreen extends StatefulWidget {
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   Widget _courseCard(CourseModel course) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
       margin: const EdgeInsets.symmetric(horizontal: 22),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -37,20 +41,32 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   topLeft: Radius.circular(28),
                   topRight: Radius.circular(28),
                 ),
-                child: Image.network(
-                  course.image,
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  cacheWidth: 800,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 220,
-                      width: double.infinity,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 40),
-                    );
-                  },
+
+                child: Animate(
+                  effects: const [
+                    ScaleEffect(
+                      begin: Offset(1.05, 1.05),
+                      end: Offset(1, 1),
+                      duration: Duration(milliseconds: 700),
+                    ),
+                  ],
+
+                  child: Image.network(
+                    course.image,
+                    height: 220,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    cacheWidth: 800,
+
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 220,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.broken_image, size: 40),
+                      );
+                    },
+                  ),
                 ),
               ),
 
@@ -148,30 +164,36 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 /// CTA BUTTON
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      if (course.showEnrollButton) {
-                        handleCTA("enroll");
-                      } else if (course.completed) {
-                        handleCTA("review");
-                      } else {
-                        handleCTA("continue");
-                      }
-                    },
-                    icon: const Icon(Icons.play_arrow),
-                    label: Text(
-                      course.showEnrollButton
-                          ? "Enroll Now"
-                          : course.actionText,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: course.showEnrollButton
-                          ? Colors.deepOrange
-                          : Colors.deepPurple,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                  child: Animate(
+                    effects: const [
+                      FadeEffect(duration: Duration(milliseconds: 500)),
+                    ],
+
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        if (course.showEnrollButton) {
+                          handleCTA("enroll");
+                        } else if (course.completed) {
+                          handleCTA("review");
+                        } else {
+                          handleCTA("continue");
+                        }
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(
+                        course.showEnrollButton
+                            ? "Enroll Now"
+                            : course.actionText,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: course.showEnrollButton
+                            ? Colors.deepOrange
+                            : Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
                     ),
                   ),
@@ -215,7 +237,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: const CustomDrawer(),
-      backgroundColor: const Color(0xffF7F7F7),
+      backgroundColor: Colors.transparent,
 
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -238,280 +260,342 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         ),
       ),
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            /// TOP GRADIENT SECTION
-            Container(
-              width: double.infinity,
+      body: AppBackground(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              /// TOP GRADIENT SECTION
+              /// TOP GRADIENT SECTION
+              Animate(
+                effects: const [
+                  FadeEffect(duration: Duration(milliseconds: 500)),
 
-              padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
-
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-
-                  colors: [Color(0xffF97316), Color(0xff7E22CE)],
-                ),
-              ),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(18),
-
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.15),
-
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-
-                        child: const Icon(
-                          Icons.school,
-                          color: Colors.white,
-                          size: 34,
-                        ),
-                      ),
-
-                      const SizedBox(width: 16),
-
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-
-                          children: [
-                            Text(
-                              "Self-Paced\nLearning",
-
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-
-                                color: Colors.white,
-                                height: 1.1,
-                              ),
-                            ),
-
-                            SizedBox(height: 12),
-
-                            Text(
-                              "Learn at your own pace,\nanytime, anywhere",
-
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  SlideEffect(
+                    begin: Offset(0, -0.1),
+                    end: Offset(0, 0),
+                    duration: Duration(milliseconds: 500),
                   ),
-
-                  const SizedBox(height: 35),
-
-                  _statCard(
-                    icon: Icons.menu_book_outlined,
-                    title: "Enrolled Courses",
-                    count: "3",
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _statCard(
-                    icon: Icons.trending_up,
-                    title: "In Progress",
-                    count: "2",
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  _statCard(
-                    icon: Icons.workspace_premium_outlined,
-                    title: "Completed",
-                    count: "1",
-                  ),
-
-                  const SizedBox(height: 10),
                 ],
-              ),
-            ),
-
-            /// FLOATING SEARCH FILTER CARD
-            Transform.translate(
-              offset: const Offset(0, 25),
-
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
 
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  width: double.infinity,
 
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
 
-                    borderRadius: BorderRadius.circular(28),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
 
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(.08),
-
-                        blurRadius: 18,
-
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
+                      colors: [Color(0xffF97316), Color(0xff7E22CE)],
+                    ),
                   ),
 
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
 
                     children: [
-                      /// SEARCH
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
 
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(18),
 
-                          border: Border.all(color: Colors.orange.shade100),
-                        ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(.15),
 
-                        child: const Row(
-                          children: [
-                            Icon(Icons.search, color: Colors.blueGrey),
-
-                            SizedBox(width: 12),
-
-                            Expanded(
-                              child: Text(
-                                "Search courses, instructors...",
-
-                                style: TextStyle(
-                                  color: Colors.blueGrey,
-                                  fontSize: 16,
-                                ),
-                              ),
+                              borderRadius: BorderRadius.circular(18),
                             ),
-                          ],
-                        ),
+
+                            child: const Icon(
+                              Icons.school,
+                              color: Colors.white,
+                              size: 34,
+                            ),
+                          ),
+
+                          const SizedBox(width: 16),
+
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+
+                              children: [
+                                Text(
+                                  "Self-Paced\nLearning",
+
+                                  style: TextStyle(
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.bold,
+
+                                    color: Colors.white,
+                                    height: 1.1,
+                                  ),
+                                ),
+
+                                SizedBox(height: 12),
+
+                                Text(
+                                  "Learn at your own pace,\nanytime, anywhere",
+
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 35),
+
+                      _statCard(
+                        icon: Icons.menu_book_outlined,
+                        title: "Enrolled Courses",
+                        count: "3",
                       ),
 
                       const SizedBox(height: 20),
 
-                      /// FILTER
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-
-                          border: Border.all(color: Colors.orange.shade100),
-                        ),
-
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-
-                          children: [
-                            Icon(Icons.filter_alt_outlined),
-
-                            SizedBox(width: 10),
-
-                            Text(
-                              "All Courses",
-
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
+                      _statCard(
+                        icon: Icons.trending_up,
+                        title: "In Progress",
+                        count: "2",
                       ),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 20),
 
-                      /// CATEGORY CHIPS
-                      Wrap(
-                        spacing: 10,
-                        runSpacing: 12,
-
-                        children: categories.map((cat) {
-                          bool selected = cat == selectedCategory;
-
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedCategory = cat;
-                              });
-                            },
-
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 18,
-                                vertical: 10,
-                              ),
-
-                              decoration: BoxDecoration(
-                                color: selected
-                                    ? Colors.deepOrange
-                                    : Colors.white,
-
-                                borderRadius: BorderRadius.circular(24),
-
-                                border: Border.all(
-                                  color: Colors.orange.shade100,
-                                ),
-                              ),
-
-                              child: Text(
-                                cat,
-
-                                style: TextStyle(
-                                  fontSize: 16,
-
-                                  color: selected
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                      _statCard(
+                        icon: Icons.workspace_premium_outlined,
+                        title: "Completed",
+                        count: "1",
                       ),
+
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 50),
+              /// FLOATING SEARCH FILTER CARD
+              Animate(
+                delay: const Duration(milliseconds: 200),
 
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: SelfPacedData.courses.length,
-              itemBuilder: (context, index) {
-                final course = SelfPacedData.courses[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: _courseCard(course),
-                );
-              },
-            ),
-            const SizedBox(height: 40),
-          ],
+                effects: const [
+                  FadeEffect(duration: Duration(milliseconds: 500)),
+
+                  SlideEffect(
+                    begin: Offset(0, 0.15),
+                    end: Offset(0, 0),
+                    duration: Duration(milliseconds: 500),
+                  ),
+                ],
+
+                child: Transform.translate(
+                  offset: const Offset(0, 25),
+
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+
+                        borderRadius: BorderRadius.circular(28),
+
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.08),
+
+                            blurRadius: 18,
+
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          /// SEARCH
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+
+                              border: Border.all(color: Colors.orange.shade100),
+                            ),
+
+                            child: const Row(
+                              children: [
+                                Icon(Icons.search, color: Colors.blueGrey),
+
+                                SizedBox(width: 12),
+
+                                Expanded(
+                                  child: Text(
+                                    "Search courses, instructors...",
+
+                                    style: TextStyle(
+                                      color: Colors.blueGrey,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          /// FILTER
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+
+                              border: Border.all(color: Colors.orange.shade100),
+                            ),
+
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+
+                              children: [
+                                Icon(Icons.filter_alt_outlined),
+
+                                SizedBox(width: 10),
+
+                                Text(
+                                  "All Courses",
+
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 22),
+
+                          /// CATEGORY CHIPS
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 12,
+
+                            children: categories.map((cat) {
+                              bool selected = cat == selectedCategory;
+
+                              return Animate(
+                                delay: Duration(
+                                  milliseconds: 80 * categories.indexOf(cat),
+                                ),
+
+                                effects: const [
+                                  FadeEffect(
+                                    duration: Duration(milliseconds: 400),
+                                  ),
+
+                                  ScaleEffect(
+                                    begin: Offset(0.9, 0.9),
+                                    end: Offset(1, 1),
+                                    duration: Duration(milliseconds: 400),
+                                  ),
+                                ],
+
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedCategory = cat;
+                                    });
+                                  },
+
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 10,
+                                    ),
+
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? Colors.deepOrange
+                                          : Colors.white,
+
+                                      borderRadius: BorderRadius.circular(24),
+
+                                      border: Border.all(
+                                        color: Colors.orange.shade100,
+                                      ),
+                                    ),
+
+                                    child: Text(
+                                      cat,
+
+                                      style: TextStyle(
+                                        fontSize: 16,
+
+                                        color: selected
+                                            ? Colors.white
+                                            : Colors.black87,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 50),
+
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: SelfPacedData.courses.length,
+                itemBuilder: (context, index) {
+                  final course = SelfPacedData.courses[index];
+                  return Animate(
+                    delay: Duration(milliseconds: 150 * index),
+
+                    effects: const [
+                      FadeEffect(duration: Duration(milliseconds: 500)),
+
+                      SlideEffect(
+                        begin: Offset(0, 0.12),
+                        end: Offset(0, 0),
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    ],
+
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: _courseCard(course),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

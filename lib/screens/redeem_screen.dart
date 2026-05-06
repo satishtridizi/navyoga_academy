@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/widgets/app_background.dart';
 
 class RedeemScreen extends StatelessWidget {
   const RedeemScreen({super.key});
@@ -7,7 +8,9 @@ class RedeemScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Redeem Rewards")),
-      body: const Center(child: Text("Redeem Flow Coming Soon 🚀")),
+      body: AppBackground(
+        child: const Center(child: Text("Redeem Flow Coming Soon 🚀")),
+      ),
     );
   }
 }

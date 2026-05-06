@@ -14,7 +14,9 @@ class ReferralStatCard extends StatelessWidget {
           Navigator.pushNamed(context, stat.route!);
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
         margin: EdgeInsets.only(bottom: 20),
         padding: EdgeInsets.all(24),
         decoration: BoxDecoration(

@@ -20,7 +20,9 @@ class ActionCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
 
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOut,
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(

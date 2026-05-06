@@ -29,23 +29,39 @@ class ProfileField extends StatelessWidget {
           const SizedBox(height: 8),
 
           /// TEXT FIELD
-          TextField(
-            controller: controller,
-            maxLines: multi ? 3 : 1,
-            decoration: InputDecoration(
-              hintText: item.helperText, // ✅ HERE
-              prefixIcon: item.icon != null ? Icon(item.icon) : null,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
 
-              filled: true,
-              fillColor: const Color(0xffEEF1F5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
 
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepOrange.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+
+            child: TextField(
+              controller: controller,
+              maxLines: multi ? 3 : 1,
+              decoration: InputDecoration(
+                hintText: item.helperText, // ✅ HERE
+                prefixIcon: item.icon != null ? Icon(item.icon) : null,
+
+                filled: true,
+                fillColor: const Color(0xffEEF1F5),
+
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide(color: Colors.orange.withOpacity(.25)),
+                ),
               ),
             ),
           ),

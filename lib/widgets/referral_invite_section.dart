@@ -40,24 +40,29 @@ class InviteSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          InkWell(
-            borderRadius: BorderRadius.circular(30),
-            onTap: () {
-              Share.share(
-                "Join NavYoga Academy using my referral code NAVYOGA-SARAH-2026\n\nhttps://navyoga.academy/join/NAVY",
-              );
-            },
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                "Share Now",
-                style: TextStyle(color: Colors.deepPurple),
+          AnimatedScale(
+            duration: const Duration(milliseconds: 150),
+            scale: 1,
+
+            child: InkWell(
+              borderRadius: BorderRadius.circular(30),
+              onTap: () {
+                Share.share(
+                  "Join NavYoga Academy using my referral code NAVYOGA-SARAH-2026\n\nhttps://navyoga.academy/join/NAVY",
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                alignment: Alignment.center,
+                child: const Text(
+                  "Share Now",
+                  style: TextStyle(color: Colors.deepPurple),
+                ),
               ),
             ),
           ),

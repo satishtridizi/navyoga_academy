@@ -8,34 +8,44 @@ class ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 22),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xfff7f7f7),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.orange.withOpacity(.25)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(.03), blurRadius: 12),
-        ],
-      ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 25, end: 0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOutCubic,
 
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.deepOrange,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+      builder: (context, value, child) {
+        return Transform.translate(offset: Offset(0, value), child: child);
+      },
+
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 22),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xfff7f7f7),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.orange.withOpacity(.25)),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(.03), blurRadius: 12),
+          ],
+        ),
+
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.deepOrange,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 18),
+            const SizedBox(height: 18),
 
-          child,
-        ],
+            child,
+          ],
+        ),
       ),
     );
   }

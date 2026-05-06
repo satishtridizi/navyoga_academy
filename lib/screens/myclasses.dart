@@ -3,6 +3,7 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/myclasses_available_classes.dart';
 import 'package:navyoga_academy/data/myclasses_enrolled_classes_data.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
 import 'package:navyoga_academy/data/myclasses_stats_data.dart';
@@ -65,7 +66,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: const CustomDrawer(),
-      backgroundColor: const Color(0xfff5f5f5),
+      backgroundColor: Colors.transparent,
 
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
@@ -86,269 +87,271 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
         ),
       ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            /// 🔥 HEADER
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Colors.deepOrange, Colors.orangeAccent],
+      body: AppBackground(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              /// 🔥 HEADER
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Colors.deepOrange, Colors.orangeAccent],
+                  ),
+                  borderRadius: BorderRadius.circular(26),
                 ),
-                borderRadius: BorderRadius.circular(26),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.menu_book, color: Colors.white, size: 30),
-                      SizedBox(width: 10),
-                      Text(
-                        "My Classes",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    "Manage your enrolled classes\nand explore new courses",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 📊 STATS GRID
-            GridView.builder(
-              itemCount: statsData.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.15,
-              ),
-              itemBuilder: (context, index) {
-                final item = statsData[index];
-
-                return GestureDetector(
-                  onTap: () {
-                    if (item.title.contains("Enrolled")) {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.myClasses,
-                        arguments: "enrolled",
-                      );
-                    } else if (item.title.contains("Completed")) {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.myClasses,
-                        arguments: "completed",
-                      );
-                    } else if (item.title.contains("Progress")) {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.myClasses,
-                        arguments: "progress",
-                      );
-                    } else if (item.title.contains("Attendance")) {
-                      Navigator.pushNamed(context, AppRoutes.attendance);
-                    }
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          (item.color).withOpacity(0.2),
-                          (item.color).withOpacity(0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: item.color,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                item.icon,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                            Text(
-                              item.value,
-                              style: const TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-
+                        Icon(Icons.menu_book, color: Colors.white, size: 30),
+                        SizedBox(width: 10),
                         Text(
-                          item.title,
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 30, 30, 30),
-                            fontSize: 14,
+                          "My Classes",
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 🔍 SEARCH
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: const Color(0xfff7f7f7),
-                borderRadius: BorderRadius.circular(24),
+                    SizedBox(height: 10),
+                    Text(
+                      "Manage your enrolled classes\nand explore new courses",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: const TextField(
-                      decoration: InputDecoration(
-                        icon: Icon(Icons.search),
-                        hintText: "Search classes or instructors...",
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: filterBox(
-                          selectedLevel,
-                          [
-                            "All Levels",
-                            "Beginner",
-                            "Intermediate",
-                            "Advanced",
+
+              const SizedBox(height: 20),
+
+              /// 📊 STATS GRID
+              GridView.builder(
+                itemCount: statsData.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.15,
+                ),
+                itemBuilder: (context, index) {
+                  final item = statsData[index];
+
+                  return GestureDetector(
+                    onTap: () {
+                      if (item.title.contains("Enrolled")) {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.myClasses,
+                          arguments: "enrolled",
+                        );
+                      } else if (item.title.contains("Completed")) {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.myClasses,
+                          arguments: "completed",
+                        );
+                      } else if (item.title.contains("Progress")) {
+                        Navigator.pushNamed(
+                          context,
+                          AppRoutes.myClasses,
+                          arguments: "progress",
+                        );
+                      } else if (item.title.contains("Attendance")) {
+                        Navigator.pushNamed(context, AppRoutes.attendance);
+                      }
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            (item.color).withOpacity(0.2),
+                            (item.color).withOpacity(0.05),
                           ],
-                          (val) => setState(() => selectedLevel = val),
                         ),
+                        borderRadius: BorderRadius.circular(24),
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: filterBox(
-                          selectedStatus,
-                          ["All Status", "Completed", "In Progress"],
-                          (val) => setState(() => selectedStatus = val),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: item.color,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  item.icon,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                              Text(
+                                item.value,
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          Text(
+                            item.title,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 30, 30, 30),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// 📚 HEADER
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.deepOrange,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.auto_awesome, color: Colors.white),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Enrolled Classes (8)",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            /// 📦 COURSE LIST
-            if (selectedSection == "enrolled" ||
-                selectedSection == "completed" ||
-                selectedSection == "progress") ...[
-              Builder(
-                builder: (context) {
-                  final filteredEnrolled = getFilteredClasses();
-                  return Column(
-                    children: filteredEnrolled
-                        .map((e) => CourseCard(data: e))
-                        .toList(),
+                    ),
                   );
                 },
               ),
-            ],
 
-            const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-            /// 🆕 AVAILABLE CLASSES HEADER
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.menu_book, color: Colors.white),
+              /// 🔍 SEARCH
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: const Color(0xfff7f7f7),
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Available Classes",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: const TextField(
+                        decoration: InputDecoration(
+                          icon: Icon(Icons.search),
+                          hintText: "Search classes or instructors...",
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: filterBox(
+                            selectedLevel,
+                            [
+                              "All Levels",
+                              "Beginner",
+                              "Intermediate",
+                              "Advanced",
+                            ],
+                            (val) => setState(() => selectedLevel = val),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: filterBox(
+                            selectedStatus,
+                            ["All Status", "Completed", "In Progress"],
+                            (val) => setState(() => selectedStatus = val),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// 📚 HEADER
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.deepOrange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.auto_awesome, color: Colors.white),
                   ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Enrolled Classes (8)",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              /// 📦 COURSE LIST
+              if (selectedSection == "enrolled" ||
+                  selectedSection == "completed" ||
+                  selectedSection == "progress") ...[
+                Builder(
+                  builder: (context) {
+                    final filteredEnrolled = getFilteredClasses();
+                    return Column(
+                      children: filteredEnrolled
+                          .map((e) => CourseCard(data: e))
+                          .toList(),
+                    );
+                  },
                 ),
               ],
-            ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-            Column(
-              children: availableClasses
-                  .map((e) => AvailableClassCard(data: e))
-                  .toList(),
-            ),
-          ],
+              /// 🆕 AVAILABLE CLASSES HEADER
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.menu_book, color: Colors.white),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Available Classes",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              Column(
+                children: availableClasses
+                    .map((e) => AvailableClassCard(data: e))
+                    .toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );

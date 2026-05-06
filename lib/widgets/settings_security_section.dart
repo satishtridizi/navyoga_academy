@@ -73,12 +73,31 @@ class SettingsSecuritySection extends StatelessWidget {
 
                 TextField(
                   obscureText: true,
-
                   decoration: InputDecoration(
                     hintText: field.hint,
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
 
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(
+                        color: Colors.deepOrange.withOpacity(0.2),
+                      ),
+                    ),
+
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(
+                        color: Colors.deepOrange.withOpacity(0.2),
+                      ),
+                    ),
+
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: const BorderSide(
+                        color: Colors.deepPurple,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 ),

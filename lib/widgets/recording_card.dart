@@ -22,7 +22,9 @@ class RecordingCard extends StatelessWidget {
           ),
         );
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
         margin: const EdgeInsets.only(bottom: 16),
 
         decoration: BoxDecoration(
