@@ -28,17 +28,20 @@ class PlanCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: plan.color.withOpacity(0.08), // 🔥 dynamic background
+          color: Colors.white.withValues(alpha: 0.92),
+          border: Border.all(
+            color: plan.color.withValues(alpha: 0.45),
+            width: isHighlighted ? 2.2 : 1.4,
+          ),
           borderRadius: BorderRadius.circular(22),
-          boxShadow: isCurrent
-              ? [
-                  BoxShadow(
-                    color: plan.color.withOpacity(0.25),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : [],
+          boxShadow: [
+            BoxShadow(
+              color: plan.color.withValues(alpha: 0.18),
+              blurRadius: 22,
+              spreadRadius: 2,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +55,7 @@ class PlanCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: plan.color.withOpacity(0.15), // 🔥 FIXED
+                        color: plan.color.withValues(alpha: 0.15), // 🔥 FIXED
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(plan.icon, color: plan.color), // 🔥 FIXED
@@ -140,9 +143,7 @@ class PlanCard extends StatelessWidget {
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: plan.isCurrent
-                      ? Colors
-                            .grey
-                            .shade400 // 🔥 disabled
+                      ? const Color.fromARGB(255, 107, 107, 107) // 🔥 disabled
                       : plan.color, // 🔥 dynamic
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),

@@ -15,7 +15,7 @@ class PaymentHistoryScreen extends StatelessWidget {
       appBar: AppBar(title: const Text("Payment History")),
       body: AppBackground(
         child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           itemCount: payments.length,
           itemBuilder: (context, index) {

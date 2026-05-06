@@ -15,7 +15,7 @@ Widget HeaderBanner() {
       SizedBox(height: 8),
       Text(
         "Manage your subscription plans and\npayment methods",
-        style: TextStyle(fontSize: 14, color: Colors.blueGrey),
+        style: TextStyle(fontSize: 14, color: Color.fromARGB(255, 0, 0, 0)),
       ),
     ],
   );

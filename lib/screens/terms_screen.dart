@@ -26,7 +26,7 @@ class TermsScreen extends StatelessWidget {
 
       body: AppBackground(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(20),
 
           child: Column(

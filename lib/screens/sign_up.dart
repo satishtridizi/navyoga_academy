@@ -162,7 +162,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             Center(
               child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Form(
                   key: _formKey,

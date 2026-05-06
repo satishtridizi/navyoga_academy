@@ -66,21 +66,22 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
           ),
 
           /// 👤 USER CARD
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 20, end: 0),
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeOutCubic,
+          Positioned(
+            top: 80,
+            left: 20,
 
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, value),
-                child: child,
-              );
-            },
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 20, end: 0),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutCubic,
 
-            child: Positioned(
-              top: 80,
-              left: 20,
+              builder: (context, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, value),
+                  child: child,
+                );
+              },
+
               child: Container(
                 width: 220,
                 height: 150,
@@ -91,11 +92,14 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                     colors: [Color(0xff2c7be5), Color(0xff0b2545)],
                   ),
                 ),
+
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.account_circle, size: 60, color: Colors.white70),
+
                     SizedBox(height: 6),
+
                     Text("You", style: TextStyle(color: Colors.white)),
                   ],
                 ),
@@ -103,7 +107,6 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
             ),
           ),
 
-          /// 🔴 LIVE TIMER
           /// 🔴 LIVE TIMER
           Positioned(
             bottom: 140,

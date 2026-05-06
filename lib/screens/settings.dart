@@ -146,7 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       body: AppBackground(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

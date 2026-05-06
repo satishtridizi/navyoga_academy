@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: AppBackground(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [

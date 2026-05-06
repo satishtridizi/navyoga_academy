@@ -69,7 +69,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             final sub = snap.data!;
 
             return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +154,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
                   const SizedBox(height: 25),
 
-                  /// ================= PAYMENT METHODS =================
                   /// ================= PAYMENT METHODS =================
                   Animate(
                     effects: const [
@@ -305,8 +304,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                     vertical: 10,
                                   ),
                                 ),
-                                icon: const Icon(Icons.download, size: 18),
-                                label: const Text("Download All"),
+                                icon: const Icon(
+                                  Icons.download,
+                                  size: 18,
+                                  color: Color.fromARGB(255, 28, 1, 84),
+                                ),
+                                label: const Text(
+                                  "Download All",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 28, 1, 84),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -354,7 +363,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.deepPurple,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  214,
+                                  214,
+                                  214,
+                                ),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
@@ -364,7 +378,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               ),
                               child: const Text(
                                 "View All Payment History",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: Colors.black),
                               ),
                             ),
                           ),

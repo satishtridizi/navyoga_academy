@@ -42,7 +42,7 @@ class ReferralScreen extends StatelessWidget {
 
       body: AppBackground(
         child: ListView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(20),
           children: [
             /// ================= HEADER =================

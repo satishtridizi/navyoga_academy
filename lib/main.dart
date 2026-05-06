@@ -6,6 +6,18 @@ void main() async {
   runApp(const MyApp());
 }
 
+/// ✅ REMOVE FLEX / STRETCH / GLOW EFFECT
+class NoGlowScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -13,6 +25,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+
+      /// ✅ GLOBAL SCROLL FIX
+      builder: (context, child) {
+        return ScrollConfiguration(
+          behavior: NoGlowScrollBehavior(),
+          child: child!,
+        );
+      },
+
       initialRoute: AppRoutes.dashboard,
       routes: AppRoutes.routes,
     );

@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       body: AppBackground(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.all(16),
 
           child: Column(

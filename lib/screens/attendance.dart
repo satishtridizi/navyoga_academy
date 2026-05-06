@@ -22,7 +22,7 @@ class AttendanceScreen extends StatelessWidget {
 
       body: AppBackground(
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           slivers: [
             SliverAppBar(
               floating: true,

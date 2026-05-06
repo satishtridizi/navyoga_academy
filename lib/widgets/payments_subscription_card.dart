@@ -46,11 +46,14 @@ class SubscriptionCard extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.deepOrange,
                           fontWeight: FontWeight.bold,
+                          fontSize: 18,
                         ),
                       ),
                       Text(
                         "Active since ${sub.activeSince}",
-                        style: const TextStyle(color: Colors.blueGrey),
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 77, 88, 93),
+                        ),
                       ),
                     ],
                   ),
@@ -100,7 +103,7 @@ class SubscriptionCard extends StatelessWidget {
 
           const Text(
             "Plan Features",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
           ),
 
           const SizedBox(height: 8),

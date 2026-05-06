@@ -262,7 +262,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
       body: AppBackground(
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               /// TOP GRADIENT SECTION
