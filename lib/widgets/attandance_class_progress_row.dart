@@ -36,7 +36,11 @@ class ClassProgressRow extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.access_time, size: 15, color: Colors.blueGrey),
+                    Icon(
+                      Icons.access_time,
+                      size: 15,
+                      color: const Color.fromARGB(255, 74, 103, 117),
+                    ),
 
                     SizedBox(width: 4),
 

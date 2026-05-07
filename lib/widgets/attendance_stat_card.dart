@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../models/attendance_stat_model.dart';
 
 class StatCard extends StatelessWidget {
@@ -23,8 +24,11 @@ class StatCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
 
         decoration: BoxDecoration(
-          color: const Color(0xffFCFBFA),
+          color: Colors.white,
+
           borderRadius: BorderRadius.circular(26),
+
+          border: Border.all(color: Colors.black.withOpacity(0.06)),
 
           boxShadow: [
             BoxShadow(
@@ -40,7 +44,11 @@ class StatCard extends StatelessWidget {
           children: [
             Text(
               data.title,
-              style: const TextStyle(fontSize: 17, color: Color(0xff64748B)),
+              style: GoogleFonts.heebo(
+                fontWeight: FontWeight.w500,
+                fontSize: 17,
+                color: Color.fromARGB(255, 87, 87, 87),
+              ),
             ),
 
             const Spacer(),

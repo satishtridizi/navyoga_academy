@@ -21,22 +21,51 @@ class DetailCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+          color: Colors.white,
+
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
+
+          border: Border.all(color: Colors.black.withOpacity(0.08)),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(data.title), IconBox(data.icon, data.color)],
+              children: [
+                Text(
+                  data.title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xff64748B),
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                IconBox(data.icon, data.color),
+              ],
             ),
             const SizedBox(height: 10),
             Row(
               children: [
                 Icon(Icons.trending_up, size: 16, color: data.color),
                 const SizedBox(width: 4),
-                Text(data.subtitle),
+                Text(
+                  data.subtitle,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xff64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -45,8 +74,9 @@ class DetailCard extends StatelessWidget {
               child: Text(
                 data.value,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: Color(0xff1E1B39),
                 ),
               ),
             ),

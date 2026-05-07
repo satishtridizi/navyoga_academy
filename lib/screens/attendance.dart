@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/attendance_data.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -40,7 +41,10 @@ class AttendanceScreen extends StatelessWidget {
 
             title: const Text(
               "NavYoga Academy",
-              style: TextStyle(color: Colors.deepOrange),
+              style: TextStyle(
+                color: Colors.deepOrange,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
 
@@ -58,7 +62,7 @@ class AttendanceScreen extends StatelessWidget {
                       child: Text(
                         "My Attendance &\nTime Tracking",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 33,
                           fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),
@@ -69,11 +73,14 @@ class AttendanceScreen extends StatelessWidget {
 
                   AnimatedItem(
                     index: 1,
-                    child: const Align(
+                    child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         "Track your class attendance, practice time, and progress metrics",
-                        style: TextStyle(color: Colors.blueGrey),
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                   ),
