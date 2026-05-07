@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -334,7 +335,19 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                     ),
                   ],
 
-                  child: RecordingCard(recording: recording),
+                  child: RecordingCard(
+                    recording: RecordingModel(
+                      title: recording.title,
+                      trainer: recording.trainer,
+                      category: recording.category,
+                      duration: recording.duration,
+                      rating: recording.rating,
+                      views: recording.views,
+                      date: recording.date,
+                      color: Colors.deepPurple,
+                      isCompleted: false,
+                    ),
+                  ),
                 );
               }).toList(),
             ),
