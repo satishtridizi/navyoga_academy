@@ -6,9 +6,42 @@ import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/recording_card.dart';
 import '../data/recordings_data.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/recording_api_model.dart';
+import 'package:navyoga_academy/services/recording_service.dart';
 
-class RecordingsDashboard extends StatelessWidget {
+class RecordingsDashboard extends StatefulWidget {
   const RecordingsDashboard({super.key});
+
+  @override
+  State<RecordingsDashboard> createState() => _RecordingsDashboardState();
+}
+
+class _RecordingsDashboardState extends State<RecordingsDashboard> {
+  final recordingService = RecordingService();
+
+  List<RecordingApiModel> recordings = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadRecordings();
+  }
+
+  Future<void> loadRecordings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await recordingService.getRecordings(token!);
+
+    final List data = response["data"];
+
+    setState(() {
+      recordings = data.map((e) => RecordingApiModel.fromJson(e)).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +317,7 @@ class RecordingsDashboard extends StatelessWidget {
 
             /// 🎬 LIST
             Column(
-              children: RecordingsData.recordings.asMap().entries.map((entry) {
+              children: recordings.asMap().entries.map((entry) {
                 final index = entry.key;
                 final recording = entry.value;
 

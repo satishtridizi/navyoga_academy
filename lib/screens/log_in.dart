@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,10 +10,11 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _NavaYugaSigninScreen();
+  State<LoginScreen> createState() => _LoginScreen();
 }
 
-class _NavaYugaSigninScreen extends State<LoginScreen> {
+class _LoginScreen extends State<LoginScreen> {
+  final AuthService authService = AuthService();
   bool rememberMe = false;
   bool obscurePassword = true;
   double _scale = 1;
@@ -252,31 +254,51 @@ class _NavaYugaSigninScreen extends State<LoginScreen> {
                                 return;
                               }
 
-                              /// 🔹 Fake authentication
-                              if (email == "navyoga@gmail.com" &&
-                                  password == "123456") {
-                                /// ✅ ADD THIS BLOCK HERE
-                                if (rememberMe) {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setString('saved_email', email);
-                                } else {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.remove('saved_email');
-                                }
-
-                                /// 🔹 Navigate
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  AppRoutes.dashboard,
-                                  (route) => false,
+                              /// 🔹 authentication
+                              try {
+                                /// 🔹 CALL LOGIN API
+                                final response = await authService.studentLogin(
+                                  email: email,
+                                  password: password,
                                 );
-                              } else {
+
+                                print(response);
+
+                                /// 🔹 SUCCESS
+                                if (response["success"] == true) {
+                                  /// SAVE TOKEN
+                                  final token = response["data"]["token"];
+
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+
+                                  await prefs.setString("token", token);
+
+                                  /// REMEMBER ME
+                                  if (rememberMe) {
+                                    await prefs.setString('saved_email', email);
+                                  } else {
+                                    await prefs.remove('saved_email');
+                                  }
+
+                                  /// NAVIGATE
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    AppRoutes.dashboard,
+                                    (route) => false,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(response["message"]),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                print(e);
+
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Invalid credentials"),
-                                  ),
+                                  SnackBar(content: Text("Login failed")),
                                 );
                               }
                             },

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/profile_field_model.dart';
+import 'package:navyoga_academy/models/student_model.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/profile_data.dart';
 import '../widgets/profile_stat_card.dart';
 import '../widgets/profile_section.dart';
@@ -18,12 +21,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  StudentModel? student;
+  final authService = AuthService();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final addressController = TextEditingController();
   List<TextEditingController> medicalControllers = [];
   List<TextEditingController> preferenceControllers = [];
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +41,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     preferenceControllers = ProfileData.preferences
         .map((e) => TextEditingController(text: e.value))
         .toList();
+
+    loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    print(token);
+
+    final response = await authService.getProfile(token!);
+
+    final studentData = StudentModel.fromJson(response["data"]);
+
+    setState(() {
+      student = studentData;
+
+      nameController.text = studentData.name;
+
+      emailController.text = studentData.email;
+
+      phoneController.text = studentData.phone;
+    });
   }
 
   @override

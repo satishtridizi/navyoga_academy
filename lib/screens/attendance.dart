@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/attendance_data.dart';
+import 'package:navyoga_academy/models/attendance_stat_model.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/attendance_stat_card.dart';
 import 'package:navyoga_academy/widgets/attandance_detail_card.dart';
@@ -10,9 +11,41 @@ import 'package:navyoga_academy/widgets/attandance_progress_row.dart';
 import 'package:navyoga_academy/widgets/attandance_class_progress_row.dart';
 import 'package:navyoga_academy/widgets/attandance_section_card.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/attendance_api_model.dart';
+import 'package:navyoga_academy/services/attendance_service.dart';
 
-class AttendanceScreen extends StatelessWidget {
+class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
+
+  @override
+  State<AttendanceScreen> createState() => _AttendanceScreenState();
+}
+
+class _AttendanceScreenState extends State<AttendanceScreen> {
+  final attendanceService = AttendanceService();
+
+  AttendanceApiModel? attendance;
+
+  @override
+  void initState() {
+    super.initState();
+    loadAttendance();
+  }
+
+  Future<void> loadAttendance() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await attendanceService.getAttendance(token!);
+
+    final attendanceData = AttendanceApiModel.fromJson(response["data"]);
+
+    setState(() {
+      attendance = attendanceData;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -179,18 +212,51 @@ class AttendanceScreen extends StatelessWidget {
 
   /// 🔹 Reusable grid
   Widget _buildStatsGrid() {
+    final stats = [
+      AttendanceStatModel(
+        title: "Attendance Rate",
+        value: "${attendance?.attendanceRate ?? 0}%",
+        icon: Icons.trending_up,
+        color: Colors.orange,
+      ),
+
+      AttendanceStatModel(
+        title: "Classes Attended",
+        value: "${attendance?.classesAttended ?? 0}",
+        icon: Icons.check_circle,
+        color: Colors.green,
+      ),
+
+      AttendanceStatModel(
+        title: "Missed Classes",
+        value: "${attendance?.missedClasses ?? 0}",
+        icon: Icons.cancel,
+        color: Colors.red,
+      ),
+
+      AttendanceStatModel(
+        title: "Current Streak",
+        value: "${attendance?.streak ?? 0}",
+        icon: Icons.local_fire_department,
+        color: Colors.deepPurple,
+      ),
+    ];
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: AttendanceData.stats.length,
+
+      itemCount: stats.length,
+
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
         childAspectRatio: 1.25,
       ),
+
       itemBuilder: (_, i) =>
-          AnimatedItem(index: i + 2, child: StatCard(AttendanceData.stats[i])),
+          AnimatedItem(index: i + 2, child: StatCard(stats[i])),
     );
   }
 

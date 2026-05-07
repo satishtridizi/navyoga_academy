@@ -16,6 +16,9 @@ import 'package:navyoga_academy/widgets/dashboard_class_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/dashboard_model.dart';
+import 'package:navyoga_academy/services/dashboard_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +31,32 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showAllUpcoming = false;
   bool showAllVideos = false;
   bool showAllReferral = false;
+
+  final dashboardService = DashboardService();
+
+  DashboardModel? dashboard;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadDashboard();
+  }
+
+  Future<void> loadDashboard() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await dashboardService.getDashboard(token!);
+
+    final dashboardData = DashboardModel.fromJson(response["data"]);
+
+    setState(() {
+      dashboard = dashboardData;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -176,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   index: 0,
                   child: StatCard(
                     "Enrolled Classes",
-                    "8",
+                    dashboard?.enrolledClasses.toString() ?? "0",
                     "+2 this month",
                     Color.fromARGB(255, 255, 89, 24),
                     onTap: () {
@@ -188,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   index: 1,
                   child: StatCard(
                     "Hours Completed",
-                    "124",
+                    dashboard?.practiceHours.toString() ?? "0",
                     "+18 this week",
                     Color.fromARGB(255, 169, 43, 191),
                     onTap: () {
@@ -200,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   index: 2,
                   child: StatCard(
                     "Recordings Watched",
-                    "45",
+                    dashboard?.recordingsWatched.toString() ?? "0",
                     "+8 this week",
                     Color.fromARGB(255, 43, 191, 117),
                     onTap: () {
@@ -213,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   index: 3,
                   child: StatCard(
                     "Attendance Rate",
-                    "92%",
+                    "${dashboard?.attendanceRate ?? 0}%",
                     "+5% improvement",
                     Colors.orange,
                     onTap: () {
