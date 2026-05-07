@@ -67,8 +67,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   /// 🔥 Notification Settings
   List<Map<String, dynamic>> settings = [
     {
@@ -109,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 4,
-      key: _scaffoldKey,
+
       drawer: const CustomDrawer(),
 
       //backgroundColor: Colors.transparent,
@@ -131,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.menu, color: Colors.white),
 
                 onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  Scaffold.of(context).openDrawer();
                 },
               ),
             ),

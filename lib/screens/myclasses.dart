@@ -19,7 +19,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   String selectedLevel = "All Levels";
   String selectedStatus = "All Status";
   String selectedSection = "enrolled";
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -65,19 +65,21 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 0,
-      key: _scaffoldKey,
+
       drawer: const CustomDrawer(),
 
       //backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.grey[200],
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.deepPurple),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.deepPurple),
 
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
         title: const Text(
           "NavYoga Academy",

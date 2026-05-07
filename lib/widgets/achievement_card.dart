@@ -34,7 +34,10 @@ class AchievementCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.green.withOpacity(0.10), Colors.white],
+              colors: [
+                const Color.fromARGB(255, 243, 243, 243).withOpacity(0.10),
+                Colors.white,
+              ],
             ),
 
             border: Border.all(

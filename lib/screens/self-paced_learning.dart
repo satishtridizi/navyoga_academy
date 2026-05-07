@@ -207,7 +207,6 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     );
   }
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String selectedCategory = "All";
 
   final categories = [
@@ -237,7 +236,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 2,
-      key: _scaffoldKey,
+
       drawer: const CustomDrawer(),
 
       // backgroundColor: Colors.transparent,
@@ -245,14 +244,15 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
 
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black),
 
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
-
         title: const Text(
           "NavYoga Academy",
           style: TextStyle(

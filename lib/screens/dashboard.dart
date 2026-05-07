@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       //  backgroundColor: Color(0xffF7F7F7),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 1,
 
         leading: Builder(

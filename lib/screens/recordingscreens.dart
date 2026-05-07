@@ -20,7 +20,7 @@ class RecordingsDashboard extends StatelessWidget {
 
       //backgroundColor: const Color(0xfff5f5f5),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: Builder(
           builder: (context) {
