@@ -9,11 +9,44 @@ import 'package:navyoga_academy/widgets/referral_reward_summary_section.dart';
 import 'package:navyoga_academy/widgets/referral_share_section.dart';
 import 'package:navyoga_academy/widgets/referral_user_card.dart';
 import '../data/referral_data.dart';
+import '../models/referral_user_model.dart';
 import '../widgets/referral_stat_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/referral_api_model.dart';
+import 'package:navyoga_academy/services/referral_service.dart';
 
-class ReferralScreen extends StatelessWidget {
+class ReferralScreen extends StatefulWidget {
   const ReferralScreen({super.key});
+
+  @override
+  State<ReferralScreen> createState() => _ReferralScreenState();
+}
+
+class _ReferralScreenState extends State<ReferralScreen> {
+  final referralService = ReferralService();
+
+  List<ReferralApiModel> referrals = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadReferrals();
+  }
+
+  Future<void> loadReferrals() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await referralService.getReferrals(token!);
+
+    final List data = response["data"];
+
+    setState(() {
+      referrals = data.map((e) => ReferralApiModel.fromJson(e)).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +209,7 @@ class ReferralScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          ...ReferralData.users.asMap().entries.map((entry) {
+          ...referrals.asMap().entries.map((entry) {
             final index = entry.key;
             final e = entry.value;
 
@@ -193,7 +226,19 @@ class ReferralScreen extends StatelessWidget {
                 ),
               ],
 
-              child: ReferralUserCard(user: e),
+              child: ReferralUserCard(
+                user: ReferralUserModel(
+                  earning: e.reward,
+                  amount: e.reward,
+                  name: e.name,
+
+                  email: "",
+
+                  status: e.status,
+
+                  date: e.joinedDate,
+                ),
+              ),
             );
           }).toList(),
 

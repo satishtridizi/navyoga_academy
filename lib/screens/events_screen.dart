@@ -8,9 +8,41 @@ import '../widgets/stat_card.dart';
 import '../widgets/event_card.dart';
 import '../models/event_model.dart';
 import 'event_details.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/event_api_model.dart';
+import 'package:navyoga_academy/services/event_service.dart';
 
-class EventsScreen extends StatelessWidget {
+class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
+
+  @override
+  State<EventsScreen> createState() => _EventsScreenState();
+}
+
+class _EventsScreenState extends State<EventsScreen> {
+  final eventService = EventService();
+
+  List<EventApiModel> events = [];
+
+  @override
+  initState() {
+    super.initState();
+    loadEvents();
+  }
+
+  Future<void> loadEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await eventService.getEvents(token!);
+
+    final List data = response["data"];
+
+    setState(() {
+      events = data.map((e) => EventApiModel.fromJson(e)).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,12 +193,34 @@ class EventsScreen extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               cacheExtent: 500,
-              itemCount: AppData.allEvents.length,
+              itemCount: events.length,
               itemBuilder: (context, index) {
                 return EventCard(
-                  event: AppData.allEvents[index],
+                  event: EventModel(
+                    description: "",
+                    location: "",
+                    price: "",
+                    seats: "",
+                    image: "",
+                    tags: [],
+                    title: events[index].title,
+                    date: events[index].date,
+                  ),
                   isCompact: true,
-                  onTap: () => _openDetails(context, AppData.allEvents[index]),
+                  onTap: () => _openDetails(
+                    context,
+
+                    EventModel(
+                      location: "",
+                      price: "",
+                      seats: "",
+                      image: "",
+                      tags: [],
+                      description: "",
+                      title: events[index].title,
+                      date: events[index].date,
+                    ),
+                  ),
                 );
               },
             ),

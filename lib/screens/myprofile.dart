@@ -3,6 +3,7 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/profile_field_model.dart';
 import 'package:navyoga_academy/models/student_model.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
+import 'package:navyoga_academy/services/profile_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
@@ -29,6 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final addressController = TextEditingController();
   List<TextEditingController> medicalControllers = [];
   List<TextEditingController> preferenceControllers = [];
+
+  final profileService = ProfileService();
+
+  bool isUpdating = false;
 
   @override
   void initState() {
@@ -64,7 +69,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
       emailController.text = studentData.email;
 
       phoneController.text = studentData.phone;
+
+      // addressController.text = studentData.address;
     });
+  }
+
+  Future<void> updateProfile() async {
+    setState(() {
+      isUpdating = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await profileService.updateProfile(
+      token: token!,
+
+      name: nameController.text,
+
+      email: emailController.text,
+
+      phone: phoneController.text,
+
+      address: addressController.text,
+    );
+    setState(() {
+      isUpdating = false;
+    });
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(response["message"])));
   }
 
   @override
@@ -178,30 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          ProfileData.personalInfo[0] = ProfileFieldModel(
-                            label: "Full Name",
-                            value: nameController.text,
-                          );
-
-                          ProfileData.personalInfo[1] = ProfileFieldModel(
-                            label: "Email Address",
-                            value: emailController.text,
-                          );
-
-                          ProfileData.personalInfo[2] = ProfileFieldModel(
-                            label: "Phone Number",
-                            value: phoneController.text,
-                          );
-
-                          ProfileData.personalInfo[3] = ProfileFieldModel(
-                            label: "Address",
-                            value: addressController.text,
-                            isMultiline: true,
-                          );
-                        });
-                      },
+                      onPressed: updateProfile,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.purple,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -209,10 +222,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      child: const Text(
-                        "Update Profile",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      child: isUpdating
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              "Update Profile",
+                              style: TextStyle(color: Colors.white),
+                            ),
                     ),
                   ),
                 ],

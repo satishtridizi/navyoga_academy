@@ -8,6 +8,7 @@ import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
 
 class DashboardButton extends StatelessWidget {
   const DashboardButton({super.key});
@@ -286,13 +287,17 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.blueGrey),
             title: const Text("Logout"),
-            onTap: () {
-              Navigator.pop(context); // close drawer
+            onTap: () async {
+              Navigator.pop(context);
+
+              await AuthService().logout();
 
               Navigator.pushAndRemoveUntil(
                 context,
+
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (route) => false, // removes all previous routes
+
+                (route) => false,
               );
             },
           ),

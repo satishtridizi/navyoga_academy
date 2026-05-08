@@ -12,6 +12,9 @@ import 'package:navyoga_academy/widgets/payments_header_banner.dart';
 import 'package:navyoga_academy/widgets/payments_plan_card.dart';
 import 'package:navyoga_academy/widgets/payments_subscription_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/models/payment_api_model.dart';
+import 'package:navyoga_academy/services/payment_service.dart';
 
 class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
@@ -21,20 +24,38 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
+  final paymentService = PaymentService();
+
+  List<PaymentApiModel> payments = [];
   final service = SubscriptionService();
   late Future<Subscription> future;
 
+  Future<void> loadPayments() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final token = prefs.getString("token");
+
+    final response = await paymentService.getPayments(token!);
+
+    final List data = response["data"];
+
+    setState(() {
+      payments = data.map((e) => PaymentApiModel.fromJson(e)).toList();
+    });
+  }
+
   @override
   void initState() {
-    future = service.fetchSubscription();
     super.initState();
+
+    future = service.fetchSubscription();
+
+    loadPayments();
   }
 
   @override
   Widget build(BuildContext context) {
     final plans = service.getPlans();
-
-    final payments = service.getPayments();
 
     return AppScaffold(
       currentIndex: 4,
@@ -339,7 +360,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               ),
                             ],
 
-                            child: paymentHistoryCard(p),
+                            child: paymentHistoryCard(
+                              PaymentHistory(
+                                title: p.method,
+                                amount: p.amount,
+                                date: p.date,
+                                //status: p.status,
+                              ),
+                            ),
                           );
                         }),
 
@@ -353,8 +381,15 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      PaymentHistoryScreen(payments: payments),
+                                  builder: (_) => PaymentHistoryScreen(
+                                    payments: payments.map((p) {
+                                      return PaymentHistory(
+                                        title: p.method,
+                                        amount: p.amount,
+                                        date: p.date,
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
                               );
                             },

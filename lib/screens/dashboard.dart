@@ -48,7 +48,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final token = prefs.getString("token");
 
-    final response = await dashboardService.getDashboard(token!);
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+
+      return;
+    }
+
+    final response = await dashboardService.getDashboard(token);
 
     final dashboardData = DashboardModel.fromJson(response["data"]);
 
