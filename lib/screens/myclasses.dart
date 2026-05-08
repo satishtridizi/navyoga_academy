@@ -7,6 +7,7 @@ import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
 import 'package:navyoga_academy/data/myclasses_stats_data.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class MyClassesScreen extends StatefulWidget {
   const MyClassesScreen({super.key});

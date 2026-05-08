@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 void main() {
   runApp(const MyApp());

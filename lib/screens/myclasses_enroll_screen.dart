@@ -3,6 +3,7 @@ import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class EnrollScreen extends StatelessWidget {
   const EnrollScreen({super.key});

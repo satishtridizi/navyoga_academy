@@ -5,6 +5,7 @@ import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -244,12 +245,9 @@ class _LoginScreen extends State<LoginScreen> {
 
                               /// 🔹 Basic validation
                               if (email.isEmpty || password.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Please enter email and password",
-                                    ),
-                                  ),
+                                AppSnackbar.showWarning(
+                                  context,
+                                  "Please enter email and password",
                                 );
                                 return;
                               }
@@ -266,15 +264,15 @@ class _LoginScreen extends State<LoginScreen> {
 
                                 /// 🔹 SUCCESS
                                 if (response["success"] == true) {
-                                  /// SAVE TOKEN
-                                  final token = response["data"]["token"];
+                                  AppSnackbar.showSuccess(
+                                    context,
+                                    "Login successful",
+                                  );
 
+                                  /// REMEMBER ME
                                   final prefs =
                                       await SharedPreferences.getInstance();
 
-                                  await prefs.setString("token", token);
-
-                                  /// REMEMBER ME
                                   if (rememberMe) {
                                     await prefs.setString('saved_email', email);
                                   } else {
@@ -288,18 +286,15 @@ class _LoginScreen extends State<LoginScreen> {
                                     (route) => false,
                                   );
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(response["message"]),
-                                    ),
+                                  AppSnackbar.showError(
+                                    context,
+                                    response["message"],
                                   );
                                 }
                               } catch (e) {
                                 print(e);
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("Login failed")),
-                                );
+                                AppSnackbar.showError(context, "Login failed");
                               }
                             },
                             style: ElevatedButton.styleFrom(

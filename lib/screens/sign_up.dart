@@ -4,6 +4,7 @@ import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -23,12 +24,12 @@ class _SignupScreenState extends State<SignupScreen> {
     final email = emailController.text.trim();
 
     if (email.isEmpty) {
-      _showSnack("Enter your email first");
+      AppSnackbar.showWarning(context, "Enter your email first");
       return;
     }
 
     if (!_isValidEmail(email)) {
-      _showSnack("Enter a valid email");
+      AppSnackbar.showWarning(context, "Enter a valid email");
       return;
     }
 
@@ -43,10 +44,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
       Navigator.pop(context);
 
-      _showSnack("Password reset link sent to $email");
+      AppSnackbar.showSuccess(context, "Password reset link sent to $email");
     } catch (e) {
       Navigator.pop(context);
-      _showSnack("Something went wrong. Try again.");
+      AppSnackbar.showError(context, "Something went wrong. Try again.");
     }
   }
 
@@ -105,7 +106,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 title: const Text("Call Admin"),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnack("Call feature coming soon");
+                  AppSnackbar.showWarning(context, "Call feature coming soon");
                 },
               ),
 
@@ -114,7 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 title: const Text("Chat Support"),
                 onTap: () {
                   Navigator.pop(context);
-                  _showSnack("Chat support coming soon");
+                  AppSnackbar.showWarning(context, "Chat support coming soon");
                 },
               ),
             ],
@@ -122,12 +123,6 @@ class _SignupScreenState extends State<SignupScreen> {
         );
       },
     );
-  }
-
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   bool _isValidEmail(String email) {
@@ -390,14 +385,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                         }
 
                                         /// ✅ Success
-                                        ScaffoldMessenger.of(
+                                        AppSnackbar.showSuccess(
                                           context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              "Account created successfully",
-                                            ),
-                                          ),
+                                          "Account created successfully",
                                         );
 
                                         /// ✅ Navigate back

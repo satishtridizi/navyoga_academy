@@ -14,6 +14,7 @@ import 'package:navyoga_academy/widgets/settings_payment_section.dart';
 import 'package:navyoga_academy/widgets/settings_privacy_section.dart';
 import 'package:navyoga_academy/widgets/settings_security_section.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

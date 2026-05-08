@@ -14,6 +14,7 @@ import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/attendance_api_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -26,7 +27,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   final attendanceService = AttendanceService();
 
   AttendanceApiModel? attendance;
-
+  bool isLoading = true;
   @override
   void initState() {
     super.initState();
@@ -38,12 +39,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     final token = prefs.getString("token");
 
-    final response = await attendanceService.getAttendance(token!);
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return;
+    }
+
+    final response = await attendanceService.getAttendance(token);
+
+    if (response["success"] != true) {
+      AppSnackbar.showError(
+        context,
+
+        response["message"] ?? "Failed to load attendance",
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return;
+    }
 
     final attendanceData = AttendanceApiModel.fromJson(response["data"]);
 
+    if (!mounted) return;
+
     setState(() {
       attendance = attendanceData;
+
+      isLoading = false;
     });
   }
 
@@ -53,160 +86,163 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       currentIndex: 3,
       drawer: const CustomDrawer(),
 
-      //backgroundColor: Colors.transparent,
-      body: CustomScrollView(
-        physics: const ClampingScrollPhysics(),
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            backgroundColor: Colors.grey[200],
-            elevation: 0,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : CustomScrollView(
+              physics: const ClampingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  floating: true,
+                  snap: true,
+                  backgroundColor: Colors.grey[200],
+                  elevation: 0,
 
-            leading: Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: Colors.black),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-            ),
+                  leading: Builder(
+                    builder: (context) => IconButton(
+                      icon: const Icon(Icons.menu, color: Colors.black),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
+                  ),
 
-            title: const Text(
-              "NavYoga Academy",
-              style: TextStyle(
-                color: Colors.deepOrange,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+                  title: const Text(
+                    "NavYoga Academy",
+                    style: TextStyle(
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// HEADER
-                  AnimatedItem(
-                    index: 0,
-                    child: const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "My Attendance &\nTime Tracking",
-                        style: TextStyle(
-                          fontSize: 33,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepOrange,
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// HEADER
+                        AnimatedItem(
+                          index: 0,
+                          child: const Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "My Attendance &\nTime Tracking",
+                              style: TextStyle(
+                                fontSize: 33,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                        const SizedBox(height: 6),
 
-                  AnimatedItem(
-                    index: 1,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Track your class attendance, practice time, and progress metrics",
-                        style: GoogleFonts.poppins(
-                          fontSize: 17,
-                          color: Colors.black87,
+                        AnimatedItem(
+                          index: 1,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Track your class attendance, practice time, and progress metrics",
+                              style: GoogleFonts.poppins(
+                                fontSize: 17,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+
+                        const SizedBox(height: 20),
+
+                        /// STATS GRID
+                        _buildStatsGrid(),
+
+                        const SizedBox(height: 20),
+
+                        /// DETAILS
+                        ...AttendanceData.details.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final e = entry.value;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: AnimatedItem(
+                              index: index + 2,
+                              child: DetailCard(e),
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(height: 6),
+
+                        /// INSIGHTS (top)
+                        ...AttendanceData.insights.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final e = entry.value;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: AnimatedItem(
+                              index: index + 5,
+                              child: InsightCard(data: e),
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(height: 20),
+
+                        /// MONTHLY
+                        AnimatedItem(
+                          index: 8,
+                          child: _buildSection(
+                            "Monthly Statistics",
+                            AttendanceData.monthly
+                                .map((e) => ProgressRow(e))
+                                .toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        /// CLASS-WISE
+                        AnimatedItem(
+                          index: 9,
+                          child: _buildSection(
+                            "Class-wise Time & Attendance",
+                            AttendanceData.classWise
+                                .map((e) => ClassProgressRow(e))
+                                .toList(),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        /// EXTRA INSIGHTS
+                        AnimatedItem(
+                          index: 10,
+                          child: InsightCard(
+                            data: AttendanceData.practiceStreak,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        AnimatedItem(
+                          index: 11,
+                          child: InsightCard(data: AttendanceData.goalProgress),
+                        ),
+                        const SizedBox(height: 20),
+
+                        AnimatedItem(
+                          index: 12,
+                          child: InsightCard(
+                            data: AttendanceData.excellentAttendance,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  /// STATS GRID
-                  _buildStatsGrid(),
-
-                  const SizedBox(height: 20),
-
-                  /// DETAILS
-                  ...AttendanceData.details.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final e = entry.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: AnimatedItem(
-                        index: index + 2,
-                        child: DetailCard(e),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 6),
-
-                  /// INSIGHTS (top)
-                  ...AttendanceData.insights.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final e = entry.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnimatedItem(
-                        index: index + 5,
-                        child: InsightCard(data: e),
-                      ),
-                    );
-                  }),
-
-                  const SizedBox(height: 20),
-
-                  /// MONTHLY
-                  AnimatedItem(
-                    index: 8,
-                    child: _buildSection(
-                      "Monthly Statistics",
-                      AttendanceData.monthly
-                          .map((e) => ProgressRow(e))
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  /// CLASS-WISE
-                  AnimatedItem(
-                    index: 9,
-                    child: _buildSection(
-                      "Class-wise Time & Attendance",
-                      AttendanceData.classWise
-                          .map((e) => ClassProgressRow(e))
-                          .toList(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// EXTRA INSIGHTS
-                  AnimatedItem(
-                    index: 10,
-                    child: InsightCard(data: AttendanceData.practiceStreak),
-                  ),
-                  const SizedBox(height: 20),
-
-                  AnimatedItem(
-                    index: 11,
-                    child: InsightCard(data: AttendanceData.goalProgress),
-                  ),
-                  const SizedBox(height: 20),
-
-                  AnimatedItem(
-                    index: 12,
-                    child: InsightCard(
-                      data: AttendanceData.excellentAttendance,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 

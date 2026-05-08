@@ -8,6 +8,7 @@ class AuthService {
 
   Future<dynamic> studentLogin({
     required String email,
+
     required String password,
   }) async {
     final response = await _api.postRequest(
@@ -15,6 +16,13 @@ class AuthService {
 
       body: {"email": email, "password": password},
     );
+
+    print(response);
+
+    /// ✅ SAVE TOKEN
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString("token", response["data"]["token"]);
 
     return response;
   }

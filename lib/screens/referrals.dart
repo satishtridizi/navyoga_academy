@@ -15,6 +15,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/referral_api_model.dart';
 import 'package:navyoga_academy/services/referral_service.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class ReferralScreen extends StatefulWidget {
   const ReferralScreen({super.key});

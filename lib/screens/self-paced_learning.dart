@@ -5,6 +5,7 @@ import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});

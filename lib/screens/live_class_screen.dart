@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'dart:async';
-
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class LiveClassScreen extends StatefulWidget {

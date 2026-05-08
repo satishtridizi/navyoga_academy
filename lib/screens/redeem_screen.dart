@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class RedeemScreen extends StatelessWidget {
   const RedeemScreen({super.key});

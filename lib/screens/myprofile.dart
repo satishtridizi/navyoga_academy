@@ -13,6 +13,7 @@ import '../widgets/profile_stat_card.dart';
 import '../widgets/profile_section.dart';
 import '../widgets/profile_field.dart';
 import '../widgets/achievement_card.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -83,8 +84,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final token = prefs.getString("token");
 
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+
+      return;
+    }
+
     final response = await profileService.updateProfile(
-      token: token!,
+      token: token,
 
       name: nameController.text,
 
@@ -94,13 +101,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       address: addressController.text,
     );
+    if (!mounted) return;
+
     setState(() {
       isUpdating = false;
     });
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(response["message"])));
+    if (response["success"] == true) {
+      AppSnackbar.showSuccess(context, response["message"]);
+    } else {
+      AppSnackbar.showError(context, response["message"]);
+    }
   }
 
   @override

@@ -13,6 +13,7 @@ import 'package:navyoga_academy/widgets/dashboard_class_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class DashboardMainScreen extends StatefulWidget {
   const DashboardMainScreen({super.key});
@@ -84,6 +85,11 @@ class _DashboardMainScreenState extends State<DashboardMainScreen> {
                       const offerText = "NAVYOGA20"; // better real coupon
 
                       Clipboard.setData(const ClipboardData(text: offerText));
+
+                      AppSnackbar.showError(
+                        context,
+                        "Coupon copied: NAVYOGA20 🎉",
+                      );
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

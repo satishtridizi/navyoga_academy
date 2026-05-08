@@ -11,6 +11,7 @@ import 'event_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/event_api_model.dart';
 import 'package:navyoga_academy/services/event_service.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});

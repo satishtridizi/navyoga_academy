@@ -3,6 +3,7 @@ import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import '../models/recording_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class RecordingPlayerScreen extends StatefulWidget {
   final RecordingModel recording;
