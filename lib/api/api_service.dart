@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 class ApiService {
+  /// ================= POST =================
   Future<dynamic> postRequest({
     required String url,
 
@@ -10,24 +12,76 @@ class ApiService {
     String? token,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse(url),
+      final response = await http
+          .post(
+            Uri.parse(url),
 
-        headers: {
-          "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
 
-          if (token != null) "Authorization": "Bearer $token",
-        },
+              if (token != null) "Authorization": "Bearer $token",
+            },
 
-        body: jsonEncode(body),
-      );
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
 
-      return jsonDecode(response.body);
-    } catch (e) {
-      return {"success": false, "message": "Network error"};
+      final data = jsonDecode(response.body);
+
+      /// SUCCESS
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return data;
+      }
+
+      /// SERVER ERROR
+      return {
+        "success": false,
+
+        "message": data["message"] ?? "Something went wrong",
+      };
+    }
+    /// TIMEOUT
+    on Exception catch (e) {
+      return {"success": false, "message": e.toString()};
     }
   }
 
+  /// ================= GET =================
+  Future<dynamic> getRequest({required String url, String? token}) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(url),
+
+            headers: {
+              "Content-Type": "application/json",
+
+              if (token != null) "Authorization": "Bearer $token",
+            },
+          )
+          .timeout(const Duration(seconds: 15));
+
+      final data = jsonDecode(response.body);
+
+      /// SUCCESS
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return data;
+      }
+
+      /// SERVER ERROR
+      return {
+        "success": false,
+
+        "message": data["message"] ?? "Something went wrong",
+      };
+    }
+    /// NETWORK ERROR
+    on Exception catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  /// ================= PUT =================
   Future<dynamic> putRequest({
     required String url,
 
@@ -35,32 +89,38 @@ class ApiService {
 
     String? token,
   }) async {
-    final response = await http.put(
-      Uri.parse(url),
+    try {
+      final response = await http
+          .put(
+            Uri.parse(url),
 
-      headers: {
-        "Content-Type": "application/json",
+            headers: {
+              "Content-Type": "application/json",
 
-        if (token != null) "Authorization": "Bearer $token",
-      },
+              if (token != null) "Authorization": "Bearer $token",
+            },
 
-      body: jsonEncode(body),
-    );
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 15));
 
-    return jsonDecode(response.body);
-  }
+      final data = jsonDecode(response.body);
 
-  Future<dynamic> getRequest({required String url, String? token}) async {
-    final response = await http.get(
-      Uri.parse(url),
+      /// SUCCESS
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return data;
+      }
 
-      headers: {
-        "Content-Type": "application/json",
+      /// SERVER ERROR
+      return {
+        "success": false,
 
-        if (token != null) "Authorization": "Bearer $token",
-      },
-    );
-
-    return jsonDecode(response.body);
+        "message": data["message"] ?? "Something went wrong",
+      };
+    }
+    /// NETWORK ERROR
+    on Exception catch (e) {
+      return {"success": false, "message": e.toString()};
+    }
   }
 }

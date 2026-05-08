@@ -5,12 +5,12 @@ import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/screens/payments.dart';
-import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/redeem_screen.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
+import 'package:navyoga_academy/screens/splash_screen.dart';
 import '../screens/live_class_screen.dart';
 import '../screens/dashboard.dart';
 import '../screens/settings.dart';
@@ -34,9 +34,14 @@ class AppRoutes {
   static const profile = "/profile";
   static const redeem = "/redeem";
   static const paymentHistory = "/paymentHistory";
+  static const splash = "/splash";
 
   static Map<String, WidgetBuilder> routes = {
-    dashboard: (_) => HomeScreen(),
+    splash: (_) => const SplashScreen(),
+
+    login: (_) => const LoginScreen(),
+
+    dashboard: (_) => const HomeScreen(),
 
     settings: (_) => const SettingsScreen(),
 
@@ -57,8 +62,6 @@ class AppRoutes {
     payments: (_) => const SubscriptionScreen(),
 
     liveClass: (_) => const LiveClassScreen(),
-
-    login: (_) => const LoginScreen(),
 
     profile: (_) => const ProfileScreen(),
 
