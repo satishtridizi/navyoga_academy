@@ -48,6 +48,14 @@ dependencies:
 
 
 
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo/logo_transparent_clean.png"
+  
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
