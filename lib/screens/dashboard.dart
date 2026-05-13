@@ -41,27 +41,36 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    loadDashboard();
+    //loadDashboard();
   }
 
   Future<void> loadDashboard() async {
     final prefs = await SharedPreferences.getInstance();
-
     final token = prefs.getString("token");
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
-
       return;
     }
 
     final response = await dashboardService.getDashboard(token);
 
-    final dashboardData = DashboardModel.fromJson(response["data"]);
+    print(response); // 👈 debug
 
-    setState(() {
-      dashboard = dashboardData;
-    });
+    if (response["success"] == true && response["data"] != null) {
+      final dashboardData = DashboardModel.fromJson(response["data"]);
+
+      setState(() {
+        dashboard = dashboardData;
+      });
+    } else {
+      print("Dashboard API failed: ${response["message"]}");
+
+      // 👇 IMPORTANT: prevent crash
+      setState(() {
+        dashboard = null;
+      });
+    }
   }
 
   @override

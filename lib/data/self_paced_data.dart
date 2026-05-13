@@ -4,6 +4,7 @@ class SelfPacedData {
   static List<CourseModel> courses = [
     /// 1
     CourseModel(
+      id: "1",
       title: "Yoga Fundamentals for Beginners",
 
       description:
@@ -35,6 +36,7 @@ class SelfPacedData {
 
     /// 2
     CourseModel(
+      id: "2",
       title: "Advanced Asana Mastery",
 
       description:
@@ -66,6 +68,7 @@ class SelfPacedData {
 
     /// 3
     CourseModel(
+      id: "3",
       title: "Pranayama & Breathwork Essentials",
 
       description:
@@ -97,6 +100,7 @@ class SelfPacedData {
 
     /// 4 Meditation
     CourseModel(
+      id: "4",
       title: "Meditation & Mindfulness Journey",
 
       description:
@@ -126,6 +130,7 @@ class SelfPacedData {
 
     /// 5 Flexibility
     CourseModel(
+      id: "5",
       title: "Yoga for Flexibility & Strength",
 
       description:
@@ -155,6 +160,7 @@ class SelfPacedData {
 
     /// 6 Restorative
     CourseModel(
+      id: "6",
       title: "Restorative Yoga & Healing",
 
       description:

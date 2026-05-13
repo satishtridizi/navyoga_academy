@@ -19,10 +19,16 @@ class AuthService {
 
     print(response);
 
-    /// ✅ SAVE TOKEN
-    final prefs = await SharedPreferences.getInstance();
+    if (response["success"] == true &&
+        response["data"] != null &&
+        response["data"]["token"] != null) {
+      final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString("token", response["data"]["token"]);
+      await prefs.setString(
+        "token",
+        response["data"]["token"], // ✅ FIXED
+      );
+    }
 
     return response;
   }

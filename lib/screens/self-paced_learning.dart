@@ -3,9 +3,13 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/self_paced_data.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/services/self_paced_service.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -16,6 +20,91 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
+  final selfPacedService = SelfPacedService();
+
+  List<CourseModel> courses = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCourses();
+  }
+
+  Future<void> loadCourses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+      return;
+    }
+
+    final response = await selfPacedService.getCourses(token);
+
+    if (response["success"] == true && response["data"] != null) {
+      final List list = response["data"];
+      if (!mounted) return;
+
+      setState(() {
+        courses = list.map((e) => CourseModel.fromJson(e)).toList();
+        isLoading = false;
+      });
+    } else {
+      AppSnackbar.showError(
+        context,
+        response["message"] ?? "Failed to load courses",
+      );
+
+      setState(() {
+        courses = SelfPacedData.courses; // fallback
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> enrollCourse(CourseModel course) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+      return;
+    }
+
+    final response = await selfPacedService.enrollCourse(token, course.id);
+
+    if (response["success"] == true) {
+      AppSnackbar.showSuccess(context, "Enrolled successfully");
+
+      // ✅ Refresh courses
+      loadCourses();
+
+      // ✅ Navigate to enroll screen (optional)
+      Navigator.pushNamed(
+        context,
+        AppRoutes.enrollClass,
+        arguments: ClassModel(
+          title: course.title,
+          trainer: course.instructor,
+          level: course.level,
+          duration: course.duration,
+          color: Colors.deepOrange,
+          next: "Next: ${course.title}",
+          schedule: "Self-Paced",
+          progress: 0,
+          students: "",
+          rating: course.rating,
+        ),
+      );
+    } else {
+      AppSnackbar.showError(
+        context,
+        response["message"] ?? "Enrollment failed",
+      );
+    }
+  }
+
   Widget _courseCard(CourseModel course) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 350),
@@ -174,7 +263,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                     child: ElevatedButton.icon(
                       onPressed: () {
                         if (course.showEnrollButton) {
-                          handleCTA("enroll");
+                          handleCTA("enroll", course);
                         } else if (course.completed) {
                           handleCTA("review");
                         } else {
@@ -219,17 +308,25 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     "Fitness",
     "Wellness",
   ];
-  void handleCTA(String type) {
+  void handleCTA(String type, [CourseModel? course]) {
     if (type == "continue") {
       Navigator.pushNamed(context, "/courseDetails");
     } else if (type == "review") {
       Navigator.pushNamed(context, "/courseReview");
-    } else if (type == "enroll") {
-      Navigator.pushNamed(context, "/enrollCourse");
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
+    }
+    void handleCTA(String type, [CourseModel? course]) {
+      if (type == "continue") {
+        Navigator.pushNamed(context, "/courseDetails");
+      } else if (type == "review") {
+        Navigator.pushNamed(context, "/courseReview");
+      } else if (type == "enroll" && course != null) {
+        // ✅ CALL API ONLY
+        enrollCourse(course);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
+      }
     }
   }
 
@@ -262,343 +359,355 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
           ),
         ),
       ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
 
-      body: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        child: Column(
-          children: [
-            /// TOP GRADIENT SECTION
-            /// TOP GRADIENT SECTION
-            Animate(
-              effects: const [
-                FadeEffect(duration: Duration(milliseconds: 500)),
+              child: Column(
+                children: [
+                  /// TOP GRADIENT SECTION
+                  /// TOP GRADIENT SECTION
+                  Animate(
+                    effects: const [
+                      FadeEffect(duration: Duration(milliseconds: 500)),
 
-                SlideEffect(
-                  begin: Offset(0, -0.1),
-                  end: Offset(0, 0),
-                  duration: Duration(milliseconds: 500),
-                ),
-              ],
+                      SlideEffect(
+                        begin: Offset(0, -0.1),
+                        end: Offset(0, 0),
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    ],
 
-              child: Container(
-                width: double.infinity,
+                    child: Container(
+                      width: double.infinity,
 
-                padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
+                      padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
 
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
 
-                    colors: [Color(0xffF97316), Color(0xff7E22CE)],
+                          colors: [Color(0xffF97316), Color(0xff7E22CE)],
+                        ),
+                      ),
+
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(18),
+
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(.15),
+
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+
+                                child: const Icon(
+                                  Icons.school,
+                                  color: Colors.white,
+                                  size: 34,
+                                ),
+                              ),
+
+                              const SizedBox(width: 16),
+
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+
+                                  children: [
+                                    Text(
+                                      "Self-Paced\nLearning",
+
+                                      style: TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.bold,
+
+                                        color: Colors.white,
+                                        height: 1.1,
+                                      ),
+                                    ),
+
+                                    SizedBox(height: 12),
+
+                                    Text(
+                                      "Learn at your own pace,\nanytime, anywhere",
+
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 16,
+                                        height: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 35),
+
+                          _statCard(
+                            icon: Icons.menu_book_outlined,
+                            title: "Enrolled Courses",
+                            count: "3",
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          _statCard(
+                            icon: Icons.trending_up,
+                            title: "In Progress",
+                            count: "2",
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          _statCard(
+                            icon: Icons.workspace_premium_outlined,
+                            title: "Completed",
+                            count: "1",
+                          ),
+
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
 
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  /// FLOATING SEARCH FILTER CARD
+                  Animate(
+                    delay: const Duration(milliseconds: 200),
 
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    effects: const [
+                      FadeEffect(duration: Duration(milliseconds: 500)),
 
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(18),
+                      SlideEffect(
+                        begin: Offset(0, 0.15),
+                        end: Offset(0, 0),
+                        duration: Duration(milliseconds: 500),
+                      ),
+                    ],
+
+                    child: Transform.translate(
+                      offset: const Offset(0, 25),
+
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 22),
+
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
 
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.15),
-
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-
-                          child: const Icon(
-                            Icons.school,
                             color: Colors.white,
-                            size: 34,
+
+                            borderRadius: BorderRadius.circular(28),
+
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(.08),
+
+                                blurRadius: 18,
+
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
                           ),
-                        ),
 
-                        const SizedBox(width: 16),
-
-                        const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
 
                             children: [
-                              Text(
-                                "Self-Paced\nLearning",
-
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.bold,
-
-                                  color: Colors.white,
-                                  height: 1.1,
+                              /// SEARCH
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
                                 ),
-                              ),
 
-                              SizedBox(height: 12),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
 
-                              Text(
-                                "Learn at your own pace,\nanytime, anywhere",
-
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 16,
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 35),
-
-                    _statCard(
-                      icon: Icons.menu_book_outlined,
-                      title: "Enrolled Courses",
-                      count: "3",
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _statCard(
-                      icon: Icons.trending_up,
-                      title: "In Progress",
-                      count: "2",
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    _statCard(
-                      icon: Icons.workspace_premium_outlined,
-                      title: "Completed",
-                      count: "1",
-                    ),
-
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ),
-            ),
-
-            /// FLOATING SEARCH FILTER CARD
-            Animate(
-              delay: const Duration(milliseconds: 200),
-
-              effects: const [
-                FadeEffect(duration: Duration(milliseconds: 500)),
-
-                SlideEffect(
-                  begin: Offset(0, 0.15),
-                  end: Offset(0, 0),
-                  duration: Duration(milliseconds: 500),
-                ),
-              ],
-
-              child: Transform.translate(
-                offset: const Offset(0, 25),
-
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-
-                      borderRadius: BorderRadius.circular(28),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.08),
-
-                          blurRadius: 18,
-
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
-                      children: [
-                        /// SEARCH
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-
-                            border: Border.all(color: Colors.orange.shade100),
-                          ),
-
-                          child: const Row(
-                            children: [
-                              Icon(Icons.search, color: Colors.blueGrey),
-
-                              SizedBox(width: 12),
-
-                              Expanded(
-                                child: Text(
-                                  "Search courses, instructors...",
-
-                                  style: TextStyle(
-                                    color: Colors.blueGrey,
-                                    fontSize: 16,
+                                  border: Border.all(
+                                    color: Colors.orange.shade100,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
 
-                        const SizedBox(height: 20),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.search, color: Colors.blueGrey),
 
-                        /// FILTER
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                    SizedBox(width: 12),
 
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
+                                    Expanded(
+                                      child: Text(
+                                        "Search courses, instructors...",
 
-                            border: Border.all(color: Colors.orange.shade100),
-                          ),
-
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-
-                            children: [
-                              Icon(Icons.filter_alt_outlined),
-
-                              SizedBox(width: 10),
-
-                              Text(
-                                "All Courses",
-
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
+                                        style: TextStyle(
+                                          color: Colors.blueGrey,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+
+                              const SizedBox(height: 20),
+
+                              /// FILTER
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+
+                                  border: Border.all(
+                                    color: Colors.orange.shade100,
+                                  ),
+                                ),
+
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+
+                                  children: [
+                                    Icon(Icons.filter_alt_outlined),
+
+                                    SizedBox(width: 10),
+
+                                    Text(
+                                      "All Courses",
+
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 22),
+
+                              /// CATEGORY CHIPS
+                              Wrap(
+                                spacing: 10,
+                                runSpacing: 12,
+
+                                children: categories.map((cat) {
+                                  bool selected = cat == selectedCategory;
+
+                                  return Animate(
+                                    delay: Duration(
+                                      milliseconds:
+                                          80 * categories.indexOf(cat),
+                                    ),
+
+                                    effects: const [
+                                      FadeEffect(
+                                        duration: Duration(milliseconds: 400),
+                                      ),
+
+                                      ScaleEffect(
+                                        begin: Offset(0.9, 0.9),
+                                        end: Offset(1, 1),
+                                        duration: Duration(milliseconds: 400),
+                                      ),
+                                    ],
+
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedCategory = cat;
+                                        });
+                                      },
+
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 18,
+                                          vertical: 10,
+                                        ),
+
+                                        decoration: BoxDecoration(
+                                          color: selected
+                                              ? Colors.deepOrange
+                                              : Colors.white,
+
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+
+                                          border: Border.all(
+                                            color: Colors.orange.shade100,
+                                          ),
+                                        ),
+
+                                        child: Text(
+                                          cat,
+
+                                          style: TextStyle(
+                                            fontSize: 16,
+
+                                            color: selected
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ],
                           ),
                         ),
+                      ),
+                    ),
+                  ),
 
-                        const SizedBox(height: 22),
+                  const SizedBox(height: 50),
 
-                        /// CATEGORY CHIPS
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 12,
-
-                          children: categories.map((cat) {
-                            bool selected = cat == selectedCategory;
-
+                  courses.isEmpty
+                      ? const Center(child: Text("No courses available"))
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: courses.length,
+                          itemBuilder: (context, index) {
+                            final course = courses[index];
                             return Animate(
-                              delay: Duration(
-                                milliseconds: 80 * categories.indexOf(cat),
-                              ),
-
+                              delay: Duration(milliseconds: 150 * index),
                               effects: const [
                                 FadeEffect(
-                                  duration: Duration(milliseconds: 400),
+                                  duration: Duration(milliseconds: 500),
                                 ),
-
-                                ScaleEffect(
-                                  begin: Offset(0.9, 0.9),
-                                  end: Offset(1, 1),
-                                  duration: Duration(milliseconds: 400),
+                                SlideEffect(
+                                  begin: Offset(0, 0.12),
+                                  end: Offset(0, 0),
+                                  duration: Duration(milliseconds: 500),
                                 ),
                               ],
-
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    selectedCategory = cat;
-                                  });
-                                },
-
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 10,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    color: selected
-                                        ? Colors.deepOrange
-                                        : Colors.white,
-
-                                    borderRadius: BorderRadius.circular(24),
-
-                                    border: Border.all(
-                                      color: Colors.orange.shade100,
-                                    ),
-                                  ),
-
-                                  child: Text(
-                                    cat,
-
-                                    style: TextStyle(
-                                      fontSize: 16,
-
-                                      color: selected
-                                          ? Colors.white
-                                          : Colors.black87,
-                                    ),
-                                  ),
-                                ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
+                                child: _courseCard(course),
                               ),
                             );
-                          }).toList(),
+                          },
                         ),
-                      ],
-                    ),
-                  ),
-                ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-
-            const SizedBox(height: 50),
-
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: SelfPacedData.courses.length,
-              itemBuilder: (context, index) {
-                final course = SelfPacedData.courses[index];
-                return Animate(
-                  delay: Duration(milliseconds: 150 * index),
-
-                  effects: const [
-                    FadeEffect(duration: Duration(milliseconds: 500)),
-
-                    SlideEffect(
-                      begin: Offset(0, 0.12),
-                      end: Offset(0, 0),
-                      duration: Duration(milliseconds: 500),
-                    ),
-                  ],
-
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: _courseCard(course),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
     );
   }
 
@@ -658,907 +767,6 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          /// IMAGE
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                top: 16,
-                right: 14,
-
-                child: _pill(
-                  "Enrolled",
-                  Colors.white,
-                  Colors.deepPurple,
-                  borderColor: Colors.deepPurple,
-                ),
-              ),
-
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Beginner", const Color(0xffD1FAE5), Colors.green),
-              ),
-
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 4.9", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Yoga Fundamentals\nfor Beginners",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Master the basic yoga poses,\nbreathing techniques, and foundational",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Priya Sharma", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 6 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text(
-                      "8 of 24 lessons",
-
-                      style: TextStyle(color: Colors.blueGrey),
-                    ),
-
-                    Text(
-                      "33%",
-
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-
-                  child: const LinearProgressIndicator(
-                    value: .33,
-                    minHeight: 10,
-                  ),
-                ),
-
-                const SizedBox(height: 26),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("continue"),
-
-                    icon: const Icon(Icons.play_arrow),
-
-                    label: const Text("Continue Learning"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdvancedCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              /// Completed
-              Positioned(
-                top: 16,
-                left: 16,
-
-                child: _pill("✓ Completed", Colors.green, Colors.white),
-              ),
-
-              /// Enrolled
-              Positioned(
-                top: 16,
-                right: 14,
-
-                child: _pill(
-                  "Enrolled",
-                  Colors.white,
-                  Colors.deepPurple,
-                  borderColor: Colors.deepPurple,
-                ),
-              ),
-
-              /// Advanced
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Advanced", Colors.white, Colors.deepPurple),
-              ),
-
-              /// Rating
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 4.8", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Advanced Asana Mastery",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Deepen your practice with advanced\nposes, inversions, and complex",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Rohan Desai", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 10 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text(
-                      "40 of 40 lessons",
-
-                      style: TextStyle(color: Colors.blueGrey),
-                    ),
-
-                    Text(
-                      "100%",
-
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-
-                  child: const LinearProgressIndicator(
-                    value: 1.0,
-                    minHeight: 10,
-                  ),
-                ),
-
-                const SizedBox(height: 26),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("review"),
-
-                    icon: const Icon(Icons.play_arrow),
-
-                    label: const Text("Review Course"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPranayamaCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                top: 16,
-                right: 14,
-
-                child: _pill(
-                  "Enrolled",
-                  Colors.white,
-                  Colors.deepPurple,
-
-                  borderColor: Colors.deepPurple,
-                ),
-              ),
-
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Intermediate", Colors.white, Colors.blue),
-              ),
-
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 5", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Pranayama &\nBreathwork Essentials",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Learn powerful breathing techniques\nto enhance your energy, reduce",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Anjali Menon", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 4 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text(
-                      "5 of 16 lessons",
-
-                      style: TextStyle(color: Colors.blueGrey),
-                    ),
-
-                    Text(
-                      "31%",
-
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-
-                  child: const LinearProgressIndicator(
-                    value: .31,
-                    minHeight: 10,
-                  ),
-                ),
-
-                const SizedBox(height: 26),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("continue"),
-
-                    icon: const Icon(Icons.play_arrow),
-
-                    label: const Text("Continue Learning"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMeditationCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1526401485004-2fda9f3f1c9b",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Beginner", Colors.white, Colors.green),
-              ),
-
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 4.9", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Meditation &\nMindfulness Journey",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Develop a consistent meditation\npractice with guided sessions ranging",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Vikram Patel", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 5 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("enroll"),
-
-                    icon: const Icon(Icons.menu_book_outlined),
-
-                    label: const Text("Enroll Now"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFlexibilityCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Intermediate", Colors.white, Colors.blue),
-              ),
-
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 4.7", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Yoga for Flexibility & Strength",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Build strength and increase flexibility\nthrough targeted sequences focusing",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Kavita Singh", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 8 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("enroll"),
-
-                    icon: const Icon(Icons.menu_book_outlined),
-
-                    label: const Text("Enroll Now"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRestorativeCourseCard() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 22),
-
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.circular(28),
-
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
-                ),
-
-                child: Image.network(
-                  "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
-
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-              Positioned(
-                left: 14,
-                bottom: 14,
-
-                child: _pill("Beginner", Colors.white, Colors.green),
-              ),
-
-              Positioned(
-                right: 14,
-                bottom: 14,
-
-                child: _pill("⭐ 4.9", Colors.white, Colors.black87),
-              ),
-            ],
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(26),
-
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  "Restorative Yoga & Healing",
-
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 14),
-
-                const Text(
-                  "Gentle, therapeutic practices designed\nto promote deep relaxation, stress",
-
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16,
-                    height: 1.5,
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                  children: [
-                    Text("Meera Iyer", style: TextStyle(fontSize: 16)),
-
-                    Text("🕒 6 hours", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  width: double.infinity,
-
-                  child: ElevatedButton.icon(
-                    onPressed: () => handleCTA("enroll"),
-
-                    icon: const Icon(Icons.menu_book_outlined),
-
-                    label: const Text("Enroll Now"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-
-                      foregroundColor: Colors.white,
-
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

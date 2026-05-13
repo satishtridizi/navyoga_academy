@@ -276,10 +276,10 @@ class _SignupScreenState extends State<SignupScreen> {
                                   child: TextFormField(
                                     controller: passwordController,
                                     obscureText: true,
-                                    keyboardType: TextInputType.number,
+                                    keyboardType: TextInputType.text,
                                     decoration: InputDecoration(
                                       labelText: "Password",
-                                      hintText: "Enter 6-digit password",
+                                      hintText: "Enter your password",
 
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
@@ -299,9 +299,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                       }
 
                                       if (!RegExp(
-                                        r'^[0-9]{6}$',
+                                        r'^[0-9]{8}$',
                                       ).hasMatch(value)) {
-                                        return "Password must be exactly 6 digits";
+                                        return "Password must be at least 8 characters";
                                       }
 
                                       return null;

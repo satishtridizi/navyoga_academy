@@ -28,21 +28,36 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadRecordings();
+    // loadRecordings();
   }
 
   Future<void> loadRecordings() async {
     final prefs = await SharedPreferences.getInstance();
-
     final token = prefs.getString("token");
 
-    final response = await recordingService.getRecordings(token!);
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, "/login");
+      return;
+    }
 
-    final List data = response["data"];
+    final response = await recordingService.getRecordings(token);
 
-    setState(() {
-      recordings = data.map((e) => RecordingApiModel.fromJson(e)).toList();
-    });
+    print(response); // 👈 debug
+
+    if (response["success"] == true && response["data"] != null) {
+      final List data = response["data"];
+
+      setState(() {
+        recordings = data.map((e) => RecordingApiModel.fromJson(e)).toList();
+      });
+    } else {
+      print("Recordings API failed: ${response["message"]}");
+
+      // 👇 VERY IMPORTANT: prevent crash
+      setState(() {
+        recordings = [];
+      });
+    }
   }
 
   @override
