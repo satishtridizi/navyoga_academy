@@ -13,13 +13,10 @@ class DashboardModel {
 
   factory DashboardModel.fromJson(Map<String, dynamic> json) {
     return DashboardModel(
-      enrolledClasses: json["enrolledClasses"] ?? 0,
-
-      practiceHours: json["practiceHours"] ?? 0,
-
-      recordingsWatched: json["recordingsWatched"] ?? 0,
-
-      attendanceRate: json["attendanceRate"] ?? 0,
+      enrolledClasses: json["cards"]?["students"]?["total"] ?? 0,
+      practiceHours: json["cards"]?["classes"]?["total"] ?? 0,
+      recordingsWatched: json["cards"]?["tutors"]?["total"] ?? 0,
+      attendanceRate: json["performance"]?["attendance"] ?? 0,
     );
   }
 }

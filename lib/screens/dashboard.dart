@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:navyoga_academy/services/attendance_service.dart';
+import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/dashboard_data.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
+import 'package:navyoga_academy/services/recording_service.dart';
+import 'package:navyoga_academy/services/subscription_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
@@ -19,7 +23,6 @@ import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,11 +32,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final attendanceService = AttendanceService();
+  final recordingService = RecordingService();
+  final subscriptionService = SubscriptionService();
   bool showAllUpcoming = false;
   bool showAllVideos = false;
   bool showAllReferral = false;
 
   final dashboardService = DashboardService();
+  final leadsService = LeadsService();
 
   DashboardModel? dashboard;
 
@@ -41,35 +48,58 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    //loadDashboard();
+    loadStudentDashboard();
   }
 
-  Future<void> loadDashboard() async {
+  Future<void> loadStudentDashboard() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
 
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, "/login");
-      return;
-    }
+    if (token == null) return;
 
-    final response = await dashboardService.getDashboard(token);
+    try {
+      final results = await Future.wait([
+        attendanceService.getAttendance(token),
+        recordingService.getRecordings(token),
+        subscriptionService.getPlans(token),
+      ]);
 
-    print(response); // 👈 debug
+      final attendanceRes = results[0];
+      final recordingsRes = results[1];
+      final coursesRes = results[2];
 
-    if (response["success"] == true && response["data"] != null) {
-      final dashboardData = DashboardModel.fromJson(response["data"]);
+      print("Attendance Response: $attendanceRes");
+      print("Recordings Response: $recordingsRes");
+      print("Courses Response: $coursesRes");
+
+      int enrolledClasses = coursesRes["success"] == true
+          ? coursesRes["data"].length
+          : 5;
+
+      int recordingsWatched = recordingsRes["success"] == true
+          ? recordingsRes["data"].length
+          : 10;
+
+      int total = attendanceRes["success"] == true
+          ? attendanceRes["data"].length
+          : 20;
+
+      int present = attendanceRes["success"] == true
+          ? attendanceRes["data"].where((e) => e["status"] == "PRESENT").length
+          : 15;
+
+      int attendanceRate = total == 0 ? 0 : ((present / total) * 100).toInt();
 
       setState(() {
-        dashboard = dashboardData;
+        dashboard = DashboardModel(
+          enrolledClasses: enrolledClasses,
+          practiceHours: 0,
+          recordingsWatched: recordingsWatched,
+          attendanceRate: attendanceRate,
+        );
       });
-    } else {
-      print("Dashboard API failed: ${response["message"]}");
-
-      // 👇 IMPORTANT: prevent crash
-      setState(() {
-        dashboard = null;
-      });
+    } catch (e) {
+      print("Dashboard Error: $e");
     }
   }
 
@@ -105,7 +135,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       body: dashboard == null
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text("Loading dashboard..."),
+                ],
+              ),
+            )
           : SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.all(16),
@@ -504,6 +543,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
+                      // AnimatedItem(
+                      //   index: 5,
+                      //   child: ActionCard(
+                      //     "Leads",
+                      //     "Manage your leads",
+                      //     Colors.blue,
+                      //     onTap: () {
+                      //       Navigator.pushNamed(context, '/leads');
+                      //     },
+                      //   ),
+                      // ),
                     ],
                   ),
 
@@ -552,8 +602,37 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
+
                   const SizedBox(height: 20),
 
+                  // ElevatedButton(
+                  //   onPressed: () async {
+                  //     final prefs = await SharedPreferences.getInstance();
+                  //     final token = prefs.getString("token");
+
+                  //     if (token == null) {
+                  //       print("No token found");
+                  //       return;
+                  //     }
+
+                  //     final response = await leadsService.createLead({
+                  //       "name": "Test User",
+                  //       "email": "test@example.com",
+                  //       "phone": "9999999999",
+                  //       "source": "INSTAGRAM",
+                  //       "interest": "Yoga classes",
+                  //     }, token);
+
+                  //     print("Lead Response: $response");
+                  //   },
+                  //   child: Text("Test Create Lead"),
+                  // ),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //     loadStudentDashboard(); // 🔁 refresh
+                  //   },
+                  //   child: Text("Refresh Dashboard"),
+                  // ),
                   const ReferralCodeCard(),
                   const ShareEarnCard(),
                 ],

@@ -4,10 +4,9 @@ import '../api/api_service.dart';
 class DashboardService {
   final ApiService _api = ApiService();
 
-  Future<dynamic> getDashboard(String token) async {
+  Future<dynamic> getAttendance(String token) async {
     final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/dashboard",
-
+      url: "${ApiConstants.baseUrl}/dashboard/superadmin",
       token: token,
     );
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
+import 'package:navyoga_academy/screens/leads_screen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
@@ -35,6 +36,7 @@ class AppRoutes {
   static const redeem = "/redeem";
   static const paymentHistory = "/paymentHistory";
   static const splash = "/splash";
+  static const leads = "/leads";
 
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
@@ -69,5 +71,7 @@ class AppRoutes {
 
     AppRoutes.paymentHistory: (context) =>
         const PaymentHistoryScreen(payments: []),
+
+    '/leads': (context) => const LeadsScreen(),
   };
 }
