@@ -6,7 +6,7 @@ class RecordingService {
 
   Future<dynamic> getRecordings(String token) async {
     final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/recordings",
+      url: "${ApiConstants.baseUrl}/ytt-recorded",
 
       token: token,
     );

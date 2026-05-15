@@ -123,4 +123,33 @@ class ApiService {
       return {"success": false, "message": e.toString()};
     }
   }
+
+  Future<dynamic> patchRequest({
+    required String url,
+    required String token,
+    Map<String, dynamic>? body,
+  }) async {
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(body),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  Future<dynamic> deleteRequest({
+    required String url,
+    required String token,
+  }) async {
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    return jsonDecode(response.body);
+  }
 }

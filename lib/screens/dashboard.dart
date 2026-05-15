@@ -7,6 +7,7 @@ import 'package:navyoga_academy/data/dashboard_data.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
+import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
 import 'package:navyoga_academy/services/subscription_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
@@ -43,12 +44,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final leadsService = LeadsService();
 
   DashboardModel? dashboard;
-
+  int unreadCount = 0;
   @override
   void initState() {
     super.initState();
 
     loadStudentDashboard();
+    loadUnreadCount();
   }
 
   Future<void> loadStudentDashboard() async {
@@ -103,6 +105,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> loadUnreadCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) return;
+
+    // ✅ FIRST declare
+    final res = await NotificationService().getNotifications(token);
+
+    // ✅ THEN print
+    print("Notification API Response: $res");
+
+    if (res["success"] == true) {
+      final list = res["data"] as List;
+
+      setState(() {
+        unreadCount = list.where((n) => n["isRead"] == false).length;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -117,7 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
-
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
@@ -132,6 +154,48 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 22,
           ),
         ),
+
+        // 🔥 ADD THIS BLOCK HERE
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.black),
+                onPressed: () async {
+                  await Navigator.pushNamed(context, AppRoutes.notifications);
+
+                  loadUnreadCount(); // 🔥 refresh after back
+                },
+              ),
+
+              if (unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$unreadCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
 
       body: dashboard == null
@@ -204,9 +268,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             left: 16,
                             child: GestureDetector(
                               onTap: () {
-                                const offerText =
-                                    "NAVYOGA20"; // better real coupon
+                                const offerText = "NAVYOGA20";
 
+                                // copy
                                 Clipboard.setData(
                                   const ClipboardData(text: offerText),
                                 );
@@ -218,6 +282,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 );
+
+                                // 🔥 ADD THIS NAVIGATION
+                                Navigator.pushNamed(context, AppRoutes.coupons);
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(

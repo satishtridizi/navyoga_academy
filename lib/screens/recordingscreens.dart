@@ -28,7 +28,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // loadRecordings();
+    loadRecordings();
   }
 
   Future<void> loadRecordings() async {
@@ -42,7 +42,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
 
     final response = await recordingService.getRecordings(token);
 
-    print(response); // 👈 debug
+    print("Recording API Response: $response");
 
     if (response["success"] == true && response["data"] != null) {
       final List data = response["data"];
@@ -51,9 +51,16 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
         recordings = data.map((e) => RecordingApiModel.fromJson(e)).toList();
       });
     } else {
+      // 🔥 SHOW ERROR TO USER
+      AppSnackbar.showError(
+        context,
+        response["message"] ?? "Failed to load recordings",
+      );
+
+      // 🧠 DEBUG
       print("Recordings API failed: ${response["message"]}");
 
-      // 👇 VERY IMPORTANT: prevent crash
+      // 🛡️ SAFE STATE
       setState(() {
         recordings = [];
       });
@@ -319,8 +326,8 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  "All Recordings (8)",
+                Text(
+                  "All Recordings (${recordings.length})",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

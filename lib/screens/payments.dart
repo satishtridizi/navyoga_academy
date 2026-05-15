@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/payment_data.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/payment_history_card.dart';
@@ -24,6 +25,23 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
+  bool isLoadingPayments = true;
+  double originalPrice = 1000; // example
+  double finalPrice = 1000;
+
+  String appliedCoupon = "";
+  double discountPercent = 0;
+
+  // 🔥 ADD HERE
+  void applyCoupon(Map couponData) {
+    setState(() {
+      appliedCoupon = couponData["code"];
+      discountPercent = couponData["discount"];
+
+      finalPrice = originalPrice - (originalPrice * discountPercent / 100);
+    });
+  }
+
   final subscriptionService = SubscriptionService();
 
   List<SubscriptionApiModel> plans = [];
@@ -33,22 +51,26 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
   Future<void> loadPayments() async {
     final prefs = await SharedPreferences.getInstance();
-
     final token = prefs.getString("token");
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
-
       return;
     }
 
     final response = await paymentService.getPayments(token);
+
+    print("Payments API Response: $response"); // ✅ debug
+
     if (response["success"] != true) {
       AppSnackbar.showError(
         context,
-
         response["message"] ?? "Failed to load payments",
       );
+
+      setState(() {
+        isLoadingPayments = false;
+      });
 
       return;
     }
@@ -59,6 +81,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     setState(() {
       payments = data.map((e) => PaymentApiModel.fromJson(e)).toList();
+      isLoadingPayments = false;
     });
   }
 
@@ -133,7 +156,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       ),
 
       /// 🔥 BODY
-      body: plans.isEmpty && payments.isEmpty
+      body: isLoadingPayments && plans.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
@@ -157,9 +180,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
                   const SizedBox(height: 20),
 
-                  const SizedBox(height: 16),
-
-                  /// ================= UPGRADE =================
                   const Text(
                     "Upgrade Your Plan",
                     style: TextStyle(
@@ -167,6 +187,21 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       fontWeight: FontWeight.bold,
                       color: Colors.deepOrange,
                     ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await Navigator.pushNamed(
+                        context,
+                        AppRoutes.coupons,
+                      );
+
+                      if (result != null) {
+                        applyCoupon(result as Map);
+                      }
+                    },
+                    child: const Text("Apply Coupon"),
                   ),
 
                   const SizedBox(height: 8),
@@ -201,31 +236,56 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                         ),
                       ],
 
-                      child: PlanCard(
-                        plan: Plan(
-                          color: Colors.orange,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            originalPrice = double.parse(p.price.toString());
+                            finalPrice = double.parse(p.price.toString());
 
-                          yearly: "",
-
-                          name: p.name,
-
-                          icon: Icons.workspace_premium,
-
-                          price: p.price,
-
-                          isPopular: p.isActive,
-
-                          features: [],
+                            appliedCoupon = "";
+                            discountPercent = 0;
+                          });
+                        },
+                        child: PlanCard(
+                          plan: Plan(
+                            color: Colors.orange,
+                            yearly: "",
+                            name: p.name,
+                            icon: Icons.workspace_premium,
+                            price: p.price,
+                            isPopular: p.isActive,
+                            features: [],
+                          ),
+                          currentPlanName: "",
                         ),
-
-                        currentPlanName: "",
                       ),
                     );
                   }),
 
                   const SizedBox(height: 25),
 
-                  /// ================= PAYMENT METHODS =================
+                  const SizedBox(height: 20),
+
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Original Price: ₹$originalPrice"),
+
+                      if (discountPercent > 0)
+                        Text("Discount: $discountPercent%"),
+
+                      const SizedBox(height: 8),
+
+                      Text(
+                        "Final Price: ₹$finalPrice",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
                   Animate(
                     effects: const [
                       FadeEffect(duration: Duration(milliseconds: 600)),
@@ -357,9 +417,9 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Recent Payments",
-                                style: TextStyle(
+                              Text(
+                                "Recent Payments (${payments.length})",
+                                style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.deepOrange,
@@ -404,6 +464,17 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                           ),
 
                           const SizedBox(height: 16),
+
+                          /// LIST
+                          /// EMPTY STATE
+                          if (payments.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                "No payment history available",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
 
                           /// LIST
                           ...payments.asMap().entries.map((entry) {
