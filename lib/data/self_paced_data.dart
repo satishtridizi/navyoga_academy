@@ -17,7 +17,7 @@ class SelfPacedData {
 
       level: "Beginner",
 
-      rating: "4.9",
+      rating: 4.9,
 
       image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
 
@@ -28,10 +28,10 @@ class SelfPacedData {
 
       lessonsText: "8 of 24 lessons",
 
-      showProgress: true,
-      showEnrollButton: false,
+      // showProgress: true,
+      // showEnrollButton: false,
 
-      actionText: "Continue Learning",
+      // actionText: "Continue Learning",
     ),
 
     /// 2
@@ -49,7 +49,7 @@ class SelfPacedData {
 
       level: "Advanced",
 
-      rating: "4.8",
+      rating: 4.8,
 
       image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
 
@@ -60,10 +60,10 @@ class SelfPacedData {
 
       lessonsText: "40 of 40 lessons",
 
-      showProgress: true,
-      showEnrollButton: false,
+      // showProgress: true,
+      // showEnrollButton: false,
 
-      actionText: "Review Course",
+      // actionText: "Review Course",
     ),
 
     /// 3
@@ -81,7 +81,7 @@ class SelfPacedData {
 
       level: "Intermediate",
 
-      rating: "5",
+      rating: 5.0,
 
       image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
@@ -92,10 +92,10 @@ class SelfPacedData {
 
       lessonsText: "5 of 16 lessons",
 
-      showProgress: true,
-      showEnrollButton: false,
+      // showProgress: true,
+      // showEnrollButton: false,
 
-      actionText: "Continue Learning",
+      // actionText: "Continue Learning",
     ),
 
     /// 4 Meditation
@@ -112,20 +112,20 @@ class SelfPacedData {
 
       level: "Beginner",
 
-      rating: "4.9",
+      rating: 4.9,
 
       image: "https://images.unsplash.com/photo-1526401485004-2fda9f3f1c9b",
 
       enrolled: false,
       completed: false,
 
-      progress: null,
+      progress: 0,
       lessonsText: null,
 
-      showProgress: false,
-      showEnrollButton: true,
+      // showProgress: false,
+      // showEnrollButton: true,
 
-      actionText: " ",
+      // actionText: " ",
     ),
 
     /// 5 Flexibility
@@ -142,20 +142,20 @@ class SelfPacedData {
 
       level: "Intermediate",
 
-      rating: "4.7",
+      rating: 4.7,
 
       image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
 
       enrolled: false,
       completed: false,
 
-      progress: null,
+      progress: 0,
       lessonsText: null,
 
-      showProgress: false,
-      showEnrollButton: true,
+      // showProgress: false,
+      // showEnrollButton: true,
 
-      actionText: "Enroll Now",
+      // actionText: "Enroll Now",
     ),
 
     /// 6 Restorative
@@ -173,20 +173,20 @@ class SelfPacedData {
 
       level: "Beginner",
 
-      rating: "4.9",
+      rating: 4.9,
 
       image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
 
       enrolled: false,
       completed: false,
 
-      progress: null,
+      progress: 0,
       lessonsText: null,
 
-      showProgress: false,
-      showEnrollButton: true,
+      // showProgress: false,
+      // showEnrollButton: true,
 
-      actionText: "Enroll Now",
+      // actionText: "Enroll Now",
     ),
   ];
 }

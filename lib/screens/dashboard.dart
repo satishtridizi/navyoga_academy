@@ -413,8 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onJoin: () {
                               Navigator.pushNamed(
                                 context,
-                                AppRoutes.liveClass,
-                                arguments: c,
+                                AppRoutes.liveClassesList,
                               );
                             },
                           ),

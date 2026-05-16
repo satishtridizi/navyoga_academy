@@ -3,6 +3,7 @@ import 'package:navyoga_academy/models/class_model.dart';
 
 List<ClassModel> enrolledClasses = [
   ClassModel(
+    id: "1",
     title: "Advanced Hatha Yoga",
     trainer: "Priya Sharma",
     rating: "4.8",
@@ -15,6 +16,7 @@ List<ClassModel> enrolledClasses = [
     color: Colors.pink,
   ),
   ClassModel(
+    id: "2",
     title: "Pranayama Basics",
     trainer: "Rahul Kumar",
     rating: "4.9",
@@ -27,6 +29,7 @@ List<ClassModel> enrolledClasses = [
     color: Colors.green,
   ),
   ClassModel(
+    id: "3",
     title: " Meditation & Mindfulness",
     trainer: "Anita Verma",
     rating: "5",
@@ -40,6 +43,7 @@ List<ClassModel> enrolledClasses = [
     isGradient: true,
   ),
   ClassModel(
+    id: "4",
     title: "Power Yoga Flow",
     trainer: "Vikram Singh",
     rating: "4.7",
@@ -52,6 +56,7 @@ List<ClassModel> enrolledClasses = [
     color: Colors.orange,
   ),
   ClassModel(
+    id: "5",
     title: "Yoga for Flexibility",
     trainer: "Meera Joshi",
     rating: "4.6",
@@ -65,6 +70,7 @@ List<ClassModel> enrolledClasses = [
     isCompleted: true,
   ),
   ClassModel(
+    id: "6",
     title: "Restorative Yoga",
     trainer: "Priya Sharma",
     rating: "4.8",
@@ -78,6 +84,7 @@ List<ClassModel> enrolledClasses = [
     isGradientProgress: true,
   ),
   ClassModel(
+    id: "7",
     title: "Vinyasa Flow",
     trainer: "Rahul Kumar",
     rating: "4.9",
@@ -91,6 +98,7 @@ List<ClassModel> enrolledClasses = [
     isCompleted: true,
   ),
   ClassModel(
+    id: "8",
     title: "Yin Yoga",
     trainer: "Anita Verma",
     rating: "5",

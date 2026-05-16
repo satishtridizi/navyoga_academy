@@ -3,6 +3,7 @@ import 'package:navyoga_academy/models/class_model.dart';
 
 List<ClassModel> availableClasses = [
   ClassModel(
+    id: "1",
     title: "Hot Yoga Basics",
     trainer: "Vikram Singh",
     rating: "4.5",
@@ -16,6 +17,7 @@ List<ClassModel> availableClasses = [
   ),
 
   ClassModel(
+    id: "2",
     title: "Aerial Yoga",
     trainer: "Meera Joshi",
     rating: "4.7",
@@ -29,6 +31,7 @@ List<ClassModel> availableClasses = [
   ),
 
   ClassModel(
+    id: "3",
     title: "Prenatal Yoga",
     trainer: "Priya Sharma",
     rating: "4.9",

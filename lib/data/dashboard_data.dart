@@ -38,6 +38,7 @@ class HomeData {
 
   static const classes = [
     ClassModel(
+      id: "1",
       title: "Advanced Hatha Yoga",
       trainer: "Priya Sharma",
       rating: "4.8",
@@ -51,6 +52,7 @@ class HomeData {
     ),
 
     ClassModel(
+      id: "2",
       title: "Pranayama Basics",
       trainer: "Rahul Kumar",
       rating: "4.9",
@@ -64,6 +66,7 @@ class HomeData {
     ),
 
     ClassModel(
+      id: "3",
       title: "Meditation & Mindfulness",
       trainer: "Anita Verma",
       rating: "5.0",
@@ -77,6 +80,7 @@ class HomeData {
     ),
 
     ClassModel(
+      id: "4",
       title: "Power Yoga Flow",
       trainer: "Vikram Singh",
       rating: "4.7",

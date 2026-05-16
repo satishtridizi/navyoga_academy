@@ -130,6 +130,7 @@ class CustomDrawer extends StatelessWidget {
       {"icon": Icons.videocam, "title": "Recordings"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
       {"icon": Icons.event, "title": "Events"},
+      {"icon": Icons.live_tv, "title": "Live Classes"},
       {"icon": Icons.card_giftcard, "title": "Referrals"},
       {"icon": Icons.person_outline, "title": "Profile"},
       {"icon": Icons.payment, "title": "Payments"},
@@ -250,6 +251,8 @@ class CustomDrawer extends StatelessWidget {
                         );
                       } else if (item["title"] == "Events") {
                         Navigator.pushNamed(context, AppRoutes.events);
+                      } else if (item["title"] == "Live Classes") {
+                        Navigator.pushNamed(context, AppRoutes.liveClassesList);
                       } else if (item["title"] == "Profile") {
                         Navigator.push(
                           context,

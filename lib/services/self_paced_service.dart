@@ -1,22 +1,33 @@
+import '../api/api_constants.dart';
 import '../api/api_service.dart';
 
 class SelfPacedService {
   final ApiService _api = ApiService();
 
-  Future<dynamic> enrollCourse(String token, String courseId) async {
+  /// 🔥 GET COURSES
+  Future<dynamic> getCourses(String token) async {
+    return await _api.getRequest(
+      url: "${ApiConstants.baseUrl}/api/self-paced/modules",
+      token: token,
+    );
+  }
+
+  Future<dynamic> initiatePayment(String token, String moduleId) async {
     return await _api.postRequest(
-      url: "/self-paced/enroll", // 🔥 confirm with backend later
+      url: "${ApiConstants.baseUrl}/api/payments/initiate",
       token: token,
-      body: {"courseId": courseId},
+      body: {
+        "moduleId": moduleId, // 🔥 important
+      },
     );
   }
 
-  Future<Map<String, dynamic>> getCourses(String token) async {
-    final response = await _api.getRequest(
-      url: "https://your-api.com/self-paced/courses", // 🔥 FULL URL required
-      token: token,
-    );
-
-    return response;
-  }
+  /// 🔥 ENROLL COURSE
+  // Future<dynamic> enrollCourse(String token, String courseId) async {
+  //   return await _api.postRequest(
+  //     url: "${ApiConstants.baseUrl}/self-paced/enroll",
+  //     token: token,
+  //     body: {"courseId": courseId},
+  //   );
+  // }
 }

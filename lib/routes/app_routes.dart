@@ -3,6 +3,7 @@ import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/coupons_screen.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/leads_screen.dart';
+import 'package:navyoga_academy/screens/live_classes_list.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/notifications_screen.dart';
@@ -41,7 +42,7 @@ class AppRoutes {
   static const leads = "/leads";
   static const notifications = "/notifications";
   static const coupons = "/coupons";
-
+  static const liveClassesList = "/live-classes-list";
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
 
@@ -79,6 +80,8 @@ class AppRoutes {
     '/leads': (context) => const LeadsScreen(),
 
     notifications: (_) => const NotificationsScreen(),
+
+    liveClassesList: (_) => const LiveClassesListScreen(),
 
     coupons: (_) => const CouponsScreen(),
   };

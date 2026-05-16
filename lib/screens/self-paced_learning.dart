@@ -57,7 +57,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       );
 
       setState(() {
-        courses = SelfPacedData.courses; // fallback
+        courses = [];
         isLoading = false;
       });
     }
@@ -72,37 +72,17 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       return;
     }
 
-    final response = await selfPacedService.enrollCourse(token, course.id);
+    final response = await selfPacedService.initiatePayment(token, course.id);
 
     if (response["success"] == true) {
-      AppSnackbar.showSuccess(context, "Enrolled successfully");
+      // 🔥 You will get payment data here
+      print("Payment Data: ${response["data"]}");
 
-      // ✅ Refresh courses
-      loadCourses();
-
-      // ✅ Navigate to enroll screen (optional)
-      Navigator.pushNamed(
-        context,
-        AppRoutes.enrollClass,
-        arguments: ClassModel(
-          title: course.title,
-          trainer: course.instructor,
-          level: course.level,
-          duration: course.duration,
-          color: Colors.deepOrange,
-          next: "Next: ${course.title}",
-          schedule: "Self-Paced",
-          progress: 0,
-          students: "",
-          rating: course.rating,
-        ),
-      );
+      AppSnackbar.showSuccess(context, "Proceed to payment");
     } else {
-      AppSnackbar.showError(
-        context,
-        response["message"] ?? "Enrollment failed",
-      );
+      AppSnackbar.showError(context, response["message"]);
     }
+    return;
   }
 
   Widget _courseCard(CourseModel course) {
@@ -222,7 +202,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 /// PROGRESS
-                if (course.showProgress) ...[
+                if (course.progress > 0) ...[
                   const SizedBox(height: 16),
 
                   Row(
@@ -262,7 +242,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        if (course.showEnrollButton) {
+                        if (!course.enrolled) {
                           handleCTA("enroll", course);
                         } else if (course.completed) {
                           handleCTA("review");
@@ -272,12 +252,16 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: Text(
-                        course.showEnrollButton
+                        !course.enrolled
                             ? "Enroll Now"
-                            : course.actionText,
+                            : course.completed
+                            ? "Review Course"
+                            : (course.enrolled
+                                  ? "Continue Learning"
+                                  : "Enroll Now"),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: course.showEnrollButton
+                        backgroundColor: !course.enrolled
                             ? Colors.deepOrange
                             : Colors.deepPurple,
                         foregroundColor: Colors.white,
@@ -313,20 +297,12 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       Navigator.pushNamed(context, "/courseDetails");
     } else if (type == "review") {
       Navigator.pushNamed(context, "/courseReview");
-    }
-    void handleCTA(String type, [CourseModel? course]) {
-      if (type == "continue") {
-        Navigator.pushNamed(context, "/courseDetails");
-      } else if (type == "review") {
-        Navigator.pushNamed(context, "/courseReview");
-      } else if (type == "enroll" && course != null) {
-        // ✅ CALL API ONLY
-        enrollCourse(course);
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
-      }
+    } else if (type == "enroll" && course != null) {
+      enrollCourse(course);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
     }
   }
 
@@ -610,7 +586,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                   return Animate(
                                     delay: Duration(
                                       milliseconds:
-                                          80 * categories.indexOf(cat),
+                                          80 * categories.indexOf(cat).toInt(),
                                     ),
 
                                     effects: const [
