@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
+import 'package:navyoga_academy/services/class_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/dashboard_data.dart';
@@ -42,6 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final dashboardService = DashboardService();
   final leadsService = LeadsService();
+  final classService = ClassService();
+
+  List<ClassModel> classes = [];
+  bool isLoadingClasses = true;
 
   DashboardModel? dashboard;
   int unreadCount = 0;
@@ -51,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadStudentDashboard();
     loadUnreadCount();
+    loadClasses();
   }
 
   Future<void> loadStudentDashboard() async {
@@ -123,6 +130,28 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         unreadCount = list.where((n) => n["isRead"] == false).length;
       });
+    }
+  }
+
+  Future<void> loadClasses() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) return;
+
+    final res = await classService.getClasses(token);
+
+    print("Classes API: $res");
+
+    if (res["success"] == true) {
+      final List data = res["data"];
+
+      setState(() {
+        classes = data.map((e) => ClassModel.fromJson(e)).toList();
+        isLoadingClasses = false;
+      });
+    } else {
+      setState(() => isLoadingClasses = false);
     }
   }
 
@@ -398,29 +427,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  Column(
-                    children: List.generate(
-                      showAllUpcoming ? HomeData.classes.length : 2,
-                      (index) {
-                        final c = HomeData.classes[index];
+                  isLoadingClasses
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: List.generate(
+                            showAllUpcoming
+                                ? classes.length
+                                : (classes.length > 2 ? 2 : classes.length),
+                            (index) {
+                              final c = classes[index];
 
-                        return AnimatedItem(
-                          index: index,
-                          child: ClassCard(
-                            c.title,
-                            "${c.trainer} • ${c.schedule}",
-                            c.duration,
-                            onJoin: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRoutes.liveClassesList,
+                              return AnimatedItem(
+                                index: index,
+                                child: ClassCard(
+                                  c.title,
+                                  "${c.trainer} • ${c.schedule}",
+                                  c.duration,
+                                  onJoin: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRoutes.liveClassesList,
+                                    );
+                                  },
+                                ),
                               );
                             },
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                        ),
                   const SizedBox(height: 30),
 
                   /// 🎥 RECORDINGS

@@ -35,7 +35,7 @@ class LeadsService {
     Map<String, dynamic> data,
     String token,
   ) async {
-    return await _apiService.putRequest(
+    return await _apiService.patchRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.leads}/$id",
       body: data,
       token: token,

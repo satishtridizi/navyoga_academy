@@ -6,7 +6,7 @@ class LiveClassService {
 
   Future<dynamic> getLiveClasses(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/api/ytt-live",
+      url: "${ApiConstants.baseUrl}/ytt-live", // ✅ FIXED
       token: token,
     );
   }

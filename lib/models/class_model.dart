@@ -35,23 +35,23 @@ class ClassModel {
   });
   factory ClassModel.fromJson(Map<String, dynamic> json) {
     return ClassModel(
-      id: json["_id"] ?? json["id"] ?? "",
+      id: json["id"] ?? "",
       title: json["title"] ?? "",
-      trainer: json["trainer"] ?? json["instructor"] ?? "",
 
-      rating: "${json["rating"] ?? 0}", // ✅ convert safely
+      // ✅ FIXED MAPPING
+      trainer: json["yogaType"] ?? "Yoga Instructor",
+
+      rating: "0",
       level: json["level"] ?? "",
 
-      duration: (json["duration"] ?? 0).toString(),
+      duration: "60", // fallback (API not giving)
+      students: "0",
 
-      students: "${json["students"] ?? 0}", // ✅ FIX
+      progress: 0.0,
 
-      progress: (json["progress"] ?? 0).toDouble(),
+      schedule: json["createdAt"] ?? "",
+      next: "",
 
-      schedule: json["schedule"] ?? "",
-      next: json["next"] ?? "",
-
-      // ✅ SAFE COLOR (important)
       color: Colors.deepPurple,
     );
   }
