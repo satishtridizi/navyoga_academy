@@ -4,13 +4,24 @@ import '../api/api_service.dart';
 class PaymentService {
   final ApiService _api = ApiService();
 
-  Future<dynamic> getPayments(String token) async {
-    final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/payments",
-
+  /// INITIATE PAYMENT
+  Future<dynamic> initiatePayment(
+    String token,
+    Map<String, dynamic> body,
+  ) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/payments/initiate",
       token: token,
+      body: body,
     );
+  }
 
-    return response;
+  /// VERIFY PAYMENT
+  Future<dynamic> verifyPayment(String token, Map<String, dynamic> body) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/payments/verify",
+      token: token,
+      body: body,
+    );
   }
 }

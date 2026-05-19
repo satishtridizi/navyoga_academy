@@ -7,7 +7,7 @@ class ClassService {
   /// GET CLASSES
   Future<dynamic> getClasses(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/classes",
+      url: "${ApiConstants.baseUrl}/classes/tutor",
       token: token,
     );
   }

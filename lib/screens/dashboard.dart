@@ -37,7 +37,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final attendanceService = AttendanceService();
   final recordingService = RecordingService();
-  final subscriptionService = SubscriptionService();
+  //final subscriptionService = SubscriptionService();
   bool showAllUpcoming = false;
   bool showAllVideos = false;
   bool showAllReferral = false;
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadStudentDashboard();
     loadUnreadCount();
-    loadClasses();
+    // loadClasses();
   }
 
   Future<void> loadStudentDashboard() async {
@@ -70,21 +70,21 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await Future.wait([
         attendanceService.getAttendance(token),
         recordingService.getRecordings(token),
-        subscriptionService.getPlans(token),
+        //subscriptionService.getPlans(token),
       ]);
 
       final attendanceRes = results[0];
       final recordingsRes = results[1];
-      final coursesRes = results[2];
+      //final coursesRes = results[2];
 
       print("Attendance Response: $attendanceRes");
       print("Recordings Response: $recordingsRes");
-      print("Courses Response: $coursesRes");
+      //print("Courses Response: $coursesRes");
 
-      int enrolledClasses = coursesRes["success"] == true
-          ? coursesRes["data"].length
-          : 5;
-
+      // int enrolledClasses = coursesRes["success"] == true
+      //     ? coursesRes["data"].length
+      //     : 5;
+      int enrolledClasses = 5; // temporary
       int recordingsWatched = recordingsRes["success"] == true
           ? recordingsRes["data"].length
           : 10;
@@ -133,27 +133,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> loadClasses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+  // Future<void> loadClasses() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final token = prefs.getString("token");
 
-    if (token == null) return;
+  //   if (token == null) return;
 
-    final res = await classService.getClasses(token);
+  //   final res = await classService.getClasses(token);
 
-    print("Classes API: $res");
+  //   print("Classes API: $res");
 
-    if (res["success"] == true) {
-      final List data = res["data"];
+  //   if (res["success"] == true) {
+  //     final List data = res["data"];
 
-      setState(() {
-        classes = data.map((e) => ClassModel.fromJson(e)).toList();
-        isLoadingClasses = false;
-      });
-    } else {
-      setState(() => isLoadingClasses = false);
-    }
-  }
+  //     setState(() {
+  //       classes = data.map((e) => ClassModel.fromJson(e)).toList();
+  //       isLoadingClasses = false;
+  //     });
+  //   } else {
+  //     setState(() => isLoadingClasses = false);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
