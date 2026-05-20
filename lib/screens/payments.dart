@@ -9,10 +9,6 @@ import 'package:navyoga_academy/widgets/payment_history_card.dart';
 import 'package:navyoga_academy/widgets/payment_method_card.dart';
 import 'package:navyoga_academy/widgets/payments_header_banner.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:navyoga_academy/models/payment_api_model.dart';
-import 'package:navyoga_academy/services/payment_service.dart';
-//import 'package:navyoga_academy/services/subscription_service.dart';
-//import 'package:navyoga_academy/models/subscription_api_model.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class SubscriptionScreen extends StatefulWidget {
@@ -23,7 +19,6 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreenState extends State<SubscriptionScreen> {
-  bool isLoadingPayments = true;
   double originalPrice = 1000; // example
   double finalPrice = 1000;
 
@@ -40,91 +35,12 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     });
   }
 
-  // final subscriptionService = SubscriptionService();
-
-  // List<SubscriptionApiModel> plans = [];
-  final paymentService = PaymentService();
-
-  List<PaymentApiModel> payments = [];
-
-  // Future<void> loadPayments() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final token = prefs.getString("token");
-
-  //   if (token == null) {
-  //     Navigator.pushReplacementNamed(context, "/login");
-  //     return;
-  //   }
-
-  //   final response = await paymentService.getPayments(token);
-
-  //   print("Payments API Response: $response"); // ✅ debug
-
-  //   if (response["success"] != true) {
-  //     AppSnackbar.showError(
-  //       context,
-  //       response["message"] ?? "Failed to load payments",
-  //     );
-
-  //     setState(() {
-  //       isLoadingPayments = false;
-  //     });
-
-  //     return;
-  //   }
-
-  //   final List data = response["data"];
-
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     payments = data.map((e) => PaymentApiModel.fromJson(e)).toList();
-  //     isLoadingPayments = false;
-  //   });
-  // }
+  List<PaymentHistory> payments = [];
 
   @override
   void initState() {
     super.initState();
-
-    //loadPayments();
-    //loadPlans();
   }
-
-  // Future<void> loadPlans() async {
-  //   final prefs = await SharedPreferences.getInstance();
-
-  //   final token = prefs.getString("token");
-
-  //   if (token == null) {
-  //     Navigator.pushReplacementNamed(context, "/login");
-
-  //     return;
-  //   }
-
-  //   final response = await subscriptionService.getPlans(token);
-  //   if (response["success"] != true) {
-  //     AppSnackbar.showError(
-  //       context,
-
-  //       response["message"] ?? "Failed to load plans",
-  //     );
-
-  //     return;
-  //   }
-
-  //   final List data = response["data"];
-
-  //   final loadedPlans = data
-  //       .map((e) => SubscriptionApiModel.fromJson(e))
-  //       .toList();
-
-  //   if (!mounted) return;
-
-  //   setState(() {
-  //     plans = loadedPlans;
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -449,7 +365,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
                         child: paymentHistoryCard(
                           PaymentHistory(
-                            title: p.method,
+                            title: p.title,
                             amount: p.amount,
                             date: p.date,
                           ),
@@ -470,7 +386,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                               builder: (_) => PaymentHistoryScreen(
                                 payments: payments.map((p) {
                                   return PaymentHistory(
-                                    title: p.method,
+                                    title: p.title,
                                     amount: p.amount,
                                     date: p.date,
                                   );

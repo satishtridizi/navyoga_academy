@@ -12,7 +12,7 @@ class AuthService {
     required String password,
   }) async {
     final response = await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/auth/superadmin/login",
+      url: "${ApiConstants.baseUrl}/auth/student/login",
 
       body: {"email": email, "password": password},
     );

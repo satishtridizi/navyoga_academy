@@ -240,75 +240,48 @@ class _LoginScreen extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: () async {
                               // // 👈 make async
-                              // final email = emailController.text.trim();
-                              // final password = passwordController.text.trim();
+                              final email = emailController.text.trim();
+                              final password = passwordController.text.trim();
 
-                              // /// 🔹 Basic validation
-                              // if (email.isEmpty || password.isEmpty) {
-                              //   AppSnackbar.showWarning(
-                              //     context,
-                              //     "Please enter email and password",
-                              //   );
-                              //   return;
-                              // }
+                              if (email.isEmpty || password.isEmpty) {
+                                AppSnackbar.showWarning(
+                                  context,
+                                  "Enter email & password",
+                                );
+                                return;
+                              }
 
-                              // /// 🔹 authentication
-                              // try {
-                              //   /// 🔹 CALL LOGIN API
-                              //   final response = await authService.studentLogin(
-                              //     email: email,
-                              //     password: password,
-                              //   );
+                              try {
+                                final response = await authService.studentLogin(
+                                  email: email,
+                                  password: password,
+                                );
+                                print("LOGIN RESPONSE: $response");
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                print(
+                                  "SAVED TOKEN: ${prefs.getString("token")}",
+                                );
+                                if (response["success"] == true) {
+                                  AppSnackbar.showSuccess(
+                                    context,
+                                    "Login successful",
+                                  );
 
-                              //   print(response);
-
-                              //   /// 🔹 SUCCESS
-                              //   if (response["success"] == true) {
-                              //     AppSnackbar.showSuccess(
-                              //       context,
-                              //       "Login successful",
-                              //     );
-
-                              //     /// REMEMBER ME
-                              //     final prefs =
-                              //         await SharedPreferences.getInstance();
-
-                              //     if (rememberMe) {
-                              //       await prefs.setString('saved_email', email);
-                              //     } else {
-                              //       await prefs.remove('saved_email');
-                              //     }
-
-                              //     /// NAVIGATE
-                              //     Navigator.pushNamedAndRemoveUntil(
-                              //       context,
-                              //       AppRoutes.dashboard,
-                              //       (route) => false,
-                              //     );
-                              //   } else {
-                              //     AppSnackbar.showError(
-                              //       context,
-                              //       response["message"],
-                              //     );
-                              //   }
-                              // } catch (e) {
-                              //   print(e);
-
-                              //   AppSnackbar.showError(context, "Login failed");
-                              // }
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-
-                              await prefs.setString(
-                                "token",
-                                "PASTE_YOUR_TOKEN_HERE",
-                              );
-
-                              Navigator.pushNamedAndRemoveUntil(
-                                context,
-                                AppRoutes.dashboard,
-                                (route) => false,
-                              );
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    AppRoutes.dashboard,
+                                    (route) => false,
+                                  );
+                                } else {
+                                  AppSnackbar.showError(
+                                    context,
+                                    response["message"],
+                                  );
+                                }
+                              } catch (e) {
+                                AppSnackbar.showError(context, "Login failed");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFFF6A1A),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
-import 'package:navyoga_academy/services/class_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/dashboard_data.dart';
@@ -11,7 +10,6 @@ import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
-import 'package:navyoga_academy/services/subscription_service.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
@@ -37,17 +35,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final attendanceService = AttendanceService();
   final recordingService = RecordingService();
-  //final subscriptionService = SubscriptionService();
+
   bool showAllUpcoming = false;
   bool showAllVideos = false;
   bool showAllReferral = false;
 
   final dashboardService = DashboardService();
   final leadsService = LeadsService();
-  final classService = ClassService();
-
-  List<ClassModel> classes = [];
-  bool isLoadingClasses = true;
 
   DashboardModel? dashboard;
   int unreadCount = 0;
@@ -57,7 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadStudentDashboard();
     loadUnreadCount();
-    // loadClasses();
   }
 
   Future<void> loadStudentDashboard() async {
@@ -70,12 +63,10 @@ class _HomeScreenState extends State<HomeScreen> {
       final results = await Future.wait([
         attendanceService.getAttendance(token),
         recordingService.getRecordings(token),
-        //subscriptionService.getPlans(token),
       ]);
 
       final attendanceRes = results[0];
       final recordingsRes = results[1];
-      //final coursesRes = results[2];
 
       print("Attendance Response: $attendanceRes");
       print("Recordings Response: $recordingsRes");
@@ -132,28 +123,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
-
-  // Future<void> loadClasses() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final token = prefs.getString("token");
-
-  //   if (token == null) return;
-
-  //   final res = await classService.getClasses(token);
-
-  //   print("Classes API: $res");
-
-  //   if (res["success"] == true) {
-  //     final List data = res["data"];
-
-  //     setState(() {
-  //       classes = data.map((e) => ClassModel.fromJson(e)).toList();
-  //       isLoadingClasses = false;
-  //     });
-  //   } else {
-  //     setState(() => isLoadingClasses = false);
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -427,33 +396,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  isLoadingClasses
-                      ? const Center(child: CircularProgressIndicator())
-                      : Column(
-                          children: List.generate(
-                            showAllUpcoming
-                                ? classes.length
-                                : (classes.length > 2 ? 2 : classes.length),
-                            (index) {
-                              final c = classes[index];
-
-                              return AnimatedItem(
-                                index: index,
-                                child: ClassCard(
-                                  c.title,
-                                  "${c.trainer} • ${c.schedule}",
-                                  c.duration,
-                                  onJoin: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.liveClassesList,
-                                    );
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                  const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      "Live classes will be available soon",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
                   const SizedBox(height: 30),
 
                   /// 🎥 RECORDINGS
