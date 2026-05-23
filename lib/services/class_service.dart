@@ -4,26 +4,18 @@ import '../api/api_service.dart';
 class ClassService {
   final ApiService _api = ApiService();
 
-  /// GET CLASSES
-  Future<dynamic> getClasses(String token) async {
+  /// TUTOR CLASSES (only for tutor role)
+  Future<dynamic> getTutorClasses(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/classes/tutor",
+      url: "${ApiConstants.baseUrl}/class/tutor",
       token: token,
     );
   }
 
-  /// GET BATCHES
-  Future<dynamic> getBatches(String token) async {
+  /// TUTOR STUDENTS (NEW API)
+  Future<dynamic> getMyStudents(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/batch",
-      token: token,
-    );
-  }
-
-  /// GET WORKSHOPS
-  Future<dynamic> getWorkshops(String token) async {
-    return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/workshop",
+      url: "${ApiConstants.baseUrl}/auth/tutor/me/students",
       token: token,
     );
   }

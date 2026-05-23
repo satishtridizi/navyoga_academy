@@ -239,34 +239,40 @@ class _LoginScreen extends State<LoginScreen> {
 
                           child: ElevatedButton(
                             onPressed: () async {
-                              // // 👈 make async
                               final email = emailController.text.trim();
                               final password = passwordController.text.trim();
 
                               if (email.isEmpty || password.isEmpty) {
                                 AppSnackbar.showWarning(
                                   context,
-                                  "Enter email & password",
+                                  "Please enter email and password",
                                 );
                                 return;
                               }
+
+                              _showLoader();
 
                               try {
                                 final response = await authService.studentLogin(
                                   email: email,
                                   password: password,
                                 );
-                                print("LOGIN RESPONSE: $response");
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                print(
-                                  "SAVED TOKEN: ${prefs.getString("token")}",
-                                );
+
+                                Navigator.pop(context); // dismiss loader
+
                                 if (response["success"] == true) {
                                   AppSnackbar.showSuccess(
                                     context,
                                     "Login successful",
                                   );
+
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  if (rememberMe) {
+                                    await prefs.setString('saved_email', email);
+                                  } else {
+                                    await prefs.remove('saved_email');
+                                  }
 
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,
@@ -276,11 +282,15 @@ class _LoginScreen extends State<LoginScreen> {
                                 } else {
                                   AppSnackbar.showError(
                                     context,
-                                    response["message"],
+                                    response["message"] ?? "Login failed",
                                   );
                                 }
                               } catch (e) {
-                                AppSnackbar.showError(context, "Login failed");
+                                Navigator.pop(context);
+                                AppSnackbar.showError(
+                                  context,
+                                  "Login failed: $e",
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(

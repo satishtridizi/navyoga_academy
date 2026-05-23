@@ -35,7 +35,7 @@ class AuthService {
 
   Future<dynamic> getProfile(String token) async {
     final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/auth/superadmin/me",
+      url: "${ApiConstants.baseUrl}/auth/student/me",
       token: token,
     );
 
