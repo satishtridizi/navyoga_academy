@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -260,7 +262,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                                 Navigator.pop(context); // dismiss loader
 
-                                if (response["success"] == true) {
+                                if (ApiHelper.isSuccess(response)) {
                                   AppSnackbar.showSuccess(
                                     context,
                                     "Login successful",

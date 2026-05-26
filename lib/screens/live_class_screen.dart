@@ -3,8 +3,8 @@ import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/services/live_class_service.dart';
 import 'dart:async';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LiveClassScreen extends StatefulWidget {
   const LiveClassScreen({super.key});
@@ -53,14 +53,10 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   }
 
   Future<void> loadLiveClasses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
-
+    final token = await AuthManager.getToken();
     if (token == null) return;
 
     final res = await service.getLiveClasses(token);
-
-    print("Live API Response: $res");
 
     if (res["success"] == true) {
       setState(() {

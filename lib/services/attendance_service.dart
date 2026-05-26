@@ -19,7 +19,7 @@ class AttendanceService {
   }
 
   // ✅ ADD THIS
-  Future<Map<String, dynamic>> getAttendance(String token) async {
+  Future<List> getAttendance(String token) async {
     final results = await Future.wait([
       getFrontlineAttendance(token),
       getOperationsAttendance(token),
@@ -28,9 +28,11 @@ class AttendanceService {
     final frontline = results[0];
     final operations = results[1];
 
-    return {
-      "success": true,
-      "data": [...(frontline["data"] ?? []), ...(operations["data"] ?? [])],
-    };
+    if (frontline["unauthorized"] == true ||
+        operations["unauthorized"] == true) {
+      throw Exception("UNAUTHORIZED");
+    }
+
+    return [...(frontline["data"] ?? []), ...(operations["data"] ?? [])];
   }
 }

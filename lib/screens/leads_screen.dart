@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import '../services/leads_service.dart';
 
 class LeadsScreen extends StatefulWidget {
@@ -22,15 +23,12 @@ class _LeadsScreenState extends State<LeadsScreen> {
   }
 
   Future<void> loadLeads() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
     final response = await leadsService.getLeads(token);
 
-    print("Leads Response: $response");
-
-    if (response["success"] == true) {
+    if (ApiHelper.isSuccess(response)) {
       setState(() {
         leads = response["data"]["items"];
         isLoading = false;

@@ -4,12 +4,21 @@ import '../api/api_service.dart';
 class RecordingService {
   final ApiService _api = ApiService();
 
-  Future<dynamic> getRecordings(String token) async {
-    final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/ytt-recorded",
+  Future<List> getRecordings(String token) async {
+    final res = await _api.getRequest(
+      url: "${ApiConstants.baseUrl}/api/ytt-recorded",
       token: token,
     );
 
-    return response;
+    // 🔥 FIXED
+    if (res["unauthorized"] == true) {
+      throw Exception("UNAUTHORIZED");
+    }
+
+    if (res["success"] == true) {
+      return (res["data"] as List?) ?? [];
+    }
+
+    return [];
   }
 }

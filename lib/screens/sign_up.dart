@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -377,7 +379,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   AnimatedItem(
                                     index: 3,
                                     child: ElevatedButton(
-                                      onPressed: () {
+                                      onPressed: () async {
                                         /// ✅ Validate form
                                         if (!_formKey.currentState!
                                             .validate()) {
@@ -385,18 +387,33 @@ class _SignupScreenState extends State<SignupScreen> {
                                         }
 
                                         /// ✅ Success
-                                        AppSnackbar.showSuccess(
-                                          context,
-                                          "Account created successfully",
-                                        );
+                                        final response = await AuthService()
+                                            .studentRegister(
+                                              email: emailController.text
+                                                  .trim(),
+                                              password: passwordController.text
+                                                  .trim(),
+                                            );
 
-                                        /// ✅ Navigate back
-                                        Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                          () {
-                                            Navigator.pop(context);
-                                          },
-                                        );
+                                        if (ApiHelper.isSuccess(response)) {
+                                          AppSnackbar.showSuccess(
+                                            context,
+                                            "Account created successfully",
+                                          );
+
+                                          Future.delayed(
+                                            const Duration(milliseconds: 500),
+                                            () {
+                                              Navigator.pop(context);
+                                            },
+                                          );
+                                        } else {
+                                          AppSnackbar.showError(
+                                            context,
+                                            response["message"] ??
+                                                "Signup failed",
+                                          );
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
@@ -515,34 +532,34 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  static Widget buildField({
-    required TextEditingController controller,
-    required String hint,
-    bool obscure = false,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Color.fromARGB(255, 85, 84, 84)),
-        filled: true,
-        fillColor: const Color.fromARGB(255, 255, 255, 255),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 08,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF6A11CB), width: 1.2),
-        ),
-      ),
-    );
-  }
+  // static Widget buildField({
+  //   required TextEditingController controller,
+  //   required String hint,
+  //   bool obscure = false,
+  // }) {
+  //   return TextField(
+  //     controller: controller,
+  //     obscureText: obscure,
+  //     decoration: InputDecoration(
+  //       hintText: hint,
+  //       hintStyle: const TextStyle(color: Color.fromARGB(255, 85, 84, 84)),
+  //       filled: true,
+  //       fillColor: const Color.fromARGB(255, 255, 255, 255),
+  //       contentPadding: const EdgeInsets.symmetric(
+  //         horizontal: 16,
+  //         vertical: 08,
+  //       ),
+  //       enabledBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(16),
+  //         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+  //       ),
+  //       focusedBorder: OutlineInputBorder(
+  //         borderRadius: BorderRadius.circular(16),
+  //         borderSide: const BorderSide(color: Color(0xFF6A11CB), width: 1.2),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _circle(double size, Color color) {
     return Container(

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:navyoga_academy/utils/auth_manager.dart';
 
 class ApiService {
   /// ================= POST =================
@@ -12,9 +13,6 @@ class ApiService {
     String? token,
   }) async {
     try {
-      print("REQUEST URL: $url");
-      print("REQUEST BODY: ${jsonEncode(body)}");
-
       final response = await http
           .post(
             Uri.parse(url),
@@ -31,19 +29,29 @@ class ApiService {
 
       final data = jsonDecode(response.body);
 
-      /// SUCCESS
+      // ✅ SUCCESS
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return data;
       }
 
-      /// SERVER ERROR
+      // ❗ HANDLE ERRORS
+      if (response.statusCode == 400) {
+        return {
+          "success": false,
+          "message": data["message"] ?? "Invalid input",
+        };
+      }
+
+      if (response.statusCode == 401) {
+        return {"success": false, "message": "Unauthorized"};
+      }
+
       return {
         "success": false,
-
         "message": data["message"] ?? "Something went wrong",
       };
     }
-    /// TIMEOUT
+    // NETWORK / TIMEOUT / OTHER ERRORS
     on Exception catch (e) {
       return {"success": false, "message": e.toString()};
     }
@@ -64,8 +72,10 @@ class ApiService {
 
       final data = jsonDecode(response.body);
 
-      /// ✅ HANDLE UNAUTHORIZED
       if (response.statusCode == 401) {
+        // 🔥 AUTO LOGOUT
+        await AuthManager.clearToken();
+
         return {
           "success": false,
           "unauthorized": true,
@@ -73,17 +83,29 @@ class ApiService {
         };
       }
 
-      /// SUCCESS
+      // ✅ HANDLE FORBIDDEN (ROLE ISSUE)
+      if (response.statusCode == 403) {
+        return {"success": false, "message": "Access denied for this role"};
+      }
+
+      // ✅ HANDLE NOT FOUND
+      if (response.statusCode == 404) {
+        return {"success": false, "message": "API not found"};
+      }
+
+      // ✅ SUCCESS
       if (response.statusCode >= 200 && response.statusCode < 300) {
         return data;
       }
 
-      /// SERVER ERROR
+      // ❗ DEFAULT ERROR
       return {
         "success": false,
         "message": data["message"] ?? "Something went wrong",
       };
-    } catch (e) {
+    }
+    // NETWORK / TIMEOUT / OTHER ERRORS
+    on Exception catch (e) {
       return {"success": false, "message": e.toString()};
     }
   }

@@ -10,6 +10,8 @@ import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
@@ -54,8 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadStudentDashboard() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, AppRoutes.login);
@@ -63,56 +64,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      final results = await Future.wait([
-        attendanceService.getAttendance(token),
-        recordingService.getRecordings(token),
-      ]);
+      final attendanceList = await attendanceService.getAttendance(token);
+      final recordingsList = await recordingService.getRecordings(token);
 
-      final attendanceRes = results[0];
-      final recordingsRes = results[1];
-      // ✅ HANDLE UNAUTHORIZED (ADD HERE)
-      if (attendanceRes["unauthorized"] == true ||
-          recordingsRes["unauthorized"] == true) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove("token");
+      int recordingsWatched = recordingsList.length;
 
-        Navigator.pushReplacementNamed(context, AppRoutes.login);
-        return;
-      }
+      int total = attendanceList.length;
 
-      print("Attendance Response: $attendanceRes");
-      print("Recordings Response: $recordingsRes");
-      //print("Courses Response: $coursesRes");
-
-      // int enrolledClasses = coursesRes["success"] == true
-      //     ? coursesRes["data"].length
-      //     : 5;
-      int enrolledClasses = 5; // temporary
-
-      int recordingsWatched = (recordingsRes["data"] as List?)?.length ?? 0;
-
-      int total = (attendanceRes["data"] as List?)?.length ?? 0;
-
-      int present =
-          (attendanceRes["data"] as List?)
-              ?.where((e) => e["status"] == "PRESENT")
-              .length ??
-          0;
+      int present = attendanceList
+          .where((e) => e["status"] == "PRESENT")
+          .length;
 
       int attendanceRate = total == 0 ? 0 : ((present / total) * 100).toInt();
 
       setState(() {
         dashboard = DashboardModel(
-          enrolledClasses: enrolledClasses,
+          enrolledClasses: attendanceList.length,
           practiceHours: 0,
           recordingsWatched: recordingsWatched,
           attendanceRate: attendanceRate,
         );
       });
     } catch (e) {
-      print("Dashboard Error: $e");
-
-      // ✅ VERY IMPORTANT: prevent infinite loader
       setState(() {
         dashboard = DashboardModel(
           enrolledClasses: 0,
@@ -125,24 +98,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadUnreadCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
     // ✅ FIRST declare
-    final res = await NotificationService().getNotifications(token);
+    final list = await NotificationService().getNotifications(token);
 
-    // ✅ THEN print
-    print("Notification API Response: $res");
-
-    if (res["success"] == true) {
-      final list = (res["data"]["items"] as List?) ?? [];
-
-      setState(() {
-        unreadCount = list.where((n) => n["isRead"] == false).length;
-      });
-    }
+    setState(() {
+      unreadCount = list.where((n) => n["isRead"] == false).length;
+    });
   }
 
   @override
@@ -612,17 +577,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      // AnimatedItem(
-                      //   index: 5,
-                      //   child: ActionCard(
-                      //     "Leads",
-                      //     "Manage your leads",
-                      //     Colors.blue,
-                      //     onTap: () {
-                      //       Navigator.pushNamed(context, '/leads');
-                      //     },
-                      //   ),
-                      // ),
                     ],
                   ),
 
@@ -673,35 +627,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(height: 20),
-
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     final prefs = await SharedPreferences.getInstance();
-                  //     final token = prefs.getString("token");
-
-                  //     if (token == null) {
-                  //       print("No token found");
-                  //       return;
-                  //     }
-
-                  //     final response = await leadsService.createLead({
-                  //       "name": "Test User",
-                  //       "email": "test@example.com",
-                  //       "phone": "9999999999",
-                  //       "source": "INSTAGRAM",
-                  //       "interest": "Yoga classes",
-                  //     }, token);
-
-                  //     print("Lead Response: $response");
-                  //   },
-                  //   child: Text("Test Create Lead"),
-                  // ),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     loadStudentDashboard(); // 🔁 refresh
-                  //   },
-                  //   child: Text("Refresh Dashboard"),
-                  // ),
                   const ReferralCodeCard(),
                   const ShareEarnCard(),
                 ],

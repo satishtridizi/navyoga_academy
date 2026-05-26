@@ -34,8 +34,6 @@ class ReferralCodeCard extends StatelessWidget {
               /// SHARE ICON
               GestureDetector(
                 onTap: () {
-                  print("SHARE CLICKED"); // 👈 DEBUG LINE
-
                   const referralCode = "NAVYOGA-SARAH-2026";
 
                   Share.share(

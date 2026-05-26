@@ -5,11 +5,22 @@ class NotificationService {
   final ApiService _api = ApiService();
 
   // ✅ GET ALL
-  Future<dynamic> getNotifications(String token) async {
-    return await _api.getRequest(
+  Future<List> getNotifications(String token) async {
+    final res = await _api.getRequest(
       url: "${ApiConstants.baseUrl}/notifications",
       token: token,
     );
+
+    // 🔥 FIXED
+    if (res["unauthorized"] == true) {
+      throw Exception("UNAUTHORIZED");
+    }
+
+    if (res["success"] == true) {
+      return (res["data"]["items"] as List?) ?? [];
+    }
+
+    return [];
   }
 
   // ✅ MARK AS READ

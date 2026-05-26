@@ -4,6 +4,8 @@ import 'package:navyoga_academy/data/self_paced_data.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/services/self_paced_service.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
@@ -32,8 +34,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   }
 
   Future<void> loadCourses() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
@@ -42,7 +43,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
     final response = await selfPacedService.getCourses(token);
 
-    if (response["success"] == true && response["data"] != null) {
+    if (ApiHelper.isSuccess(response) && response["data"] != null) {
       final List list = response["data"];
       if (!mounted) return;
 
@@ -64,8 +65,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   }
 
   Future<void> enrollCourse(CourseModel course) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
@@ -74,10 +74,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
     final response = await selfPacedService.initiatePayment(token, course.id);
 
-    if (response["success"] == true) {
-      // 🔥 You will get payment data here
-      print("Payment Data: ${response["data"]}");
-
+    if (ApiHelper.isSuccess(response) && response["data"] != null) {
       AppSnackbar.showSuccess(context, "Proceed to payment");
     } else {
       AppSnackbar.showError(context, response["message"]);

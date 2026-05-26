@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/referral_badge_card.dart';
@@ -41,14 +42,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
   }
 
   Future<void> loadReferrals() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
     final res = await service.getReferrals(token);
-
-    print("Referral API: $res");
 
     if (res["success"] == true) {
       final data = res["data"];

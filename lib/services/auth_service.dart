@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -17,17 +17,10 @@ class AuthService {
       body: {"email": email, "password": password},
     );
 
-    print(response);
-
     if (response["success"] == true &&
         response["data"] != null &&
         response["data"]["token"] != null) {
-      final prefs = await SharedPreferences.getInstance();
-
-      await prefs.setString(
-        "token",
-        response["data"]["token"], // ✅ FIXED
-      );
+      await AuthManager.saveToken(response["data"]["token"]);
     }
 
     return response;
@@ -43,8 +36,18 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
+    await AuthManager.clearToken();
+  }
 
-    await prefs.remove("token");
+  Future<dynamic> studentRegister({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/register",
+      body: {"email": email, "password": password},
+    );
+
+    return response;
   }
 }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/attendance_stat_model.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import '../data/app_data.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/event_card.dart';
 import '../models/event_model.dart';
 import 'event_details.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/event_api_model.dart';
 import 'package:navyoga_academy/services/event_service.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -33,14 +34,22 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   Future<void> loadEvents() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
     final response = await eventService.getEvents(token);
 
-    if (response["success"] == true && response["data"] != null) {
+    if (response["unauthorized"] == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+      return;
+    }
+
+    if (ApiHelper.isSuccess(response) && response["data"] != null) {
       final List data = response["data"];
 
       setState(() {
@@ -58,10 +67,7 @@ class _EventsScreenState extends State<EventsScreen> {
       }
 
       // fallback error
-      AppSnackbar.showError(
-        context,
-        response["message"] ?? "Failed to load events",
-      );
+      AppSnackbar.showError(context, ApiHelper.getMessage(response));
 
       setState(() {
         isLoading = false;

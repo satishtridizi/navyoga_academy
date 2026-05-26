@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/attendance_data.dart';
 import 'package:navyoga_academy/models/attendance_stat_model.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/attendance_stat_card.dart';
 import 'package:navyoga_academy/widgets/attandance_detail_card.dart';
@@ -11,7 +13,6 @@ import 'package:navyoga_academy/widgets/attandance_progress_row.dart';
 import 'package:navyoga_academy/widgets/attandance_class_progress_row.dart';
 import 'package:navyoga_academy/widgets/attandance_section_card.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/attendance_api_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
@@ -31,50 +32,50 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   @override
   void initState() {
     super.initState();
-    //loadAttendance();
+    loadAttendance();
   }
 
   Future<void> loadAttendance() async {
-    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoading = true;
+    });
 
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
-
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-      });
-
       return;
     }
 
-    final response = await attendanceService.getAttendance(token);
+    final attendanceList = await attendanceService.getAttendance(token);
 
-    if (response["success"] == true && response["data"] != null) {
-      final attendanceData = AttendanceApiModel.fromJson(response["data"]);
+    if (!mounted) return;
 
-      if (!mounted) return;
-
+    if (attendanceList.isEmpty) {
       setState(() {
-        attendance = attendanceData;
         isLoading = false;
       });
-    } else {
-      AppSnackbar.showError(
-        context,
-        response["message"] ?? "Failed to load attendance",
+      return;
+    }
+
+    int total = attendanceList.length;
+
+    int present = attendanceList.where((e) => e["status"] == "PRESENT").length;
+
+    int absent = attendanceList.where((e) => e["status"] == "ABSENT").length;
+
+    int attendanceRate = total == 0 ? 0 : ((present / total) * 100).toInt();
+
+    setState(() {
+      attendance = AttendanceApiModel(
+        attendanceRate: attendanceRate,
+        classesAttended: present,
+        missedClasses: absent,
+        streak: 0,
       );
 
-      if (!mounted) return;
-
-      setState(() {
-        isLoading = false;
-        attendance = null;
-      });
-    }
+      isLoading = false;
+    });
   }
 
   @override

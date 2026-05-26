@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/notification_model.dart';
@@ -24,28 +26,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> loadNotifications() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
-    final response = await service.getNotifications(token);
+    final list = await service.getNotifications(token);
 
-    if (response["success"] == true) {
-      final list = response["data"] as List;
-
-      setState(() {
-        notifications = list.map((e) => NotificationModel.fromJson(e)).toList();
-        isLoading = false;
-      });
-    } else {
-      setState(() => isLoading = false);
-    }
+    setState(() {
+      notifications = list.map((e) => NotificationModel.fromJson(e)).toList();
+      isLoading = false;
+    });
   }
 
   Future<void> markAsRead(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
@@ -54,8 +48,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> deleteNotification(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/recording_card.dart';
@@ -32,39 +34,17 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
   }
 
   Future<void> loadRecordings() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
-
+    final token = await AuthManager.getToken();
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
       return;
     }
 
-    final response = await recordingService.getRecordings(token);
+    final list = await recordingService.getRecordings(token);
 
-    print("Recording API Response: $response");
-
-    if (response["success"] == true && response["data"] != null) {
-      final List data = response["data"];
-
-      setState(() {
-        recordings = data.map((e) => RecordingApiModel.fromJson(e)).toList();
-      });
-    } else {
-      // 🔥 SHOW ERROR TO USER
-      AppSnackbar.showError(
-        context,
-        response["message"] ?? "Failed to load recordings",
-      );
-
-      // 🧠 DEBUG
-      print("Recordings API failed: ${response["message"]}");
-
-      // 🛡️ SAFE STATE
-      setState(() {
-        recordings = [];
-      });
-    }
+    setState(() {
+      recordings = list.map((e) => RecordingApiModel.fromJson(e)).toList();
+    });
   }
 
   @override

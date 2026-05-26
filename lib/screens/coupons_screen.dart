@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import '../models/coupon_model.dart';
 import '../services/coupon_service.dart';
 
@@ -26,14 +25,11 @@ class _CouponsScreenState extends State<CouponsScreen> {
   }
 
   Future<void> loadCoupons() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
     final res = await service.getCoupons(token);
-
-    print("Coupons Response: $res");
 
     if (res["success"] == true) {
       final list = res["data"] as List;

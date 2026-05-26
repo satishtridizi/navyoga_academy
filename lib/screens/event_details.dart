@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import '../models/event_model.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final EventModel event;

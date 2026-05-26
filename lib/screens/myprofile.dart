@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/models/profile_field_model.dart';
 import 'package:navyoga_academy/models/student_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/services/profile_service.dart';
+import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../data/profile_data.dart';
 import '../widgets/profile_stat_card.dart';
 import '../widgets/profile_section.dart';
@@ -52,17 +53,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> loadProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) return;
 
     final response = await authService.getProfile(token);
 
-    print("Profile API Response: $response");
+    if (response["unauthorized"] == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
+      return;
+    }
 
-    if (response["success"] != true || response["data"] == null) {
-      print("Profile data is null or API failed");
+    if (!ApiHelper.isSuccess(response) || response["data"] == null) {
       return;
     }
 
@@ -81,9 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isUpdating = true;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-
-    final token = prefs.getString("token");
+    final token = await AuthManager.getToken();
 
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
@@ -108,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isUpdating = false;
     });
 
-    if (response["success"] == true) {
+    if (ApiHelper.isSuccess(response)) {
       AppSnackbar.showSuccess(context, response["message"]);
     } else {
       AppSnackbar.showError(context, response["message"]);
