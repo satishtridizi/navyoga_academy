@@ -57,7 +57,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
 
-    if (token == null) return;
+    if (token == null) {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
+      return;
+    }
 
     try {
       final results = await Future.wait([
@@ -67,6 +70,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final attendanceRes = results[0];
       final recordingsRes = results[1];
+      // ✅ HANDLE UNAUTHORIZED (ADD HERE)
+      if (attendanceRes["unauthorized"] == true ||
+          recordingsRes["unauthorized"] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove("token");
+
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+        return;
+      }
 
       print("Attendance Response: $attendanceRes");
       print("Recordings Response: $recordingsRes");
@@ -76,17 +88,16 @@ class _HomeScreenState extends State<HomeScreen> {
       //     ? coursesRes["data"].length
       //     : 5;
       int enrolledClasses = 5; // temporary
-      int recordingsWatched = recordingsRes["success"] == true
-          ? recordingsRes["data"].length
-          : 10;
 
-      int total = attendanceRes["success"] == true
-          ? attendanceRes["data"].length
-          : 20;
+      int recordingsWatched = (recordingsRes["data"] as List?)?.length ?? 0;
 
-      int present = attendanceRes["success"] == true
-          ? attendanceRes["data"].where((e) => e["status"] == "PRESENT").length
-          : 15;
+      int total = (attendanceRes["data"] as List?)?.length ?? 0;
+
+      int present =
+          (attendanceRes["data"] as List?)
+              ?.where((e) => e["status"] == "PRESENT")
+              .length ??
+          0;
 
       int attendanceRate = total == 0 ? 0 : ((present / total) * 100).toInt();
 
@@ -100,6 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       print("Dashboard Error: $e");
+
+      // ✅ VERY IMPORTANT: prevent infinite loader
+      setState(() {
+        dashboard = DashboardModel(
+          enrolledClasses: 0,
+          practiceHours: 0,
+          recordingsWatched: 0,
+          attendanceRate: 0,
+        );
+      });
     }
   }
 
@@ -116,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Notification API Response: $res");
 
     if (res["success"] == true) {
-      final list = res["data"] as List;
+      final list = (res["data"]["items"] as List?) ?? [];
 
       setState(() {
         unreadCount = list.where((n) => n["isRead"] == false).length;

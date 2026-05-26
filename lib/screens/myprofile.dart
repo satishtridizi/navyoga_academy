@@ -53,25 +53,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
-
     final token = prefs.getString("token");
 
-    print(token);
+    if (token == null) return;
 
-    final response = await authService.getProfile(token!);
+    final response = await authService.getProfile(token);
+
+    print("Profile API Response: $response");
+
+    if (response["success"] != true || response["data"] == null) {
+      print("Profile data is null or API failed");
+      return;
+    }
 
     final studentData = StudentModel.fromJson(response["data"]);
 
     setState(() {
       student = studentData;
-
       nameController.text = studentData.name;
-
       emailController.text = studentData.email;
-
       phoneController.text = studentData.phone;
-
-      // addressController.text = studentData.address;
     });
   }
 

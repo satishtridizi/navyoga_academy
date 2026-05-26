@@ -12,6 +12,9 @@ class ApiService {
     String? token,
   }) async {
     try {
+      print("REQUEST URL: $url");
+      print("REQUEST BODY: ${jsonEncode(body)}");
+
       final response = await http
           .post(
             Uri.parse(url),
@@ -52,16 +55,23 @@ class ApiService {
       final response = await http
           .get(
             Uri.parse(url),
-
             headers: {
               "Content-Type": "application/json",
-
               if (token != null) "Authorization": "Bearer $token",
             },
           )
           .timeout(const Duration(seconds: 15));
 
       final data = jsonDecode(response.body);
+
+      /// ✅ HANDLE UNAUTHORIZED
+      if (response.statusCode == 401) {
+        return {
+          "success": false,
+          "unauthorized": true,
+          "message": "Session expired",
+        };
+      }
 
       /// SUCCESS
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -71,12 +81,9 @@ class ApiService {
       /// SERVER ERROR
       return {
         "success": false,
-
         "message": data["message"] ?? "Something went wrong",
       };
-    }
-    /// NETWORK ERROR
-    on Exception catch (e) {
+    } catch (e) {
       return {"success": false, "message": e.toString()};
     }
   }

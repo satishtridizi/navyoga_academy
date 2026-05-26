@@ -6,7 +6,7 @@ class AttendanceService {
 
   Future<dynamic> getFrontlineAttendance(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/attendance/frontline/me",
+      url: "${ApiConstants.baseUrl}/api/attendance/frontline/me",
       token: token,
     );
   }

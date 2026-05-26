@@ -7,14 +7,14 @@ class SelfPacedService {
   /// 🔥 GET COURSES
   Future<dynamic> getCourses(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/api/self-paced/modules",
+      url: "${ApiConstants.baseUrl}/self-paced/modules",
       token: token,
     );
   }
 
   Future<dynamic> initiatePayment(String token, String moduleId) async {
     return await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/api/payments/initiate",
+      url: "${ApiConstants.baseUrl}/payments/initiate",
       token: token,
       body: {
         "moduleId": moduleId, // 🔥 important

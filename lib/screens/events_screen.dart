@@ -40,8 +40,6 @@ class _EventsScreenState extends State<EventsScreen> {
 
     final response = await eventService.getEvents(token);
 
-    print("Events API: $response");
-
     if (response["success"] == true && response["data"] != null) {
       final List data = response["data"];
 
@@ -50,6 +48,16 @@ class _EventsScreenState extends State<EventsScreen> {
         isLoading = false;
       });
     } else {
+      // 🔥 HANDLE ROLE ERROR SAFELY
+      if (response["message"] == "Access denied for this role") {
+        setState(() {
+          events = []; // no events
+          isLoading = false;
+        });
+        return;
+      }
+
+      // fallback error
       AppSnackbar.showError(
         context,
         response["message"] ?? "Failed to load events",
@@ -202,42 +210,49 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  /// 🔥 OTHER EVENTS LIST
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    cacheExtent: 500,
-                    itemCount: events.length,
-                    itemBuilder: (context, index) {
-                      return EventCard(
-                        event: EventModel(
-                          description: "",
-                          location: "",
-                          price: "",
-                          seats: "",
-                          image: "",
-                          tags: [],
-                          title: events[index].title,
-                          date: events[index].date,
-                        ),
-                        isCompact: true,
-                        onTap: () => _openDetails(
-                          context,
-
-                          EventModel(
-                            location: "",
-                            price: "",
-                            seats: "",
-                            image: "",
-                            tags: [],
-                            description: "",
-                            title: events[index].title,
-                            date: events[index].date,
+                  events.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Text(
+                              "No events available for your account",
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            return EventCard(
+                              event: EventModel(
+                                description: "",
+                                location: "",
+                                price: "",
+                                seats: "",
+                                image: "",
+                                tags: [],
+                                title: events[index].title,
+                                date: events[index].date,
+                              ),
+                              isCompact: true,
+                              onTap: () => _openDetails(
+                                context,
+                                EventModel(
+                                  location: "",
+                                  price: "",
+                                  seats: "",
+                                  image: "",
+                                  tags: [],
+                                  description: "",
+                                  title: events[index].title,
+                                  date: events[index].date,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                   const SizedBox(height: 30),
                 ],
               ),

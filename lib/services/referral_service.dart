@@ -6,7 +6,7 @@ class ReferralService {
 
   Future<dynamic> getReferrals(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/api/referrals/me",
+      url: "${ApiConstants.baseUrl}/referrals/me",
       token: token,
     );
   }
