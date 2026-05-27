@@ -7,7 +7,7 @@ class ClassService {
   /// TUTOR CLASSES (only for tutor role)
   Future<dynamic> getTutorClasses(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/class/tutor",
+      url: "${ApiConstants.baseUrl}/api/class/tutor",
       token: token,
     );
   }
@@ -15,7 +15,7 @@ class ClassService {
   /// TUTOR STUDENTS (NEW API)
   Future<dynamic> getMyStudents(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/auth/tutor/me/students",
+      url: "${ApiConstants.baseUrl}/api/auth/tutor/me/students",
       token: token,
     );
   }

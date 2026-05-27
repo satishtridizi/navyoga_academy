@@ -10,7 +10,7 @@ class PaymentService {
     Map<String, dynamic> body,
   ) async {
     return await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/payments/initiate",
+      url: "${ApiConstants.baseUrl}/api/payments/initiate",
       token: token,
       body: body,
     );
@@ -19,7 +19,7 @@ class PaymentService {
   /// VERIFY PAYMENT
   Future<dynamic> verifyPayment(String token, Map<String, dynamic> body) async {
     return await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/payments/verify",
+      url: "${ApiConstants.baseUrl}/api/payments/verify",
       token: token,
       body: body,
     );

@@ -16,7 +16,7 @@ class ProfileService {
     required String address,
   }) async {
     final response = await _api.putRequest(
-      url: "${ApiConstants.baseUrl}/profile",
+      url: "${ApiConstants.baseUrl}/api/profile",
 
       token: token,
 

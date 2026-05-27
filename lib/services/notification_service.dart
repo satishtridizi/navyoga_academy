@@ -7,7 +7,7 @@ class NotificationService {
   // ✅ GET ALL
   Future<List> getNotifications(String token) async {
     final res = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/notifications",
+      url: "${ApiConstants.baseUrl}/api/notifications",
       token: token,
     );
 
@@ -26,7 +26,7 @@ class NotificationService {
   // ✅ MARK AS READ
   Future<dynamic> markAsRead(String token, String id) async {
     return await _api.patchRequest(
-      url: "${ApiConstants.baseUrl}/notifications/$id",
+      url: "${ApiConstants.baseUrl}/api/notifications/$id",
       token: token,
       body: {"isRead": true},
     );
@@ -35,7 +35,7 @@ class NotificationService {
   // ✅ DELETE
   Future<dynamic> deleteNotification(String token, String id) async {
     return await _api.deleteRequest(
-      url: "${ApiConstants.baseUrl}/notifications/$id",
+      url: "${ApiConstants.baseUrl}/api/notifications/$id",
       token: token,
     );
   }

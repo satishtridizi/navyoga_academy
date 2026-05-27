@@ -13,7 +13,7 @@ class AttendanceService {
 
   Future<dynamic> getOperationsAttendance(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/attendance/operations/me",
+      url: "${ApiConstants.baseUrl}/api/attendance/operations/me",
       token: token,
     );
   }

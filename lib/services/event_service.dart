@@ -6,7 +6,7 @@ class EventService {
 
   Future<dynamic> getEvents(String token) async {
     final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/events",
+      url: "${ApiConstants.baseUrl}/api/events",
 
       token: token,
     );

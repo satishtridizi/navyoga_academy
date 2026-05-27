@@ -37,41 +37,34 @@ class _EventsScreenState extends State<EventsScreen> {
     final token = await AuthManager.getToken();
 
     if (token == null) return;
-
-    final response = await eventService.getEvents(token);
-
-    if (response["unauthorized"] == true) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.login,
-        (route) => false,
-      );
-      return;
-    }
-
-    if (ApiHelper.isSuccess(response) && response["data"] != null) {
-      final List data = response["data"];
+    try {
+      final list = await eventService.getEvents(token);
 
       setState(() {
-        events = data.map((e) => EventApiModel.fromJson(e)).toList();
+        events = list.map((e) => EventApiModel.fromJson(e)).toList();
         isLoading = false;
       });
-    } else {
-      // 🔥 HANDLE ROLE ERROR SAFELY
-      if (response["message"] == "Access denied for this role") {
-        setState(() {
-          events = []; // no events
-          isLoading = false;
-        });
+    } catch (e) {
+      if (e.toString().contains("UNAUTHORIZED")) {
+        await AuthManager.clearToken();
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (route) => false,
+        );
         return;
       }
 
-      // fallback error
-      AppSnackbar.showError(context, ApiHelper.getMessage(response));
-
+      // 🔥 ROLE / ACCESS ERROR
       setState(() {
+        events = [];
         isLoading = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("You don’t have access to events")),
+      );
     }
   }
 

@@ -6,7 +6,7 @@ class CouponService {
 
   Future<dynamic> getCoupons(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/coupons",
+      url: "${ApiConstants.baseUrl}/api/coupons",
       token: token,
     );
   }

@@ -6,7 +6,7 @@ class DashboardService {
 
   Future<dynamic> getDashboard(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/dashboard/student",
+      url: "${ApiConstants.baseUrl}/api/dashboard/student",
       token: token,
     );
   }

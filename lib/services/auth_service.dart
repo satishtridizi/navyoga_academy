@@ -12,7 +12,7 @@ class AuthService {
     required String password,
   }) async {
     final response = await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/auth/student/login",
+      url: "${ApiConstants.baseUrl}/api/auth/student/login",
 
       body: {"email": email, "password": password},
     );
@@ -28,7 +28,7 @@ class AuthService {
 
   Future<dynamic> getProfile(String token) async {
     final response = await _api.getRequest(
-      url: "${ApiConstants.baseUrl}/auth/student/me",
+      url: "${ApiConstants.baseUrl}/api/auth/student/me",
       token: token,
     );
 
