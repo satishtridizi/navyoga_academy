@@ -7,14 +7,16 @@ import 'package:navyoga_academy/screens/download_data_screen.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
 import 'package:navyoga_academy/screens/privacy_policy_screen.dart';
 import 'package:navyoga_academy/screens/terms_screen.dart';
+import 'package:navyoga_academy/services/payment_service.dart';
 import 'package:navyoga_academy/services/settings_service.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/settings_notification_tile.dart';
 import 'package:navyoga_academy/widgets/settings_payment_section.dart';
 import 'package:navyoga_academy/widgets/settings_privacy_section.dart';
 import 'package:navyoga_academy/widgets/settings_security_section.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -24,51 +26,20 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  List<PaymentHistory> paymentHistoryList = [
-    PaymentHistory(title: "Premium Plan", date: "May 2026", amount: "₹999"),
-    PaymentHistory(title: "Premium Plan", date: "April 2026", amount: "₹999"),
-  ];
+  // ==================== STATE VARIABLES ====================
+
+  final TextEditingController _currentPasswordCtrl = TextEditingController();
+  final TextEditingController _newPasswordCtrl = TextEditingController();
+  final TextEditingController _confirmPasswordCtrl = TextEditingController();
+
+  List<PaymentHistory> paymentHistoryList = [];
+  bool isPaymentHistoryLoading = true;
   bool isPrivacyLoading = true;
-  @override
-  void initState() {
-    super.initState();
-    loadSecurityFields();
-    loadPrivacyOptions();
-  }
+  bool twoFactorEnabled = false;
 
-  void loadSecurityFields() {
-    /// simulate API (future-ready)
-    final apiResponse = [
-      SecurityField(label: "Current Password", hint: "Enter current password"),
-      SecurityField(label: "New Password", hint: "Enter new password"),
-      SecurityField(label: "Confirm Password", hint: "Re-enter password"),
-    ];
+  List<SecurityField> securityFields = [];
+  List<PrivacyOption> privacyOptions = [];
 
-    setState(() {
-      securityFields = apiResponse;
-    });
-  }
-
-  void loadPrivacyOptions() async {
-    try {
-      final data = await SettingsService().fetchPrivacyOptions();
-
-      setState(() {
-        privacyOptions = data;
-        isPrivacyLoading = false; // 👈 IMPORTANT
-      });
-    } catch (e) {
-      setState(() {
-        isPrivacyLoading = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Failed to load privacy settings")),
-      );
-    }
-  }
-
-  /// 🔥 Notification Settings
   List<Map<String, dynamic>> settings = [
     {
       "title": "Class Reminders",
@@ -87,37 +58,104 @@ class _SettingsScreenState extends State<SettingsScreen> {
     },
   ];
 
-  /// 🔐 Security Fields
-  List<SecurityField> securityFields = [];
-
-  /// 🔒 Privacy & Data Options
-  List<PrivacyOption> privacyOptions = [];
-
-  /// 💳 Payment Data
   Map<String, dynamic> paymentData = {
-    "plan": "Premium Membership",
-    "status": "Active",
-    "validTill": "May 10, 2026",
-    "price": "₹999/month",
-    "card": "**** **** **** 1234",
-    "autoRenew": true,
+    "plan": "Loading...",
+    "status": "—",
+    "validTill": "—",
+    "price": "—",
+    "card": "—",
+    "autoRenew": false,
   };
-  bool twoFactorEnabled = false;
+
+  // ==================== LIFECYCLE ====================
+
+  @override
+  void initState() {
+    super.initState();
+    loadSecurityFields();
+    loadPrivacyOptions();
+  }
+
+  @override
+  void dispose() {
+    _currentPasswordCtrl.dispose();
+    _newPasswordCtrl.dispose();
+    _confirmPasswordCtrl.dispose();
+    super.dispose();
+  }
+
+  // ==================== LOADERS ====================
+
+  void loadSecurityFields() {
+    setState(() {
+      securityFields = [
+        SecurityField(
+          label: "Current Password",
+          hint: "Enter current password",
+        ),
+        SecurityField(label: "New Password", hint: "Enter new password"),
+        SecurityField(label: "Confirm Password", hint: "Re-enter password"),
+      ];
+    });
+  }
+
+  void loadPrivacyOptions() {
+    try {
+      final data = SettingsService().fetchPrivacyOptions();
+      setState(() {
+        privacyOptions = data;
+        isPrivacyLoading = false;
+      });
+    } catch (e) {
+      setState(() => isPrivacyLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to load privacy settings")),
+      );
+    }
+  }
+
+  Future<void> handleUpdatePassword() async {
+    print("current: '${_currentPasswordCtrl.text}'");
+    print("new: '${_newPasswordCtrl.text}'");
+    print("confirm: '${_confirmPasswordCtrl.text}'");
+    if (_newPasswordCtrl.text != _confirmPasswordCtrl.text) {
+      AppSnackbar.showError(context, "Passwords do not match");
+      return;
+    }
+
+    final token = await AuthManager.getToken();
+    if (token == null) return;
+
+    final res = await SettingsService().changePassword(
+      token: token,
+      currentPassword: _currentPasswordCtrl.text.trim(),
+      newPassword: _newPasswordCtrl.text.trim(),
+    );
+
+    if (res["success"] == true) {
+      AppSnackbar.showSuccess(context, res["message"] ?? "Password updated");
+      _currentPasswordCtrl.clear();
+      _newPasswordCtrl.clear();
+      _confirmPasswordCtrl.clear();
+    } else {
+      AppSnackbar.showError(
+        context,
+        res["message"] ?? "Failed to update password",
+      );
+    }
+  }
+
+  // ==================== BUILD ====================
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 4,
-
       drawer: const CustomDrawer(),
-
-      //backgroundColor: Colors.transparent,
       appBar: AppBar(
         leadingWidth: 72,
         backgroundColor: Colors.grey[200],
         elevation: 0,
-
-        /// 🔥 ADD THIS
         leading: Builder(
           builder: (context) => Padding(
             padding: const EdgeInsets.only(left: 12),
@@ -128,28 +166,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.menu, color: Colors.white),
-
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
+                onPressed: () => Scaffold.of(context).openDrawer(),
               ),
             ),
           ),
         ),
-
         title: const Text(
           "NavYoga Academy",
           style: TextStyle(color: Colors.deepOrange),
         ),
       ),
-
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔥 HEADER
+            // ===== HEADER =====
             const Text(
               "Settings",
               style: TextStyle(
@@ -158,17 +191,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: Colors.deepOrange,
               ),
             ),
-
             const SizedBox(height: 6),
-
             const Text(
               "Manage your account preferences\nand security",
               style: TextStyle(color: Colors.blueGrey),
             ),
-
             const SizedBox(height: 20),
 
-            /// ================= NOTIFICATION =================
+            // ===== NOTIFICATIONS =====
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -192,21 +222,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
                   ...settings.asMap().entries.map((entry) {
                     return SettingsNotificationTile(
                       title: entry.value["title"],
-
                       subtitle: entry.value["subtitle"],
-
                       value: entry.value["value"],
-
                       onChanged: (val) {
-                        setState(() {
-                          settings[entry.key]["value"] = val;
-                        });
+                        setState(() => settings[entry.key]["value"] = val);
                       },
                     );
                   }).toList(),
@@ -216,43 +239,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 20),
 
-            /// ================= SECURITY =================
+            // ===== SECURITY =====
             SettingsSecuritySection(
               securityFields: securityFields,
               twoFactorEnabled: twoFactorEnabled,
               onTwoFactorChanged: (val) {
-                setState(() {
-                  twoFactorEnabled = val;
-                });
+                setState(() => twoFactorEnabled = val);
               },
-              onUpdatePassword: () {},
+              onUpdatePassword: handleUpdatePassword,
+              // ✅ ADD THESE THREE
+              currentPasswordController: _currentPasswordCtrl,
+              newPasswordController: _newPasswordCtrl,
+              confirmPasswordController: _confirmPasswordCtrl,
             ).animate().fade(duration: 400.ms).slideY(begin: 0.2),
 
             const SizedBox(height: 20),
+
+            // ===== PAYMENT =====
             SettingsPaymentSection(
               paymentData: paymentData,
-
               onAutoRenewChanged: (val) {
-                setState(() {
-                  paymentData["autoRenew"] = val;
-                });
+                setState(() => paymentData["autoRenew"] = val);
               },
-
               onManagePayment: () {},
-
               onViewPaymentDetails: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => PaymentHistoryScreen(
-                      payments: paymentHistoryList, // 👈 dynamic data
-                    ),
+                    builder: (_) =>
+                        PaymentHistoryScreen(payments: paymentHistoryList),
                   ),
                 );
               },
             ),
 
             const SizedBox(height: 20),
+
+            // ===== PRIVACY =====
             isPrivacyLoading
                 ? const Center(child: CircularProgressIndicator())
                 : SettingsPrivacySection(
@@ -301,7 +324,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                                 onPressed: () {
                                   Navigator.pop(context);
-
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text("Account deleted (mock)"),

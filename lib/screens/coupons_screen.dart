@@ -29,7 +29,7 @@ class _CouponsScreenState extends State<CouponsScreen> {
 
     if (token == null) return;
 
-    final res = await service.getCoupons(token);
+    final res = await service.validateCoupon(appliedCoupon, token);
 
     if (res["success"] == true) {
       final list = res["data"] as List;
