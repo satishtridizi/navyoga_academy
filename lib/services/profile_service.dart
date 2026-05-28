@@ -15,8 +15,8 @@ class ProfileService {
 
     required String address,
   }) async {
-    final response = await _api.putRequest(
-      url: "${ApiConstants.baseUrl}/api/profile",
+    final response = await _api.patchRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/me",
 
       token: token,
 
