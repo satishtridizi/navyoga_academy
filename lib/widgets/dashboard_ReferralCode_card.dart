@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ReferralCodeCard extends StatelessWidget {
-  const ReferralCodeCard({super.key});
+  final String referralCode;
+
+  const ReferralCodeCard({super.key, required this.referralCode});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,7 @@ class ReferralCodeCard extends StatelessWidget {
               /// SHARE ICON
               GestureDetector(
                 onTap: () {
-                  const referralCode = "NAVYOGA-SARAH-2026";
+                  final code = referralCode;
 
                   Share.share(
                     "Join NavYoga Academy using my referral code: $referralCode\n\nGet discounts on your subscription 🎉",
@@ -53,9 +55,9 @@ class ReferralCodeCard extends StatelessWidget {
               /// COPY BUTTON
               GestureDetector(
                 onTap: () {
-                  const code = "NAVYOGA20";
+                  final code = referralCode;
 
-                  Clipboard.setData(const ClipboardData(text: code));
+                  Clipboard.setData(ClipboardData(text: code));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Referral code copied 🎉")),
@@ -85,8 +87,8 @@ class ReferralCodeCard extends StatelessWidget {
           const SizedBox(height: 20),
 
           /// CODE
-          const Text(
-            "NAVYOGA20",
+          Text(
+            referralCode,
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,

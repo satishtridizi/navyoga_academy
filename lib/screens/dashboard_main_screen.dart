@@ -23,6 +23,11 @@ class DashboardMainScreen extends StatefulWidget {
 }
 
 class _DashboardMainScreenState extends State<DashboardMainScreen> {
+  List<dynamic> upcomingClasses = [];
+
+  Map<String, dynamic>? referralStats;
+
+  String referralCode = "";
   bool showAllUpcoming = false;
   bool showAllVideos = false;
   bool showAllReferral = false;
@@ -197,21 +202,17 @@ class _DashboardMainScreenState extends State<DashboardMainScreen> {
 
           Column(
             children: List.generate(
-              showAllUpcoming ? HomeData.classes.length : 2,
+              showAllUpcoming
+                  ? upcomingClasses.length
+                  : (upcomingClasses.length > 2 ? 2 : upcomingClasses.length),
               (index) {
-                final c = HomeData.classes[index];
+                final cls = upcomingClasses[index];
 
                 return ClassCard(
-                  c.title,
-                  "${c.trainer} • ${c.schedule}",
-                  c.duration,
-                  onJoin: () {
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.liveClass,
-                      arguments: c, // pass model if needed
-                    );
-                  },
+                  cls["name"] ?? "Class",
+                  cls["instructor"] ?? "Instructor",
+                  "${cls["duration"] ?? 0} mins",
+                  onJoin: () {},
                 );
               },
             ),
@@ -394,27 +395,37 @@ class _DashboardMainScreenState extends State<DashboardMainScreen> {
 
           const SizedBox(height: 10),
 
-          Column(
-            children: List.generate(
-              showAllReferral ? HomeData.referrals.length : 2,
-              (index) {
-                final r = HomeData.referrals[index];
+          if (referralStats != null)
+            Column(
+              children: [
+                ReferralCard(
+                  referralStats!["totalReferrals"].toString(),
+                  "Total Referrals",
+                  Colors.orange,
+                  "Active",
+                ),
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.referral);
-                    },
-                    child: ReferralCard(r.value, r.title, r.color, r.status),
-                  ),
-                );
-              },
+                ReferralCard(
+                  "₹${referralStats!["totalEarned"]}",
+                  "Total Earned",
+                  Colors.purple,
+                  "Earned",
+                ),
+
+                ReferralCard(
+                  referralStats!["unlockedBadges"].toString(),
+                  "Achievement Badges",
+                  Colors.green,
+                  "Unlocked",
+                ),
+              ],
             ),
-          ),
           const SizedBox(height: 20),
 
-          const ReferralCodeCard(),
+          ReferralCodeCard(referralCode: referralCode),
+
+          const SizedBox(height: 20),
+
           const ShareEarnCard(),
         ],
       ),

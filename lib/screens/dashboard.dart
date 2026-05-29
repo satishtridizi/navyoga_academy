@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/dashboard_data.dart';
-import 'package:navyoga_academy/models/recording_model.dart';
+//import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
-import 'package:navyoga_academy/screens/recording_player_screen.dart';
+//import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
-import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -22,8 +20,7 @@ import 'package:navyoga_academy/widgets/dashboard_achievement_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_class_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
-import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
 
@@ -44,7 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final dashboardService = DashboardService();
   final leadsService = LeadsService();
+  List<dynamic> upcomingClasses = [];
+  List<dynamic> achievements = [];
 
+  Map<String, dynamic>? referralStats;
+
+  String referralCode = "";
   DashboardModel? dashboard;
   int unreadCount = 0;
   @override
@@ -64,36 +66,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      final attendanceList = await attendanceService.getAttendance(token);
-      final recordingsList = await recordingService.getRecordings(token);
+      final res = await dashboardService.getDashboard(token);
 
-      int recordingsWatched = recordingsList.length;
+      if (res["success"] == true) {
+        final data = res["data"];
 
-      int total = attendanceList.length;
+        setState(() {
+          dashboard = DashboardModel.fromJson(data["metrics"] ?? {});
 
-      int present = attendanceList
-          .where((e) => e["status"] == "PRESENT")
-          .length;
+          upcomingClasses = data["upcomingClasses"] ?? [];
 
-      int attendanceRate = total == 0 ? 0 : ((present / total) * 100).toInt();
+          achievements = data["achievements"] ?? [];
 
-      setState(() {
-        dashboard = DashboardModel(
-          enrolledClasses: attendanceList.length,
-          practiceHours: 0,
-          recordingsWatched: recordingsWatched,
-          attendanceRate: attendanceRate,
-        );
-      });
+          referralStats = data["referralStats"];
+
+          referralCode = data["referralStats"]?["referralCode"] ?? "";
+        });
+        print("Referral Stats = $referralStats");
+        print("Referral Code = $referralCode");
+      }
     } catch (e) {
-      setState(() {
-        dashboard = DashboardModel(
-          enrolledClasses: 0,
-          practiceHours: 0,
-          recordingsWatched: 0,
-          attendanceRate: 0,
-        );
-      });
+      debugPrint("Dashboard Error: $e");
     }
   }
 
@@ -382,11 +375,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      "Live classes will be available soon",
-                      style: TextStyle(color: Colors.grey),
+                  Column(
+                    children: List.generate(
+                      showAllUpcoming
+                          ? upcomingClasses.length
+                          : (upcomingClasses.length > 2
+                                ? 2
+                                : upcomingClasses.length),
+                      (index) {
+                        final cls = upcomingClasses[index];
+
+                        return ClassCard(
+                          cls["name"] ?? "Class",
+                          cls["instructor"] ?? "Instructor",
+                          "${cls["duration"] ?? 0} mins",
+                          onJoin: () {},
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -405,49 +410,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  Column(
-                    children: List.generate(
-                      showAllVideos ? HomeData.videos.length : 2,
-                      (index) {
-                        final v = HomeData.videos[index];
-
-                        return AnimatedItem(
-                          index: index,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: VideoCard(
-                              v.title,
-                              "${v.trainer} • ${v.duration}",
-                              v.views,
-                              v.date,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => RecordingPlayerScreen(
-                                      recording: RecordingModel(
-                                        title: v.title,
-                                        trainer: "${v.trainer} • ${v.duration}"
-                                            .split(" • ")[0], // quick extract
-                                        category: "Yoga",
-                                        duration: "${v.trainer} • ${v.duration}"
-                                            .split(" • ")[1],
-                                        rating: "4.8",
-                                        views: v.views,
-                                        date: v.date,
-                                        color: Colors.purple,
-                                        isCompleted: false,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
                   const SizedBox(height: 30),
 
                   /// 🏆 ACHIEVEMENTS
@@ -458,64 +420,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  Column(
-                    children: [
-                      AnimatedItem(
-                        index: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.profile,
-                              arguments: "achievements", // 👈 IMPORTANT
-                            );
-                          },
-                          child: const AchievementCard(
-                            "30-Day Streak",
-                            "Attended classes for 30 consecutive days",
-                            Color.fromARGB(255, 245, 135, 102),
-                            true,
-                          ),
-                        ),
+                  if (achievements.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        "No achievements yet",
+                        style: TextStyle(color: Colors.grey),
                       ),
-                      AnimatedItem(
-                        index: 1,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.profile,
-                              arguments: "achievements",
-                            );
-                          },
-                          child: const AchievementCard(
-                            "Early Bird",
-                            "Attended 10 morning classes",
-                            Color.fromARGB(255, 48, 175, 52),
-                            true,
-                          ),
-                        ),
-                      ),
-                      AnimatedItem(
-                        index: 2,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRoutes.profile,
-                              arguments: "achievements",
-                            );
-                          },
-                          child: const AchievementCard(
-                            "Meditation Master",
-                            "Completed 20 sessions",
-                            Colors.grey,
-                            false,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    )
+                  else
+                    Column(
+                      children: achievements.map((achievement) {
+                        return AchievementCard(
+                          achievement["title"] ?? "",
+                          achievement["description"] ?? "",
+                          Colors.orange,
+                          true,
+                        );
+                      }).toList(),
+                    ),
 
                   const SizedBox(height: 30),
 
@@ -596,38 +519,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  Column(
-                    children: List.generate(
-                      showAllReferral ? HomeData.referrals.length : 2,
-                      (index) {
-                        final r = HomeData.referrals[index];
+                  if (referralStats != null)
+                    Column(
+                      children: [
+                        ReferralCard(
+                          referralStats!["totalReferrals"].toString(),
+                          "Total Referrals",
+                          Colors.orange,
+                          "Active",
+                        ),
 
-                        return AnimatedItem(
-                          index: index,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.referral,
-                                );
-                              },
-                              child: ReferralCard(
-                                r.value,
-                                r.title,
-                                r.color,
-                                r.status,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                        ReferralCard(
+                          "₹${referralStats!["totalEarned"]}",
+                          "Total Earned",
+                          Colors.purple,
+                          "Earned",
+                        ),
+
+                        ReferralCard(
+                          referralStats!["unlockedBadges"].toString(),
+                          "Achievement Badges",
+                          Colors.green,
+                          "Unlocked",
+                        ),
+                      ],
                     ),
-                  ),
-
                   const SizedBox(height: 20),
-                  const ReferralCodeCard(),
+                  ReferralCodeCard(referralCode: referralCode),
                   const ShareEarnCard(),
                 ],
               ),

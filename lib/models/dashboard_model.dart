@@ -11,12 +11,12 @@ class DashboardModel {
     required this.attendanceRate,
   });
 
-  factory DashboardModel.fromJson(Map<String, dynamic> json) {
+  factory DashboardModel.fromJson(Map<String, dynamic> metrics) {
     return DashboardModel(
-      enrolledClasses: json["cards"]?["students"]?["total"] ?? 0,
-      practiceHours: json["cards"]?["classes"]?["total"] ?? 0,
-      recordingsWatched: json["cards"]?["tutors"]?["total"] ?? 0,
-      attendanceRate: json["performance"]?["attendance"] ?? 0,
+      enrolledClasses: metrics["enrolledClasses"] ?? 0,
+      practiceHours: metrics["hoursCompleted"] ?? 0,
+      recordingsWatched: metrics["recordingsWatched"] ?? 0,
+      attendanceRate: metrics["attendanceRate"] ?? 0,
     );
   }
 }
