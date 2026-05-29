@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
+import 'package:navyoga_academy/screens/change_password_screen.dart';
 import 'package:navyoga_academy/screens/coupons_screen.dart';
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/leads_screen.dart';
@@ -43,6 +44,8 @@ class AppRoutes {
   static const notifications = "/notifications";
   static const coupons = "/coupons";
   static const liveClassesList = "/live-classes-list";
+  static const changePassword = "/change-password";
+
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
 
@@ -84,5 +87,7 @@ class AppRoutes {
     liveClassesList: (_) => const LiveClassesListScreen(),
 
     coupons: (_) => const CouponsScreen(),
+
+    changePassword: (_) => const ChangePasswordScreen(),
   };
 }

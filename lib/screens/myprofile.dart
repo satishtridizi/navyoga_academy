@@ -257,6 +257,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
+            ProfileSection(
+              title: "Security",
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pushNamed(context, AppRoutes.changePassword);
+                      },
+                      icon: const Icon(Icons.lock, color: Colors.white),
+                      label: const Text(
+                        "Change Password",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.purple,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             /// 🎯 HEALTH GOALS
             ProfileSection(
               title: "Health Goals",

@@ -50,4 +50,16 @@ class AuthService {
 
     return response;
   }
+
+  Future<dynamic> changePassword({
+    required String token,
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/change-password",
+      token: token,
+      body: {"currentPassword": currentPassword, "newPassword": newPassword},
+    );
+  }
 }
