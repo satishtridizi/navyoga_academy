@@ -10,7 +10,9 @@ class RecordingService {
       token: token,
     );
 
-    // 🔥 FIXED
+    print("RECORDINGS RESPONSE");
+    print(res);
+
     if (res["unauthorized"] == true) {
       throw Exception("UNAUTHORIZED");
     }

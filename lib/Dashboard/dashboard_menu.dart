@@ -9,6 +9,7 @@ import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 
 class DashboardButton extends StatelessWidget {
   const DashboardButton({super.key});
@@ -293,7 +294,11 @@ class CustomDrawer extends StatelessWidget {
             onTap: () async {
               Navigator.pop(context);
 
-              await AuthService().logout();
+              final token = await AuthManager.getToken();
+
+              if (token != null) {
+                await AuthService().logout(token);
+              }
 
               Navigator.pushAndRemoveUntil(
                 context,

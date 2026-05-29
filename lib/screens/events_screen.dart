@@ -39,7 +39,8 @@ class _EventsScreenState extends State<EventsScreen> {
     if (token == null) return;
     try {
       final list = await eventService.getEvents(token);
-
+      print("EVENT RESPONSE");
+      print(list);
       setState(() {
         events = list.map((e) => EventApiModel.fromJson(e)).toList();
         isLoading = false;
@@ -226,27 +227,27 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemBuilder: (context, index) {
                             return EventCard(
                               event: EventModel(
-                                description: "",
-                                location: "",
-                                price: "",
-                                seats: "",
-                                image: "",
-                                tags: [],
                                 title: events[index].title,
+                                description: events[index].description,
                                 date: events[index].date,
+                                location: events[index].location,
+                                price: "₹${events[index].price}",
+                                seats: events[index].capacity.toString(),
+                                image: events[index].thumbnail,
+                                tags: [],
                               ),
                               isCompact: true,
                               onTap: () => _openDetails(
                                 context,
                                 EventModel(
-                                  location: "",
-                                  price: "",
-                                  seats: "",
-                                  image: "",
-                                  tags: [],
-                                  description: "",
                                   title: events[index].title,
+                                  description: events[index].description,
                                   date: events[index].date,
+                                  location: events[index].location,
+                                  price: "₹${events[index].price}",
+                                  seats: events[index].capacity.toString(),
+                                  image: events[index].thumbnail,
+                                  tags: [],
                                 ),
                               ),
                             );

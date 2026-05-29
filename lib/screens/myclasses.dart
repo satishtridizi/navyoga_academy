@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/myclasses_available_classes.dart';
-import 'package:navyoga_academy/data/myclasses_enrolled_classes_data.dart';
+import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/services/ytt_live_service.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
+import 'package:navyoga_academy/widgets/live_enrollment_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
 import 'package:navyoga_academy/data/myclasses_stats_data.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class MyClassesScreen extends StatefulWidget {
   const MyClassesScreen({super.key});
@@ -17,9 +19,42 @@ class MyClassesScreen extends StatefulWidget {
 }
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
+  List<LiveEnrollmentModel> enrolledClasses = [];
+  bool loading = true;
   String selectedLevel = "All Levels";
   String selectedStatus = "All Status";
   String selectedSection = "enrolled";
+  @override
+  void initState() {
+    super.initState();
+    loadEnrollments();
+  }
+
+  Future<void> loadEnrollments() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final res = await YttLiveService().getMyEnrollments(token);
+
+    print("LIVE ENROLLMENTS");
+    print(res);
+
+    if (res["success"] == true) {
+      final List data = res["data"] ?? [];
+
+      setState(() {
+        enrolledClasses = data
+            .map((e) => LiveEnrollmentModel.fromJson(e))
+            .toList();
+        loading = false;
+      });
+    } else {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -35,12 +70,11 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   List getFilteredClasses() {
     return enrolledClasses.where((e) {
       /// STATUS FILTER
-      if (selectedStatus == "Completed" && e.progress != 1.0) {
+      if (selectedStatus == "Completed" && e.status != "COMPLETED") {
         return false;
       }
 
-      if (selectedStatus == "In Progress" &&
-          (e.progress == 0 || e.progress == 1.0)) {
+      if (selectedStatus == "In Progress" && e.status != "ACTIVE") {
         return false;
       }
 
@@ -51,11 +85,11 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
       /// SECTION FILTER
       if (selectedSection == "completed") {
-        return e.progress == 1.0;
+        return e.status == "COMPLETED";
       }
 
       if (selectedSection == "progress") {
-        return e.progress > 0 && e.progress < 1;
+        return e.status == "ACTIVE";
       }
 
       return true;
@@ -314,7 +348,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                   final filteredEnrolled = getFilteredClasses();
                   return Column(
                     children: filteredEnrolled
-                        .map((e) => CourseCard(data: e))
+                        .map((e) => LiveEnrollmentCard(enrollment: e))
                         .toList(),
                   );
                 },

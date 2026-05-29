@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class TermsScreen extends StatelessWidget {
@@ -174,6 +176,29 @@ class TermsScreen extends StatelessWidget {
             ).animate().fade(duration: 600.ms).slideY(begin: 0.15),
 
             const SizedBox(height: 30),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final token = await AuthManager.getToken();
+
+                  if (token == null) return;
+
+                  final res = await AuthService().acceptTerms(token: token);
+
+                  print("TERMS RESPONSE");
+                  print(res);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Terms Accepted")),
+                  );
+                },
+                child: const Text("Accept Terms"),
+              ),
+            ),
+
+            const SizedBox(height: 20),
 
             /// FOOTER
             Center(

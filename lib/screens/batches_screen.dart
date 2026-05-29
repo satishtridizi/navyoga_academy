@@ -29,11 +29,8 @@ class _BatchesScreenState extends State<BatchesScreen> {
 
     final res = await service.getBatches(token);
 
-    print("BATCH RESPONSE");
-    print(res);
-
     if (res["success"] == true) {
-      final List data = res["data"] ?? [];
+      final List data = res["data"]["items"] ?? [];
 
       setState(() {
         batches = data.map((e) => BatchModel.fromJson(e)).toList();
@@ -62,8 +59,11 @@ class _BatchesScreenState extends State<BatchesScreen> {
                 return Card(
                   margin: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: Text(batch.name),
-                    subtitle: Text(batch.id),
+                    title: Text(
+                      batch.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   ),
                 );
               },

@@ -35,8 +35,16 @@ class AuthService {
     return response;
   }
 
-  Future<void> logout() async {
+  Future<dynamic> logout(String token) async {
+    final response = await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/logout",
+      token: token,
+      body: {},
+    );
+
     await AuthManager.clearToken();
+
+    return response;
   }
 
   Future<dynamic> studentRegister({
@@ -60,6 +68,14 @@ class AuthService {
       url: "${ApiConstants.baseUrl}/api/auth/student/change-password",
       token: token,
       body: {"currentPassword": currentPassword, "newPassword": newPassword},
+    );
+  }
+
+  Future<dynamic> acceptTerms({required String token}) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/accept-terms",
+      token: token,
+      body: {},
     );
   }
 }

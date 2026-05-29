@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:navyoga_academy/screens/batches_screen.dart';
+import 'package:navyoga_academy/screens/workshops_screen.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/data/dashboard_data.dart';
-//import 'package:navyoga_academy/models/recording_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
-//import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
+import 'package:navyoga_academy/services/workshop_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -55,6 +55,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     loadStudentDashboard();
     loadUnreadCount();
+    testWorkshops();
+  }
+
+  Future<void> testWorkshops() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final res = await WorkshopService().getWorkshops(token);
+
+    print("WORKSHOP RESPONSE");
+    print(res);
   }
 
   Future<void> loadStudentDashboard() async {
@@ -452,7 +464,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           "Explore available courses",
                           Colors.deepOrange,
                           onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.myClasses);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const WorkshopsScreen(),
+                              ),
+                            );
                           },
                         ),
                       ),

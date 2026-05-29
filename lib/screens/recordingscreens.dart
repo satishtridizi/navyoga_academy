@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
-import 'package:navyoga_academy/routes/app_routes.dart';
-import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/recording_card.dart';
 import '../data/recordings_data.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class RecordingsDashboard extends StatefulWidget {
   const RecordingsDashboard({super.key});
@@ -28,13 +23,13 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     loadRecordings();
   }
 
   Future<void> loadRecordings() async {
     final token = await AuthManager.getToken();
+
     if (token == null) {
       Navigator.pushReplacementNamed(context, "/login");
       return;
@@ -42,9 +37,13 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
 
     final list = await recordingService.getRecordings(token);
 
+    print("TOTAL RECORDINGS = ${list.length}");
+
     setState(() {
       recordings = list.map((e) => RecordingApiModel.fromJson(e)).toList();
     });
+
+    print("PARSED RECORDINGS = ${recordings.length}");
   }
 
   @override
@@ -338,17 +337,10 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                     ),
                   ],
 
-                  child: RecordingCard(
-                    recording: RecordingModel(
-                      title: recording.title,
-                      trainer: recording.trainer,
-                      category: recording.category,
-                      duration: recording.duration,
-                      rating: recording.rating,
-                      views: recording.views,
-                      date: recording.date,
-                      color: Colors.deepPurple,
-                      isCompleted: false,
+                  child: Card(
+                    child: ListTile(
+                      title: Text(recording.title),
+                      subtitle: Text(recording.yogaType),
                     ),
                   ),
                 );
