@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
+import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
@@ -88,7 +89,12 @@ class EventCard extends StatelessWidget {
                     spacing: 16,
                     runSpacing: 6,
                     children: [
-                      _info(Icons.calendar_today, event.date),
+                      _info(
+                        Icons.calendar_today,
+                        DateFormat(
+                          'dd MMM yyyy',
+                        ).format(DateTime.parse(event.date)),
+                      ),
                       _info(Icons.location_on, event.location),
                     ],
                   ),

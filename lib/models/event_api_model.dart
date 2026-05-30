@@ -33,7 +33,7 @@ class EventApiModel {
       duration: json["duration"] ?? "",
       location: json["location"] ?? "",
       capacity: json["capacity"] ?? 0,
-      price: (json["price"] ?? 0).toDouble(),
+      price: double.tryParse(json["price"]?.toString() ?? "0") ?? 0,
       isEnrolled: json["isEnrolled"] ?? false,
     );
   }

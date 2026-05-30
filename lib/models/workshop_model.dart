@@ -33,7 +33,7 @@ class WorkshopModel {
       level: json["level"] ?? "",
       mode: json["mode"] ?? "",
       instructorName: json["instructorName"] ?? "",
-      price: (json["price"] ?? 0).toDouble(),
+      price: double.tryParse(json["price"].toString()) ?? 0,
       isEnrolled: json["isEnrolled"] ?? false,
     );
   }

@@ -58,7 +58,7 @@ class WorkshopService {
   /// ENROLL IN WORKSHOP
   Future<dynamic> enrollWorkshop(String id, String token) async {
     return await _api.postRequest(
-      url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/$id/enroll",
+      url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/$id/enrollment",
       body: {},
       token: token,
     );

@@ -38,6 +38,8 @@ class AppData {
   /// FEATURED EVENTS
   static const List<EventModel> featuredEvents = [
     EventModel(
+      id: "1",
+      isEnrolled: false,
       title: "Advanced Meditation Retreat",
       description: "A 3-day immersive meditation retreat",
       date: "15 Apr 2026",
@@ -49,6 +51,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "2",
+      isEnrolled: false,
       title: "Pranayama Breathing Workshop",
       description: "Master the art of breath control",
       date: "8 Apr 2026",
@@ -60,6 +64,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "3",
+      isEnrolled: false,
       title: "Ayurveda & Yoga Wellness Retreat",
       description: "Combine Ayurveda with yoga",
       date: "20 Apr 2026",
@@ -71,6 +77,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "4",
+      isEnrolled: false,
       title: "International Yoga Day Celebration",
       description: "Special yoga celebration",
       date: "21 Jun 2026",
@@ -85,6 +93,8 @@ class AppData {
   /// ALL EVENTS
   static const List<EventModel> allEvents = [
     EventModel(
+      id: "1",
+      isEnrolled: false,
       title: "Advanced Meditation Retreat",
       description: "A 3-day immersive meditation retreat",
       date: "15 Apr",
@@ -96,6 +106,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "2",
+      isEnrolled: false,
       title: "Pranayama Breathing Workshop",
       description: "Master breath control",
       date: "8 Apr",
@@ -107,6 +119,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "3",
+      isEnrolled: false,
       title: "Yoga for Athletes Masterclass",
       description: "Yoga for athletes",
       date: "12 Apr",
@@ -118,6 +132,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "4",
+      isEnrolled: false,
       title: "Ayurveda & Yoga Wellness Retreat",
       description: "Ayurveda + Yoga",
       date: "20 Apr",
@@ -129,6 +145,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "5",
+      isEnrolled: false,
       title: "Chakra Balancing Webinar",
       description: "Chakra learning",
       date: "5 Apr",
@@ -140,6 +158,8 @@ class AppData {
     ),
 
     EventModel(
+      id: "6",
+      isEnrolled: false,
       title: "International Yoga Day Celebration",
       description: "Yoga event",
       date: "21 Jun",

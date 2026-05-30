@@ -8,6 +8,7 @@ import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
+import 'package:navyoga_academy/screens/workshops_screen.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 
@@ -131,6 +132,7 @@ class CustomDrawer extends StatelessWidget {
       {"icon": Icons.videocam, "title": "Recordings"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
       {"icon": Icons.event, "title": "Events"},
+      {"icon": Icons.school, "title": "Workshops"},
       {"icon": Icons.live_tv, "title": "Live Classes"},
       {"icon": Icons.card_giftcard, "title": "Referrals"},
       {"icon": Icons.person_outline, "title": "Profile"},
@@ -252,6 +254,13 @@ class CustomDrawer extends StatelessWidget {
                         );
                       } else if (item["title"] == "Events") {
                         Navigator.pushNamed(context, AppRoutes.events);
+                      } else if (item["title"] == "Workshops") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const WorkshopsScreen(),
+                          ),
+                        );
                       } else if (item["title"] == "Live Classes") {
                         Navigator.pushNamed(context, AppRoutes.liveClassesList);
                       } else if (item["title"] == "Profile") {

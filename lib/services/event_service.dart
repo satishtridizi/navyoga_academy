@@ -10,13 +10,18 @@ class EventService {
       token: token,
     );
 
-    print("EVENT RESPONSE");
-    print(response);
-
     if (response["success"] == true) {
       return response["data"]["items"] ?? [];
     }
 
     return [];
+  }
+
+  Future<dynamic> enrollEvent(String eventId, String token) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/events/$eventId/enrollment",
+      body: {},
+      token: token,
+    );
   }
 }

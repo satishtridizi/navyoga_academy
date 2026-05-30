@@ -3,11 +3,69 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import '../models/event_model.dart';
+import '../services/event_service.dart';
+import '../utils/auth_manager.dart';
 
-class EventDetailsScreen extends StatelessWidget {
+class EventDetailsScreen extends StatefulWidget {
   final EventModel event;
 
   const EventDetailsScreen({super.key, required this.event});
+
+  @override
+  State<EventDetailsScreen> createState() => _EventDetailsScreenState();
+}
+
+class _EventDetailsScreenState extends State<EventDetailsScreen> {
+  final EventService _eventService = EventService();
+
+  bool isEnrolled = false;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isEnrolled = widget.event.isEnrolled;
+  }
+
+  Future<void> _enrollEvent() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+      final res = await _eventService.enrollEvent(widget.event.id, token);
+
+      if (res["success"] == true) {
+        setState(() {
+          isEnrolled = true;
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Enrolled successfully")));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res["message"] ?? "Enrollment failed")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +90,7 @@ class EventDetailsScreen extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     CachedNetworkImage(
-                      imageUrl: event.image,
+                      imageUrl: widget.event.image,
                       fit: BoxFit.cover,
 
                       placeholder: (context, url) => Container(
@@ -71,7 +129,7 @@ class EventDetailsScreen extends StatelessWidget {
                         index: 0,
 
                         child: Text(
-                          event.title,
+                          widget.event.title,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 30,
@@ -103,7 +161,7 @@ class EventDetailsScreen extends StatelessWidget {
                         spacing: 10,
                         runSpacing: 10,
 
-                        children: event.tags.map((tag) {
+                        children: widget.event.tags.map((tag) {
                           return _tag(tag);
                         }).toList(),
                       ),
@@ -147,7 +205,7 @@ class EventDetailsScreen extends StatelessWidget {
                             const SizedBox(height: 14),
 
                             Text(
-                              event.description,
+                              widget.event.description,
                               style: const TextStyle(
                                 color: Colors.blueGrey,
                                 height: 1.6,
@@ -188,7 +246,7 @@ class EventDetailsScreen extends StatelessWidget {
                             _detailRow(
                               Icons.calendar_today,
                               "Date",
-                              event.date,
+                              widget.event.date,
                             ),
 
                             const SizedBox(height: 18),
@@ -196,19 +254,23 @@ class EventDetailsScreen extends StatelessWidget {
                             _detailRow(
                               Icons.location_on,
                               "Location",
-                              event.location,
+                              widget.event.location,
                             ),
 
                             const SizedBox(height: 18),
 
-                            _detailRow(Icons.payments, "Price", event.price),
+                            _detailRow(
+                              Icons.payments,
+                              "Price",
+                              widget.event.price,
+                            ),
 
                             const SizedBox(height: 18),
 
                             _detailRow(
                               Icons.people,
                               "Seats Registered",
-                              "${event.seats}",
+                              "${widget.event.seats}",
                             ),
                           ],
                         ),
@@ -223,38 +285,37 @@ class EventDetailsScreen extends StatelessWidget {
 
                       child: SizedBox(
                         width: double.infinity,
-
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Successfully registered for ${event.title} 🎉",
+                        child: isEnrolled
+                            ? ElevatedButton(
+                                onPressed: null,
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                ),
+                                child: const Text("Already Enrolled"),
+                              )
+                            : ElevatedButton(
+                                onPressed: isLoading ? null : _enrollEvent,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepOrange,
+                                  elevation: 6,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "Register Now",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            );
-                          },
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepOrange,
-                            elevation: 6,
-
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(22),
-                            ),
-                          ),
-
-                          child: const Text(
-                            "Register Now",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
                       ),
                     ),
 

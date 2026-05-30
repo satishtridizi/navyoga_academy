@@ -36,13 +36,19 @@ class _EventsScreenState extends State<EventsScreen> {
   Future<void> loadEvents() async {
     final token = await AuthManager.getToken();
 
-    if (token == null) return;
+    if (token == null) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
     try {
       final list = await eventService.getEvents(token);
-      print("EVENT RESPONSE");
-      print(list);
+
+      final mapped = list.map((e) => EventApiModel.fromJson(e)).toList();
+
       setState(() {
-        events = list.map((e) => EventApiModel.fromJson(e)).toList();
+        events = mapped;
         isLoading = false;
       });
     } catch (e) {
@@ -227,6 +233,8 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemBuilder: (context, index) {
                             return EventCard(
                               event: EventModel(
+                                isEnrolled: events[index].isEnrolled,
+                                id: events[index].id,
                                 title: events[index].title,
                                 description: events[index].description,
                                 date: events[index].date,
@@ -240,6 +248,8 @@ class _EventsScreenState extends State<EventsScreen> {
                               onTap: () => _openDetails(
                                 context,
                                 EventModel(
+                                  isEnrolled: events[index].isEnrolled,
+                                  id: events[index].id,
                                   title: events[index].title,
                                   description: events[index].description,
                                   date: events[index].date,
