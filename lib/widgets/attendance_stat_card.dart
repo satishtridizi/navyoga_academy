@@ -46,7 +46,7 @@ class StatCard extends StatelessWidget {
               data.title,
               style: GoogleFonts.heebo(
                 fontWeight: FontWeight.w500,
-                fontSize: 17,
+                fontSize: 15,
                 color: Color.fromARGB(255, 87, 87, 87),
               ),
             ),
@@ -58,11 +58,16 @@ class StatCard extends StatelessWidget {
               children: [
                 _iconBox(),
 
-                Text(
-                  data.value,
-                  style: const TextStyle(
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      data.value,
+                      style: const TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -75,9 +80,9 @@ class StatCard extends StatelessWidget {
 
   Widget _iconBox() {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: data.color.withOpacity(.15),
+        color: data.color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Icon(data.icon, color: data.color),

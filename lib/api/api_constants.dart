@@ -1,7 +1,8 @@
 // lib/api/api_constants.dart
 
 class ApiConstants {
-  static const baseUrl = "http://10.0.2.2:5001";
+  static const String baseUrl =
+      "https://nv-ef0f7d558f594bc189c052805c7fbed8.ecs.ap-south-1.on.aws";
 
   // existing
   static const String leads = "/leads";

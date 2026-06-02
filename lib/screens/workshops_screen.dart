@@ -136,8 +136,18 @@ class _WorkshopsScreenState extends State<WorkshopsScreen> {
                                 Wrap(
                                   spacing: 8,
                                   children: [
-                                    Chip(label: Text(workshop.yogaType)),
-                                    Chip(label: Text(workshop.level)),
+                                    Chip(
+                                      avatar: const Icon(
+                                        Icons.self_improvement,
+                                        size: 16,
+                                      ),
+                                      label: Text(workshop.yogaType),
+                                    ),
+
+                                    Chip(
+                                      avatar: const Icon(Icons.star, size: 16),
+                                      label: Text(workshop.level),
+                                    ),
                                   ],
                                 ),
 
@@ -160,9 +170,17 @@ class _WorkshopsScreenState extends State<WorkshopsScreen> {
                                 ),
 
                                 if (workshop.isEnrolled)
-                                  const Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Text(
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade100,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
                                       "✓ Enrolled",
                                       style: TextStyle(
                                         color: Colors.green,

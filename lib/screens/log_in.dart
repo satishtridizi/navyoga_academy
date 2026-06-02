@@ -114,17 +114,10 @@ class _LoginScreen extends State<LoginScreen> {
               child: Column(
                 children: [
                   /// 🔶 LOGO
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF6A1A),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.auto_awesome_outlined,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                  Image.asset(
+                    "assets/logo/logo_transparent_clean.png",
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
 
                   const SizedBox(height: 16),

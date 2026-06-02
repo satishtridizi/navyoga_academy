@@ -273,7 +273,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 1.25,
+        childAspectRatio: 0.98,
       ),
 
       itemBuilder: (_, i) =>
