@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "651087361715",
+    "project_id": "navyoga-63bc5",
+    "storage_bucket": "navyoga-63bc5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651087361715:android:154586909f80271d1562c6",
+        "android_client_info": {
+          "package_name": "com.example.navyoga_academy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "651087361715-c4lv3edrc6fmf7p3jjffmj68adm53nva.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.navyoga_academy",
+            "certificate_hash": "e48a08324a14f7224a0d2ae02a5203046e857e52"
+          }
+        },
+        {
+          "client_id": "651087361715-tm4vt2ftneutaav3es70tj2spm1097k0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_opoKH1MGwjd1KO0ivRU3-_eWHamvcg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "651087361715-tm4vt2ftneutaav3es70tj2spm1097k0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -13,6 +13,8 @@ class ApiService {
     String? token,
   }) async {
     try {
+      print("POST URL = $url");
+      print("POST BODY = $body");
       final response = await http
           .post(
             Uri.parse(url),
@@ -52,7 +54,10 @@ class ApiService {
       };
     }
     // NETWORK / TIMEOUT / OTHER ERRORS
-    on Exception catch (e) {
+    on Exception catch (e, stackTrace) {
+      print("POST ERROR = $e");
+      print(stackTrace);
+
       return {"success": false, "message": e.toString()};
     }
   }
