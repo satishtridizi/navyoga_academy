@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
+import 'package:navyoga_academy/screens/dashboard.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
@@ -8,6 +10,7 @@ import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
+import 'package:navyoga_academy/services/google_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +20,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreen extends State<LoginScreen> {
+  final GoogleAuthService googleAuthService = GoogleAuthService();
   final AuthService authService = AuthService();
   bool rememberMe = false;
   bool obscurePassword = true;
@@ -56,21 +60,41 @@ class _LoginScreen extends State<LoginScreen> {
       return;
     }
 
-    _showLoader();
-
     try {
-      await Future.delayed(const Duration(seconds: 2)); // replace with API
-      Navigator.pop(context);
-      _showSnack("Reset link sent to $email");
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      _showSnack("Password reset email sent");
     } catch (e) {
-      Navigator.pop(context);
-      _showSnack("Something went wrong");
+      _showSnack("Error: $e");
     }
   }
 
-  void _handleGoogleLogin() {
-    _showSnack("Google login coming soon");
-    // Future: FirebaseAuth.instance.signInWithGoogle()
+  Future<void> _handleGoogleLogin() async {
+    try {
+      print("STEP 1");
+
+      final result = await googleAuthService.signInWithGoogle();
+
+      print("STEP 2");
+      print(result);
+      print("mounted = $mounted");
+      if (result != null) {
+        print("STEP 3");
+
+        await AuthManager.saveToken("test_token");
+
+        print("TOKEN SAVED");
+
+        Future.delayed(const Duration(milliseconds: 300), () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+          );
+        });
+      }
+    } catch (e) {
+      print("GOOGLE ERROR = $e");
+    }
   }
 
   void _handleFacebookLogin() {
