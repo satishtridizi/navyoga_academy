@@ -28,7 +28,10 @@ class DashboardButton extends StatelessWidget {
           shape: BoxShape.circle,
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 12),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 12,
+            ),
           ],
         ),
         child: Column(
@@ -51,12 +54,12 @@ class CustomBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 70,
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 12),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 12),
         ],
       ),
 
@@ -121,12 +124,13 @@ class BottomItem extends StatelessWidget {
 }
 
 class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({super.key});
+  final String currentPage;
 
+  const CustomDrawer({super.key, required this.currentPage});
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> menuItems = [
-      {"icon": Icons.dashboard, "title": "Dashboard", "active": true},
+      {"icon": Icons.dashboard, "title": "Dashboard"},
       {"icon": Icons.menu_book, "title": "My Classes"},
       {"icon": Icons.school, "title": "Self-Paced"},
       {"icon": Icons.videocam, "title": "Recordings"},
@@ -149,12 +153,18 @@ class CustomDrawer extends StatelessWidget {
           /// 🔝 HEADER
           ListTile(
             leading: Container(
-              padding: const EdgeInsets.all(12),
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.auto_awesome, color: Colors.white),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/logo/logo_transparent_clean.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             title: const Text(
               "NavYoga",
@@ -190,7 +200,7 @@ class CustomDrawer extends StatelessWidget {
               itemCount: menuItems.length,
               itemBuilder: (context, index) {
                 final item = menuItems[index];
-                final bool isActive = item["active"] == true;
+                final bool isActive = item["title"] == currentPage;
 
                 return Container(
                   margin: const EdgeInsets.symmetric(
@@ -206,6 +216,8 @@ class CustomDrawer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: ListTile(
+                    dense: true,
+                    visualDensity: const VisualDensity(vertical: -2),
                     leading: Icon(
                       item["icon"],
                       color: isActive ? Colors.white : Colors.blueGrey,

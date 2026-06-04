@@ -37,9 +37,11 @@ class _LoginScreen extends State<LoginScreen> {
 
   Future<void> _loadRememberMe() async {
     final prefs = await SharedPreferences.getInstance();
+
     setState(() {
       rememberMe = prefs.getBool('remember_me') ?? false;
       emailController.text = prefs.getString('saved_email') ?? '';
+      passwordController.text = prefs.getString('saved_password') ?? '';
     });
   }
 
@@ -144,23 +146,11 @@ class _LoginScreen extends State<LoginScreen> {
                     fit: BoxFit.contain,
                   ),
 
-                  const SizedBox(height: 16),
-
-                  /// TITLE
-                  const Text(
-                    "NavYoga Academy",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 72, 0, 113),
-                    ),
-                  ),
-
                   const SizedBox(height: 6),
 
                   const Text(
                     "Welcome back",
-                    style: TextStyle(color: Color.fromARGB(255, 69, 69, 69)),
+                    style: TextStyle(color: Color.fromARGB(255, 16, 16, 16)),
                   ),
 
                   const SizedBox(height: 24),
@@ -289,8 +279,13 @@ class _LoginScreen extends State<LoginScreen> {
                                       await SharedPreferences.getInstance();
                                   if (rememberMe) {
                                     await prefs.setString('saved_email', email);
+                                    await prefs.setString(
+                                      'saved_password',
+                                      password,
+                                    );
                                   } else {
                                     await prefs.remove('saved_email');
+                                    await prefs.remove('saved_password');
                                   }
 
                                   Navigator.pushNamedAndRemoveUntil(

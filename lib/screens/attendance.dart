@@ -82,7 +82,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 3,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Attendance"),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,

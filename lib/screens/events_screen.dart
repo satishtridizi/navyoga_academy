@@ -79,7 +79,7 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 2,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Events"),
 
       // backgroundColor: Colors.transparent,
       appBar: AppBar(

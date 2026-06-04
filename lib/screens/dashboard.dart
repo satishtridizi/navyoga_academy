@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 2,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Dashboard"),
 
       //  backgroundColor: Color(0xffF7F7F7),
       appBar: AppBar(
@@ -259,7 +259,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () {
                                 const offerText = "NAVYOGA20";
 
-                                // copy
                                 Clipboard.setData(
                                   const ClipboardData(text: offerText),
                                 );
@@ -271,9 +270,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 );
-
-                                // 🔥 ADD THIS NAVIGATION
-                                Navigator.pushNamed(context, AppRoutes.coupons);
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -380,9 +376,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     "Upcoming Classes",
                     onViewAllTap: () {
                       setState(() {
-                        showAllUpcoming = !showAllUpcoming; // 👈 TOGGLE
+                        showAllUpcoming = !showAllUpcoming;
                       });
                     },
+                    viewAllText: showAllUpcoming ? "Show Less ↑" : "View All →",
                   ),
 
                   const SizedBox(height: 10),
@@ -401,7 +398,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           cls["name"] ?? "Class",
                           cls["instructor"] ?? "Instructor",
                           "${cls["duration"] ?? 0} mins",
-                          onJoin: () {},
+                          onJoin: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.liveClassesList,
+                            );
+                          },
                         );
                       },
                     ),

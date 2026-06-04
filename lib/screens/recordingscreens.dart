@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
+import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/recording_card.dart';
@@ -52,7 +53,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
 
     return AppScaffold(
       currentIndex: 1,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Recordings"),
 
       //backgroundColor: const Color(0xfff5f5f5),
       appBar: AppBar(
@@ -336,11 +337,20 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                       duration: Duration(milliseconds: 500),
                     ),
                   ],
-
                   child: Card(
                     child: ListTile(
                       title: Text(recording.title),
                       subtitle: Text(recording.yogaType),
+
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                RecordingPlayerScreen(recording: recording),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );

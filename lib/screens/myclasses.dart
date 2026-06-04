@@ -100,9 +100,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 0,
-
-      drawer: const CustomDrawer(),
-
+      drawer: const CustomDrawer(currentPage: "My Classes"),
       //backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.grey[200],

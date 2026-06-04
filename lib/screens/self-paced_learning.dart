@@ -308,8 +308,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     return AppScaffold(
       currentIndex: 2,
 
-      drawer: const CustomDrawer(),
-
+      drawer: const CustomDrawer(currentPage: "Self-Paced"),
       // backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.white,

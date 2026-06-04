@@ -48,7 +48,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     return AppScaffold(
       currentIndex: 4,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Payments"),
 
       /// 🔥 APP BAR
       appBar: AppBar(
@@ -104,14 +104,14 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
             ElevatedButton(
               onPressed: () async {
-                final result = await Navigator.pushNamed(
-                  context,
-                  AppRoutes.coupons,
-                );
+                // final result = await Navigator.pushNamed(
+                //   context,
+                //   AppRoutes.coupons,
+                // );
 
-                if (result != null) {
-                  applyCoupon(result as Map);
-                }
+                // if (result != null) {
+                //   applyCoupon(result as Map);
+                // }
               },
               child: const Text("Apply Coupon"),
             ),
@@ -170,8 +170,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             //     ),
             //   );
             // }),
-            const SizedBox(height: 25),
-
             const SizedBox(height: 20),
 
             Column(

@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 4,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Settings"),
       appBar: AppBar(
         leadingWidth: 72,
         backgroundColor: Colors.grey[200],

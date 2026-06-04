@@ -79,7 +79,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 2,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Referrals"),
 
       // backgroundColor: Colors.transparent,
       appBar: AppBar(

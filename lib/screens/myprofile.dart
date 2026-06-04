@@ -132,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 4,
-      drawer: const CustomDrawer(),
+      drawer: const CustomDrawer(currentPage: "Profile"),
 
       //backgroundColor: Colors.transparent,
       appBar: AppBar(
