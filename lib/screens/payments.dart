@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/payment_data.dart';
+import 'package:navyoga_academy/models/currentSubscription.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
@@ -36,6 +37,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   }
 
   List<PaymentHistory> payments = [];
+  CurrentSubscription? currentPlan;
 
   @override
   void initState() {
@@ -47,7 +49,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     //final plans = service.getPlans();
 
     return AppScaffold(
-      currentIndex: 4,
+      currentIndex: null,
       drawer: const CustomDrawer(currentPage: "Payments"),
 
       /// 🔥 APP BAR

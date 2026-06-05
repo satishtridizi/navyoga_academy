@@ -29,8 +29,8 @@ class InsightCard extends StatelessWidget {
 
   Widget _simpleInsightCard() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
 
       decoration: BoxDecoration(
         color: const Color(0xffFCFBFA),
@@ -55,14 +55,14 @@ class InsightCard extends StatelessWidget {
               Text(
                 data.title,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Color(0xff64748B),
                   fontWeight: FontWeight.w500,
                 ),
               ),
 
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: data.color.withOpacity(.18),
                   borderRadius: BorderRadius.circular(16),
@@ -74,12 +74,12 @@ class InsightCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Icon(data.icon, color: data.color, size: 20),
+                child: Icon(data.icon, color: data.color, size: 14),
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 8),
 
           /// 🔻 SUBTITLE + VALUE
           Row(
@@ -99,7 +99,7 @@ class InsightCard extends StatelessWidget {
                     data.subtitle,
                     style: const TextStyle(
                       color: Color(0xff64748B),
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -109,7 +109,7 @@ class InsightCard extends StatelessWidget {
               Text(
                 data.value + (data.unit.isNotEmpty ? " ${data.unit}" : ""),
                 style: const TextStyle(
-                  fontSize: 28,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Color(0xff1E1B39),
                 ),
@@ -128,7 +128,7 @@ class InsightCard extends StatelessWidget {
   Widget _streakCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(12),
 
       decoration: BoxDecoration(
         color: Colors.orange[50],
@@ -151,7 +151,7 @@ class InsightCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -168,7 +168,7 @@ class InsightCard extends StatelessWidget {
                 child: Icon(
                   Icons.local_fire_department,
                   color: Colors.white,
-                  size: 48,
+                  size: 32,
                 ),
               ),
 
@@ -180,6 +180,8 @@ class InsightCard extends StatelessWidget {
                   children: [
                     Text(
                       "Practice Streak",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -198,7 +200,7 @@ class InsightCard extends StatelessWidget {
                   Text(
                     data.value,
                     style: TextStyle(
-                      fontSize: 42,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.orange,
                     ),
@@ -209,10 +211,10 @@ class InsightCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 22),
+          SizedBox(height: 10),
 
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.orange.shade200),
               borderRadius: BorderRadius.circular(16),
@@ -244,7 +246,7 @@ class InsightCard extends StatelessWidget {
   Widget _goalProgressCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(12),
 
       decoration: BoxDecoration(
         color: Colors.green[50],
@@ -264,9 +266,9 @@ class InsightCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 40,
+                radius: 22,
                 backgroundColor: Colors.green,
-                child: Icon(Icons.gps_fixed, color: Colors.white, size: 40),
+                child: Icon(Icons.gps_fixed, color: Colors.white, size: 26),
               ),
 
               SizedBox(width: 20),
@@ -275,17 +277,20 @@ class InsightCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       "Monthly Goal Progress",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    SizedBox(height: 12),
-
-                    Text(data.subtitle),
+                    const SizedBox(height: 4),
+                    Text(
+                      data.subtitle,
+                      style: const TextStyle(fontSize: 12, height: 1.3),
+                    ),
                   ],
                 ),
               ),
@@ -293,7 +298,7 @@ class InsightCard extends StatelessWidget {
               Text(
                 data.value,
                 style: TextStyle(
-                  fontSize: 40,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.green,
                 ),
@@ -301,11 +306,11 @@ class InsightCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 30),
+          SizedBox(height: 12),
 
           LinearProgressIndicator(
             value: .85,
-            minHeight: 14,
+            minHeight: 8,
             backgroundColor: Colors.grey.shade300,
             valueColor: AlwaysStoppedAnimation(Colors.green),
           ),
@@ -343,7 +348,7 @@ class InsightCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            radius: 38,
+            radius: 28,
             backgroundColor: Colors.teal.withOpacity(.12),
             child: Icon(Icons.workspace_premium, color: Colors.teal, size: 42),
           ),
@@ -354,20 +359,25 @@ class InsightCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   "Excellent Attendance!",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
 
-                SizedBox(height: 14),
+                const SizedBox(height: 6),
 
-                Text(data.subtitle, style: TextStyle(height: 1.5)),
+                Text(
+                  data.subtitle,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, height: 1.3),
+                ),
               ],
             ),
           ),
 
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.teal.withOpacity(.12),
               borderRadius: BorderRadius.circular(18),
@@ -382,7 +392,7 @@ class InsightCard extends StatelessWidget {
             child: Text(
               data.value,
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.teal,
               ),

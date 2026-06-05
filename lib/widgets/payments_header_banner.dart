@@ -5,9 +5,9 @@ Widget HeaderBanner() {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: const [
       Text(
-        "Payments &\nSubscription",
+        "Payments & Subscription",
         style: TextStyle(
-          fontSize: 28,
+          fontSize: 25,
           fontWeight: FontWeight.bold,
           color: Colors.deepOrange,
         ),

@@ -324,9 +324,9 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                   child: const Icon(Icons.auto_awesome, color: Colors.white),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  "Enrolled Classes (8)",
-                  style: TextStyle(
+                Text(
+                  "Enrolled Classes (${enrolledClasses.length})",
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.deepOrange,
@@ -344,6 +344,17 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
               Builder(
                 builder: (context) {
                   final filteredEnrolled = getFilteredClasses();
+
+                  if (filteredEnrolled.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        "No enrolled classes found",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    );
+                  }
+
                   return Column(
                     children: filteredEnrolled
                         .map((e) => LiveEnrollmentCard(enrollment: e))

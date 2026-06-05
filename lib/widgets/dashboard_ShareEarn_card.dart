@@ -48,7 +48,7 @@ class ShareEarnCard extends StatelessWidget {
 
           /// TITLE
           const Text(
-            "Share & Earn\nRewards!",
+            "Share & Earn Rewards!",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,

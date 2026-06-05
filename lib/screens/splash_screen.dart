@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkLogin() async {
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
 
     final token = await AuthManager.getToken();
 
@@ -47,24 +47,15 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
-            const Icon(
-              Icons.self_improvement,
-
-              size: 90,
-
-              color: Colors.deepOrange,
-            ),
+            Image.asset("assets/images/logo.png", height: 120, width: 120),
 
             const SizedBox(height: 20),
 
             const Text(
               "NavYoga Academy",
-
               style: TextStyle(
                 fontSize: 28,
-
                 fontWeight: FontWeight.bold,
-
                 color: Colors.deepOrange,
               ),
             ),

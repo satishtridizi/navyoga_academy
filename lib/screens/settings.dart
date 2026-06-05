@@ -150,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      currentIndex: 4,
+      currentIndex: null,
       drawer: const CustomDrawer(currentPage: "Settings"),
       appBar: AppBar(
         leadingWidth: 72,

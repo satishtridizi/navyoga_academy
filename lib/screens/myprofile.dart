@@ -15,6 +15,8 @@ import '../widgets/profile_section.dart';
 import '../widgets/profile_field.dart';
 import '../widgets/achievement_card.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -25,6 +27,9 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   StudentModel? student;
+  File? selectedImage;
+  String? profileImageUrl;
+  final ImagePicker _picker = ImagePicker();
   final authService = AuthService();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -79,7 +84,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
       nameController.text = studentData.name;
       emailController.text = studentData.email;
       phoneController.text = studentData.phone;
+      profileImageUrl = studentData.profileImage;
     });
+  }
+
+  Future<void> pickImage() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+
+    if (image == null) return;
+
+    setState(() {
+      selectedImage = File(image.path);
+    });
+
+    await uploadProfileImage();
+  }
+
+  Future<void> uploadProfileImage() async {
+    if (selectedImage == null) return;
+
+    final token = await AuthManager.getToken();
+
+    final response = await profileService.uploadProfileImage(
+      token: token!,
+      imageFile: selectedImage!,
+    );
+
+    if (ApiHelper.isSuccess(response)) {
+      setState(() {
+        profileImageUrl = response["image_url"];
+      });
+
+      AppSnackbar.showSuccess(context, "Profile image updated");
+    }
   }
 
   Future<void> updateProfile() async {
@@ -144,7 +184,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         title: const Text(
           "NavYoga Academy",
-          style: TextStyle(color: Colors.deepOrange),
+          style: TextStyle(
+            color: Colors.deepOrange,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.grey[200],
         elevation: 0,
@@ -294,29 +337,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 16),
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // future: open add goal screen
-                      },
-                      icon: const Icon(
-                        Icons.track_changes,
-                        color: Colors.purple,
-                      ),
-                      label: const Text("Set New Goal"),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Colors.purple,
-                          width: 1.5,
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   child: OutlinedButton.icon(
+                  //     onPressed: () {
+                  //       // future: open add goal screen
+                  //     },
+                  //     icon: const Icon(
+                  //       Icons.track_changes,
+                  //       color: Colors.purple,
+                  //     ),
+                  //     label: const Text("Set New Goal"),
+                  //     style: OutlinedButton.styleFrom(
+                  //       side: const BorderSide(
+                  //         color: Colors.purple,
+                  //         width: 1.5,
+                  //       ),
+                  //       padding: const EdgeInsets.symmetric(vertical: 14),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(30),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -384,47 +427,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-}
 
-/// 🔥 AVATAR
-Widget _buildAvatar() {
-  return Center(
-    child: TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.9, end: 1),
-      duration: const Duration(milliseconds: 700),
-      curve: Curves.easeOutBack,
+  /// 🔥 AVATAR
+  Widget _buildAvatar() {
+    return Center(
+      child: GestureDetector(
+        onTap: pickImage,
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.deepOrange, width: 3),
+              ),
+              child: ClipOval(
+                child: selectedImage != null
+                    ? Image.file(selectedImage!, fit: BoxFit.cover)
+                    : profileImageUrl != null
+                    ? Image.network(profileImageUrl!, fit: BoxFit.cover)
+                    : const Icon(Icons.person, size: 60, color: Colors.purple),
+              ),
+            ),
 
-      builder: (context, value, child) {
-        return Transform.scale(scale: value, child: child);
-      },
-
-      child: Container(
-        height: 115,
-        width: 115,
-
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-
-          gradient: LinearGradient(
-            colors: [
-              Colors.purple.withOpacity(.2),
-              Colors.deepOrange.withOpacity(.15),
-            ],
-          ),
-
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withOpacity(.25),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Colors.deepOrange,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
           ],
         ),
-
-        child: const Icon(Icons.person_outline, size: 52, color: Colors.purple),
       ),
-    ),
-  );
+    );
+  }
 }
 
 /// 🔥 PRIMARY BUTTON

@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
-import '../models/recording_model.dart';
 
 class RecordingCard extends StatelessWidget {
-  final RecordingModel recording;
-
+  final RecordingApiModel recording;
   const RecordingCard({super.key, required this.recording});
 
   @override
   Widget build(BuildContext context) {
-    final Color color = recording.color;
-    final bool isCompleted = recording.isCompleted;
+    const Color color = Colors.deepPurple;
+    const bool isCompleted = false;
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -89,7 +88,7 @@ class RecordingCard extends StatelessWidget {
                     ),
 
                     child: Text(
-                      recording.duration,
+                      recording.level,
 
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
@@ -118,7 +117,7 @@ class RecordingCard extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   Text(
-                    recording.trainer,
+                    recording.description,
 
                     style: const TextStyle(color: Colors.blueGrey),
                   ),
@@ -127,7 +126,7 @@ class RecordingCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      chip(recording.category, color.withOpacity(0.2), color),
+                      chip(recording.yogaType, color.withOpacity(0.2), color),
 
                       const SizedBox(width: 8),
 
@@ -140,13 +139,15 @@ class RecordingCard extends StatelessWidget {
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                     children: [
-                      Text("👁 ${recording.views}"),
-
-                      Text("⭐ ${recording.rating}"),
-
-                      Text(recording.date),
+                      Text(
+                        recording.level,
+                        style: const TextStyle(color: Colors.blueGrey),
+                      ),
+                      Text(
+                        recording.yogaType,
+                        style: const TextStyle(color: Colors.deepPurple),
+                      ),
                     ],
                   ),
                 ],

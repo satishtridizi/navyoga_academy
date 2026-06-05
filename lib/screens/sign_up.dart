@@ -18,7 +18,7 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool rememberMe = false;
-
+  bool _obscurePassword = true;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -182,19 +182,11 @@ class _SignupScreenState extends State<SignupScreen> {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color.fromARGB(255, 255, 174, 0),
-                                    Color(0xFF6A11CB),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: const Icon(
-                                Icons.auto_awesome_outlined,
-                                color: Colors.white,
-                                size: 35,
+
+                              child: Image.asset(
+                                "assets/logo/logo_transparent_clean.png",
+                                height: 120,
+                                fit: BoxFit.contain,
                               ),
                             ),
 
@@ -233,7 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                     keyboardType: TextInputType.emailAddress,
                                     decoration: InputDecoration(
                                       labelText: "Email Address",
-                                      hintText: "your.email@navyoga.com",
+                                      hintText: "Enter your email address",
 
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(16),
@@ -277,7 +269,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   index: 1,
                                   child: TextFormField(
                                     controller: passwordController,
-                                    obscureText: true,
+                                    obscureText: _obscurePassword,
                                     keyboardType: TextInputType.text,
                                     decoration: InputDecoration(
                                       labelText: "Password",
@@ -294,15 +286,28 @@ class _SignupScreenState extends State<SignupScreen> {
                                           width: 2,
                                         ),
                                       ),
+
+                                      suffixIcon: IconButton(
+                                        icon: Icon(
+                                          _obscurePassword
+                                              ? Icons.visibility_off
+                                              : Icons.visibility,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _obscurePassword =
+                                                !_obscurePassword;
+                                          });
+                                        },
+                                      ),
                                     ),
+
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "Password is required";
                                       }
 
-                                      if (!RegExp(
-                                        r'^[0-9]{8}$',
-                                      ).hasMatch(value)) {
+                                      if (value.length < 8) {
                                         return "Password must be at least 8 characters";
                                       }
 

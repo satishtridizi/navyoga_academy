@@ -89,7 +89,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 22),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.06),
@@ -121,14 +121,14 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                   child: Image.network(
                     course.image,
-                    height: 220,
+                    height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
                     cacheWidth: 800,
 
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        height: 220,
+                        height: 150,
                         width: double.infinity,
                         color: Colors.grey[300],
                         child: const Icon(Icons.broken_image, size: 40),
@@ -169,26 +169,26 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
           /// CONTENT
           Padding(
-            padding: const EdgeInsets.all(26),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   course.title,
                   style: const TextStyle(
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 2),
 
                 Text(
                   course.description,
                   style: const TextStyle(color: Colors.blueGrey),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 2),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,7 +200,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                 /// PROGRESS
                 if (course.progress > 0) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -227,7 +227,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   ),
                 ],
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 /// CTA BUTTON
                 SizedBox(
@@ -262,7 +262,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                             ? Colors.deepOrange
                             : Colors.deepPurple,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -306,7 +306,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      currentIndex: 2,
+      currentIndex: null,
 
       drawer: const CustomDrawer(currentPage: "Self-Paced"),
       // backgroundColor: Colors.transparent,
@@ -354,7 +354,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                     child: Container(
                       width: double.infinity,
 
-                      padding: const EdgeInsets.fromLTRB(24, 30, 24, 50),
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
 
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
@@ -374,7 +374,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(18),
+                                padding: const EdgeInsets.all(12),
 
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(.15),
@@ -385,7 +385,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                 child: const Icon(
                                   Icons.school,
                                   color: Colors.white,
-                                  size: 34,
+                                  size: 24,
                                 ),
                               ),
 
@@ -397,10 +397,10 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                                   children: [
                                     Text(
-                                      "Self-Paced\nLearning",
+                                      "Self-Paced Learning",
 
                                       style: TextStyle(
-                                        fontSize: 40,
+                                        fontSize: 24,
                                         fontWeight: FontWeight.bold,
 
                                         color: Colors.white,
@@ -411,11 +411,11 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                     SizedBox(height: 12),
 
                                     Text(
-                                      "Learn at your own pace,\nanytime, anywhere",
+                                      "Learn at your own pace, anytime, anywhere",
 
                                       style: TextStyle(
                                         color: Colors.white70,
-                                        fontSize: 16,
+                                        fontSize: 13,
                                         height: 1.5,
                                       ),
                                     ),
@@ -433,7 +433,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                             count: "3",
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
 
                           _statCard(
                             icon: Icons.trending_up,
@@ -441,7 +441,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                             count: "2",
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
 
                           _statCard(
                             icon: Icons.workspace_premium_outlined,
@@ -476,12 +476,12 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 22),
 
                         child: Container(
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.all(14),
 
                           decoration: BoxDecoration(
                             color: Colors.white,
 
-                            borderRadius: BorderRadius.circular(28),
+                            borderRadius: BorderRadius.circular(20),
 
                             boxShadow: [
                               BoxShadow(
@@ -501,8 +501,8 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                               /// SEARCH
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 14,
+                                  horizontal: 12,
+                                  vertical: 10,
                                 ),
 
                                 decoration: BoxDecoration(
@@ -525,7 +525,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                                         style: TextStyle(
                                           color: Colors.blueGrey,
-                                          fontSize: 16,
+                                          fontSize: 13,
                                         ),
                                       ),
                                     ),
@@ -533,12 +533,12 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                 ),
                               ),
 
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 6),
 
                               /// FILTER
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
+                                  vertical: 10,
                                 ),
 
                                 decoration: BoxDecoration(
@@ -561,7 +561,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                       "All Courses",
 
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
@@ -569,12 +569,12 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                 ),
                               ),
 
-                              const SizedBox(height: 22),
+                              const SizedBox(height: 10),
 
                               /// CATEGORY CHIPS
                               Wrap(
-                                spacing: 10,
-                                runSpacing: 12,
+                                spacing: 6,
+                                runSpacing: 6,
 
                                 children: categories.map((cat) {
                                   bool selected = cat == selectedCategory;
@@ -606,8 +606,8 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                                       child: Container(
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 18,
-                                          vertical: 10,
+                                          horizontal: 12,
+                                          vertical: 6,
                                         ),
 
                                         decoration: BoxDecoration(
@@ -628,7 +628,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                                           cat,
 
                                           style: TextStyle(
-                                            fontSize: 16,
+                                            fontSize: 13,
 
                                             color: selected
                                                 ? Colors.white
@@ -691,7 +691,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(26),
+      padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(.12),
@@ -704,7 +704,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(8),
 
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(.15),
@@ -715,7 +715,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
             child: Icon(icon, color: Colors.white),
           ),
 
-          const SizedBox(width: 18),
+          const SizedBox(width: 10),
 
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,7 +724,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
               Text(
                 title,
 
-                style: const TextStyle(color: Colors.white70, fontSize: 17),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
               ),
 
               const SizedBox(height: 6),
@@ -734,7 +734,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -748,7 +748,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
 Widget _pill(String text, Color bg, Color fg, {Color? borderColor}) {
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
 
     decoration: BoxDecoration(
       color: bg,
@@ -761,7 +761,7 @@ Widget _pill(String text, Color bg, Color fg, {Color? borderColor}) {
     child: Text(
       text,
 
-      style: TextStyle(color: fg, fontWeight: FontWeight.w600),
+      style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
     ),
   );
 }

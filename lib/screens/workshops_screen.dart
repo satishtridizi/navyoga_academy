@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/api/api_constants.dart';
 import 'package:navyoga_academy/screens/workshop_details_screen.dart';
 import '../models/workshop_model.dart';
 import '../services/workshop_service.dart';
 import '../utils/auth_manager.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class WorkshopsScreen extends StatefulWidget {
   const WorkshopsScreen({super.key});
@@ -48,7 +50,9 @@ class _WorkshopsScreenState extends State<WorkshopsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      currentIndex: null,
+      drawer: const CustomDrawer(currentPage: "Workshops"),
       appBar: AppBar(title: const Text("Workshops")),
       body: loading
           ? const Center(child: CircularProgressIndicator())

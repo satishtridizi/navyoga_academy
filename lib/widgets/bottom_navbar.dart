@@ -1,67 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:navyoga_academy/routes/app_routes.dart';
 
 class BottomNavbar extends StatelessWidget {
-  final int currentIndex;
+  final int? currentIndex;
+  final void Function(BuildContext, int)? onTap;
 
-  const BottomNavbar({super.key, required this.currentIndex});
-
-  void onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
-        Navigator.pushNamed(context, AppRoutes.myClasses);
-        break;
-
-      case 1:
-        Navigator.pushNamed(context, AppRoutes.recordings);
-        break;
-
-      case 2:
-        Navigator.pushNamed(context, AppRoutes.dashboard);
-        break;
-
-      case 3:
-        Navigator.pushNamed(context, AppRoutes.attendance);
-        break;
-
-      case 4:
-        Navigator.pushNamed(context, AppRoutes.profile);
-        break;
-    }
-  }
+  const BottomNavbar({super.key, this.currentIndex, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: currentIndex,
-      type: BottomNavigationBarType.fixed,
-
-      selectedItemColor: Colors.deepPurple,
+      currentIndex: currentIndex ?? 0,
+      selectedItemColor: currentIndex == null ? Colors.grey : Colors.deepPurple,
       unselectedItemColor: Colors.grey,
-
-      onTap: (index) => onTap(context, index),
-
+      type: BottomNavigationBarType.fixed,
+      onTap: (index) => onTap?.call(context, index),
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.menu_book),
           label: "My Classes",
         ),
-
         BottomNavigationBarItem(
           icon: Icon(Icons.videocam),
           label: "Recordings",
         ),
-
         BottomNavigationBarItem(
           icon: Icon(Icons.dashboard),
           label: "Dashboard",
         ),
-
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_today),
           label: "Attendance",
         ),
-
         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
       ],
     );

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import '../models/recording_model.dart';
+import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class RecordingPlayerScreen extends StatefulWidget {
-  final RecordingModel recording;
+  final RecordingApiModel recording;
 
   const RecordingPlayerScreen({super.key, required this.recording});
 
@@ -19,7 +19,7 @@ class _RecordingPlayerScreenState extends State<RecordingPlayerScreen> {
   bool isPlaying = false;
   String currentTime = "0:00";
 
-  String get totalTime => widget.recording.duration;
+  String get totalTime => "N/A";
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +72,11 @@ class _RecordingPlayerScreenState extends State<RecordingPlayerScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.recording.trainer,
+                                  "NavYoga Instructor",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                const Text(
-                                  "Instructor",
-                                  style: TextStyle(color: Colors.white70),
                                 ),
                               ],
                             ),
@@ -88,16 +84,16 @@ class _RecordingPlayerScreenState extends State<RecordingPlayerScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          widget.recording.category,
+                          widget.recording.yogaType,
                           style: const TextStyle(color: Colors.pinkAccent),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          "⏱ ${widget.recording.duration}",
+                          "Level: ${widget.recording.level}",
                           style: const TextStyle(color: Colors.white70),
                         ),
                         Text(
-                          "⭐ ${widget.recording.rating}",
+                          widget.recording.description,
                           style: const TextStyle(color: Colors.white70),
                         ),
                       ],

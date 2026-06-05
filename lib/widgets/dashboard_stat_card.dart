@@ -114,7 +114,7 @@ class StatCard extends StatelessWidget {
                     overflow: TextOverflow.visible,
 
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: color,
                       fontWeight: FontWeight.w600,
                       height: 1.2,

@@ -117,9 +117,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     child: const Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "My Attendance &\nTime Tracking",
+                        "My Attendance & Time Tracking",
                         style: TextStyle(
-                          fontSize: 33,
+                          fontSize: 23,
                           fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),
@@ -271,9 +271,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.98,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.3,
       ),
 
       itemBuilder: (_, i) =>

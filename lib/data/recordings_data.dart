@@ -46,6 +46,7 @@ class RecordingsData {
       category: "Hatha Yoga",
       color: Colors.deepOrange,
       isCompleted: true,
+      videoUrl: "https://www.youtube.com/watch?v=example1",
     ),
 
     RecordingModel(
@@ -58,6 +59,7 @@ class RecordingsData {
       category: "Pranayama",
       color: Colors.purple,
       isCompleted: true,
+      videoUrl: "https://www.youtube.com/watch?v=example2",
     ),
 
     RecordingModel(
@@ -70,6 +72,7 @@ class RecordingsData {
       category: "Flexibility",
       color: Colors.green,
       isCompleted: false,
+      videoUrl: "https://www.youtube.com/watch?v=example3",
     ),
 
     RecordingModel(
@@ -82,6 +85,7 @@ class RecordingsData {
       category: "Power Yoga",
       color: Colors.pink,
       isCompleted: false,
+      videoUrl: "https://www.youtube.com/watch?v=example4",
     ),
 
     RecordingModel(
@@ -94,6 +98,7 @@ class RecordingsData {
       category: "Meditation",
       color: Colors.purple,
       isCompleted: true,
+      videoUrl: "https://www.youtube.com/watch?v=example5",
     ),
 
     RecordingModel(
@@ -106,6 +111,7 @@ class RecordingsData {
       category: "Restorative",
       color: Colors.blue,
       isCompleted: false,
+      videoUrl: "https://www.youtube.com/watch?v=example6",
     ),
 
     RecordingModel(
@@ -118,6 +124,7 @@ class RecordingsData {
       category: "Power Yoga",
       color: Colors.red,
       isCompleted: false,
+      videoUrl: "https://www.youtube.com/watch?v=example7",
     ),
 
     RecordingModel(
@@ -130,6 +137,7 @@ class RecordingsData {
       category: "Yin Yoga",
       color: Colors.orange,
       isCompleted: false,
+      videoUrl: "https://www.youtube.com/watch?v=example8",
     ),
   ];
 }

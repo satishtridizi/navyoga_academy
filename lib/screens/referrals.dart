@@ -78,7 +78,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      currentIndex: 2,
+      currentIndex: null,
       drawer: const CustomDrawer(currentPage: "Referrals"),
 
       // backgroundColor: Colors.transparent,
