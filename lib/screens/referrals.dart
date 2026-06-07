@@ -51,18 +51,30 @@ class _ReferralScreenState extends State<ReferralScreen> {
     if (res["success"] == true) {
       final data = res["data"];
 
-      final List referralList = data["items"]; // ✅ FIXED
-      final overview = data["overview"]; // ✅ FIXED
+      final List referralList = data["items"];
 
+      final referralsData = referralList
+          .map((e) => ReferralApiModel.fromJson(e))
+          .toList();
+
+      final totalReferralsCount = referralsData.length;
+
+      final activeReferralsCount = referralsData
+          .where((e) => e.status.toLowerCase() == "active")
+          .length;
+
+      final totalEarnedAmount = referralsData.fold<int>(0, (sum, e) {
+        final reward = int.tryParse(e.reward.toString()) ?? 0;
+
+        return e.status.toLowerCase() == "active" ? sum + reward : sum;
+      });
       setState(() {
-        referrals = referralList
-            .map((e) => ReferralApiModel.fromJson(e))
-            .toList();
+        referrals = referralsData;
 
-        totalReferrals = overview["totalReferrals"];
-        activeReferrals = overview["active"];
-        totalEarned = overview["totalEarned"];
-        availableBalance = overview["totalEarned"]; // adjust later if needed
+        totalReferrals = totalReferralsCount;
+        activeReferrals = activeReferralsCount;
+        totalEarned = totalEarnedAmount;
+        availableBalance = totalEarnedAmount;
 
         isLoading = false;
       });
@@ -93,13 +105,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
             },
           ),
         ),
-        title: const Text(
-          "NavYoga Academy",
-          style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
       ),
 
       body: isLoading
@@ -281,14 +291,13 @@ class _ReferralScreenState extends State<ReferralScreen> {
 
                     child: ReferralUserCard(
                       user: ReferralUserModel(
-                        earning: e.reward,
                         amount: e.reward,
+                        earning: e.status.toLowerCase() == "active"
+                            ? "earned"
+                            : "pending",
                         name: e.name,
-
-                        email: "",
-
+                        email: e.email ?? "",
                         status: e.status,
-
                         date: e.joinedDate,
                       ),
                     ),

@@ -53,7 +53,13 @@ class _WorkshopsScreenState extends State<WorkshopsScreen> {
     return AppScaffold(
       currentIndex: null,
       drawer: const CustomDrawer(currentPage: "Workshops"),
-      appBar: AppBar(title: const Text("Workshops")),
+      appBar: AppBar(
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
+        ),
+        centerTitle: true,
+      ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : workshops.isEmpty

@@ -60,7 +60,7 @@ class ActionCard extends StatelessWidget {
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 18,
                   ),
                 ),
                 const SizedBox(height: 4),

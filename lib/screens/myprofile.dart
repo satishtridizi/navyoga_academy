@@ -37,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final addressController = TextEditingController();
   List<TextEditingController> medicalControllers = [];
   List<TextEditingController> preferenceControllers = [];
-
+  List<dynamic> achievements = [];
   final profileService = ProfileService();
 
   bool isUpdating = false;
@@ -81,6 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       student = studentData;
+      achievements = response["data"]["achievements"] ?? [];
       nameController.text = studentData.name;
       emailController.text = studentData.email;
       phoneController.text = studentData.phone;
@@ -182,13 +183,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        title: const Text(
-          "NavYoga Academy",
-          style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
         backgroundColor: Colors.grey[200],
         elevation: 0,
       ),
@@ -225,22 +224,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            /// 📊 STATS
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: ProfileData.stats.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
-              ),
-              itemBuilder: (_, i) => ProfileStatCard(ProfileData.stats[i]),
-            ),
-
-            const SizedBox(height: 20),
-
             /// 👤 PERSONAL INFO
             ProfileSection(
               title: "Personal Information",
@@ -267,8 +250,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
 
-                  const SizedBox(height: 12),
+                  /// 📊 STATS
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: ProfileData.stats.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.1,
+                        ),
+                    itemBuilder: (_, i) =>
+                        ProfileStatCard(ProfileData.stats[i]),
+                  ),
+
+                  const SizedBox(height: 20),
 
                   SizedBox(
                     width: double.infinity,
@@ -367,13 +367,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
             ProfileSection(
               title: "Your Achievements",
-              child: Column(
-                children: [
-                  ...ProfileData.achievements.map(
-                    (e) => AchievementCard(data: e),
-                  ),
-                ],
-              ),
+              child: achievements.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                        "No achievements yet",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  : Column(
+                      children: achievements.map((achievement) {
+                        return AchievementCard(data: achievement);
+                      }).toList(),
+                    ),
             ),
 
             /// 🏥 MEDICAL INFO

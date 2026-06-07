@@ -3,6 +3,7 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/myclasses_available_classes.dart';
 import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/services/workshop_service.dart';
 import 'package:navyoga_academy/services/ytt_live_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -10,6 +11,7 @@ import 'package:navyoga_academy/widgets/live_enrollment_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
 import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
 import 'package:navyoga_academy/data/myclasses_stats_data.dart';
+import 'package:navyoga_academy/services/dashboard_service.dart';
 
 class MyClassesScreen extends StatefulWidget {
   const MyClassesScreen({super.key});
@@ -35,22 +37,33 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
     if (token == null) return;
 
-    final res = await YttLiveService().getMyEnrollments(token);
-
-    print("LIVE ENROLLMENTS");
-    print(res);
+    final res = await WorkshopService().getWorkshops(token);
 
     if (res["success"] == true) {
-      final List data = res["data"] ?? [];
+      final List items = res["data"]["items"] ?? [];
+      print("WORKSHOP ITEM:");
+      print(items.first);
+
+      final enrolledItems = items
+          .where((e) => e["isEnrolled"] == true)
+          .toList();
 
       setState(() {
-        enrolledClasses = data
-            .map((e) => LiveEnrollmentModel.fromJson(e))
-            .toList();
-        loading = false;
-      });
-    } else {
-      setState(() {
+        enrolledClasses = enrolledItems.map((e) {
+          return LiveEnrollmentModel(
+            id: e["id"] ?? "",
+            courseId: "",
+            planName: e["title"] ?? "",
+            status: "ACTIVE",
+            meetingUrl: e["meetingUrl"] ?? "",
+            title: e["title"] ?? "",
+            yogaType: e["yogaType"] ?? "",
+            level: e["level"] ?? "",
+            trainer: e["instructorName"] ?? "Instructor",
+            duration: e["totalDuration"] ?? 0,
+          );
+        }).toList();
+
         loading = false;
       });
     }
@@ -114,13 +127,11 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
             },
           ),
         ),
-        title: const Text(
-          "NavYoga Academy",
-          style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
       ),
 
       body: SingleChildScrollView(

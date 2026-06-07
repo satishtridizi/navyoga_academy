@@ -205,7 +205,9 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                         CircleAvatar(
                           backgroundColor: Colors.purple,
                           child: Text(
-                            classData.trainer.substring(0, 1),
+                            (classData.trainer.isNotEmpty)
+                                ? classData.trainer.substring(0, 1)
+                                : "I",
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),

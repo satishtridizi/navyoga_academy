@@ -171,10 +171,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ),
-        title: const Text(
-          "NavYoga Academy",
-          style: TextStyle(color: Colors.deepOrange),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),

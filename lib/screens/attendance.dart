@@ -94,13 +94,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             },
           ),
         ),
-        title: const Text(
-          "NavYoga Academy",
-          style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
       ),
 
       body: isLoading

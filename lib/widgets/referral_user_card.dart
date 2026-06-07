@@ -40,69 +40,87 @@ class ReferralUserCard extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Color(0xffF2DED2)),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xffF5D8CB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           /// AVATAR
           Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
+            width: 45,
+            height: 45,
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [Colors.deepPurple, Colors.orange],
+                colors: [Colors.deepPurple, Colors.deepOrange],
               ),
             ),
             alignment: Alignment.center,
             child: Text(
-              user.name[0],
+              user.name.isNotEmpty ? user.name[0].toUpperCase() : "U",
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
+                fontSize: 15,
               ),
             ),
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
-          /// DETAILS
+          /// LEFT SIDE
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   user.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    color: Color(0xff202033),
                   ),
                 ),
 
-                Text(
-                  user.email,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.blueGrey),
-                ),
+                const SizedBox(height: 2),
+
+                if (user.email.isNotEmpty)
+                  Text(
+                    user.email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xff64748B),
+                      fontSize: 12,
+                    ),
+                  ),
+
+                const SizedBox(height: 4),
 
                 Row(
                   children: [
-                    const Icon(Icons.access_time, size: 14),
+                    const Icon(
+                      Icons.access_time_outlined,
+                      size: 18,
+                      color: Color(0xff64748B),
+                    ),
                     const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        user.date,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
+                    Text(
+                      "Joined ${user.date}",
+                      style: const TextStyle(
+                        color: Color(0xff64748B),
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -115,21 +133,66 @@ class ReferralUserCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _chip(user.status, statusColor),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Text(
-                    user.amount,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 6),
-                  _chip(user.earning, earningColor),
-                ],
+              _statusBadge(user.status),
+
+              const SizedBox(height: 8),
+
+              Text(
+                "₹ ${user.amount}",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff202033),
+                ),
               ),
+
+              const SizedBox(height: 8),
+
+              _earningBadge(user.earning),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _statusBadge(String status) {
+    final isPending = status.toLowerCase() == "pending";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isPending ? const Color(0xffFFF1CC) : const Color(0xffDDE8FF),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isPending ? const Color(0xffF4D87A) : const Color(0xffB8CCFF),
+        ),
+      ),
+      child: Text(
+        status.toLowerCase(),
+        style: TextStyle(
+          color: isPending ? const Color(0xffB77700) : const Color(0xff2155F5),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _earningBadge(String earning) {
+    final isPending = earning.toLowerCase() == "pending";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isPending ? const Color(0xffFBE6D2) : const Color(0xffD4F0DA),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        earning.toLowerCase(),
+        style: TextStyle(
+          color: isPending ? const Color(0xffD35400) : const Color(0xff008A2E),
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -145,7 +208,7 @@ class ReferralUserCard extends StatelessWidget {
         text,
         style: TextStyle(
           color: color,
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
       ),

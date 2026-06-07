@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:navyoga_academy/screens/batches_screen.dart';
+import 'package:navyoga_academy/data/profile_data.dart';
+import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/screens/myclasses.dart';
+import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/workshops_screen.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
@@ -8,6 +11,7 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
+import 'package:navyoga_academy/services/referral_service.dart';
 import 'package:navyoga_academy/services/workshop_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
@@ -16,13 +20,15 @@ import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_ReferralCode_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_Referral_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_ShareEarn_card.dart';
-import 'package:navyoga_academy/widgets/dashboard_achievement_card.dart';
+import 'package:navyoga_academy/widgets/achievement_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_class_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
-//import 'package:navyoga_academy/widgets/dashboard_video_card.dart';
+import 'package:navyoga_academy/models/recording_api_model.dart';
+import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,6 +40,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final attendanceService = AttendanceService();
   final recordingService = RecordingService();
+  List<dynamic> recordings = [];
 
   bool showAllUpcoming = false;
   bool showAllVideos = false;
@@ -49,6 +56,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String referralCode = "";
   DashboardModel? dashboard;
   int unreadCount = 0;
+
+  int totalReferrals = 0;
+  int activeReferrals = 0;
+  int totalEarned = 0;
+  int availableBalance = 0;
   @override
   void initState() {
     super.initState();
@@ -56,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
     loadStudentDashboard();
     loadUnreadCount();
     testWorkshops();
+    loadReferralStats();
+    loadRecordings();
   }
 
   Future<void> testWorkshops() async {
@@ -115,6 +129,47 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> loadReferralStats() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final res = await ReferralService().getReferrals(token);
+
+    if (res["success"] == true) {
+      final items = res["data"]["items"] as List;
+
+      totalReferrals = items.length;
+
+      activeReferrals = items
+          .where((e) => e["status"].toString().toLowerCase() == "active")
+          .length;
+
+      totalEarned = items.fold<int>(
+        0,
+        (sum, e) => e["status"].toString().toLowerCase() == "active"
+            ? sum + int.parse(e["reward"].toString())
+            : sum,
+      );
+
+      availableBalance = totalEarned;
+
+      setState(() {});
+    }
+  }
+
+  Future<void> loadRecordings() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final list = await recordingService.getRecordings(token);
+
+    setState(() {
+      recordings = list.map((e) => RecordingApiModel.fromJson(e)).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -135,14 +190,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        title: Text(
-          "NavYoga Academy",
-          style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
         ),
+        centerTitle: true,
 
         // 🔥 ADD THIS BLOCK HERE
         actions: [
@@ -381,9 +433,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     viewAllText: showAllUpcoming ? "Show Less ↑" : "View All →",
                   ),
-
-                  const SizedBox(height: 10),
-
                   Column(
                     children: List.generate(
                       showAllUpcoming
@@ -399,57 +448,88 @@ class _HomeScreenState extends State<HomeScreen> {
                           cls["instructor"] ?? "Instructor",
                           "${cls["duration"] ?? 0} mins",
                           onJoin: () {
+                            final classModel = ClassModel.fromJson(cls);
+
                             Navigator.pushNamed(
                               context,
-                              AppRoutes.liveClassesList,
+                              AppRoutes.liveClass,
+                              arguments: classModel,
                             );
                           },
                         );
                       },
                     ),
                   ),
-                  const SizedBox(height: 30),
 
-                  /// 🎥 RECORDINGS
+                  const SizedBox(height: 10),
+
                   sectionHeader(
                     Icons.videocam,
                     "Recent Recordings",
                     onViewAllTap: () {
-                      setState(() {
-                        showAllVideos = !showAllVideos;
-                      });
+                      Navigator.pushNamed(context, AppRoutes.recordings);
                     },
-                    viewAllText: showAllVideos ? "Show Less ↑" : "View All →",
+                    viewAllText: "View All →",
                   ),
 
                   const SizedBox(height: 10),
 
-                  const SizedBox(height: 30),
+                  Column(
+                    children: List.generate(
+                      recordings.length > 3 ? 3 : recordings.length,
+                      (index) {
+                        final recording = recordings[index];
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: const Icon(
+                              Icons.play_circle_fill,
+                              color: Colors.deepPurple,
+                            ),
+                            title: Text(recording.title),
+                            subtitle: Text(recording.yogaType),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RecordingPlayerScreen(
+                                    recording: recording,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
 
                   /// 🏆 ACHIEVEMENTS
                   sectionHeader(
-                    Icons.calendar_today,
+                    Icons.emoji_events,
                     "Your Achievements",
-                    showViewAll: false,
+                    onViewAllTap: () {
+                      Navigator.pushNamed(context, AppRoutes.profile);
+                    },
+                    viewAllText: "View All →",
                   ),
                   const SizedBox(height: 10),
 
                   if (achievements.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        "No achievements yet",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
+                    const Center(child: Text("No achievements found"))
                   else
                     Column(
                       children: achievements.map((achievement) {
-                        return AchievementCard(
-                          achievement["title"] ?? "",
-                          achievement["description"] ?? "",
-                          Colors.orange,
-                          true,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.profile);
+                          },
+                          child: AchievementCard(data: achievement),
                         );
                       }).toList(),
                     ),
@@ -469,7 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const WorkshopsScreen(),
+                                builder: (_) => const MyClassesScreen(),
                               ),
                             );
                           },
@@ -486,17 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-                      AnimatedItem(
-                        index: 2,
-                        child: ActionCard(
-                          "Watch Recordings",
-                          "Catch up on sessions",
-                          Colors.pink,
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.recordings);
-                          },
-                        ),
-                      ),
+
                       AnimatedItem(
                         index: 3,
                         child: ActionCard(
@@ -529,11 +599,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icons.card_giftcard,
                     "Referral Program",
                     onViewAllTap: () {
-                      setState(() {
-                        showAllReferral = !showAllReferral;
-                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ReferralScreen(),
+                        ),
+                      );
                     },
-                    viewAllText: showAllReferral ? "Show Less ↑" : "View All →",
+                    viewAllText: "View All →",
                   ),
 
                   const SizedBox(height: 10),
@@ -542,24 +615,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     Column(
                       children: [
                         ReferralCard(
-                          referralStats!["totalReferrals"].toString(),
+                          totalReferrals.toString(),
                           "Total Referrals",
-                          Colors.orange,
+                          Colors.blue,
+                          "Total",
+                        ),
+
+                        ReferralCard(
+                          activeReferrals.toString(),
+                          "Active Referrals",
+                          Colors.green,
                           "Active",
                         ),
 
                         ReferralCard(
-                          "₹${referralStats!["totalEarned"]}",
+                          "₹$totalEarned",
                           "Total Earned",
-                          Colors.purple,
+                          Colors.orange,
                           "Earned",
                         ),
 
                         ReferralCard(
-                          referralStats!["unlockedBadges"].toString(),
-                          "Achievement Badges",
-                          Colors.green,
-                          "Unlocked",
+                          "₹$availableBalance",
+                          "Available Balance",
+                          Colors.purple,
+                          "Balance",
                         ),
                       ],
                     ),

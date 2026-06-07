@@ -50,6 +50,10 @@ class _LiveClassesListScreenState extends State<LiveClassesListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final classId = ModalRoute.of(context)?.settings.arguments as String?;
+
+    print("SELECTED CLASS ID = $classId");
+
     return Scaffold(
       appBar: AppBar(title: const Text("Live Classes")),
 
