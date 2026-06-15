@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/data/self_paced_data.dart';
+import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/screens/self_paced_lesson_screen.dart';
+import 'package:navyoga_academy/services/self_paced_progress_service.dart';
 import 'package:navyoga_academy/services/self_paced_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
-import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:navyoga_academy/services/subscription_service.dart';
+import 'package:navyoga_academy/screens/self_paced_classes_screen.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -22,15 +23,44 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
+  Map<String, double> courseProgress = {};
+  Map<String, bool> courseCompleted = {};
+  final progressService = SelfPacedProgressService();
   final selfPacedService = SelfPacedService();
-
+  int enrolledCount = 0;
+  int inProgressCount = 0;
+  int completedCount = 0;
   List<CourseModel> courses = [];
   bool isLoading = true;
+  bool hasActiveSubscription = false;
+  String selectedStat = "all";
+  List<CourseModel> get filteredCourses {
+    switch (selectedStat) {
+      case "enrolled":
+        return courses.where((c) => (courseProgress[c.id] ?? 0) > 0).toList();
+
+      case "progress":
+        return courses
+            .where(
+              (c) =>
+                  (courseProgress[c.id] ?? 0) > 0 &&
+                  !(courseCompleted[c.id] ?? false),
+            )
+            .toList();
+
+      case "completed":
+        return courses.where((c) => courseCompleted[c.id] ?? false).toList();
+
+      default:
+        return courses;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     loadCourses();
+    loadSubscription();
   }
 
   Future<void> loadCourses() async {
@@ -47,8 +77,75 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       final List list = response["data"];
       if (!mounted) return;
 
+      courses = list.map((e) => CourseModel.fromJson(e)).toList();
+
+      final progressResponse = await progressService.getMyProgress(token);
+      final progressList = progressResponse["data"] ?? [];
+      int enrolled = 0;
+      int inProgress = 0;
+      int completed = 0;
+
+      for (final course in courses) {
+        final classesResponse = await selfPacedService.getClasses(
+          token,
+          course.id,
+        );
+
+        final List classes = classesResponse["data"] ?? [];
+
+        if (classes.isEmpty) continue;
+
+        int completedLessons = 0;
+
+        for (final lesson in classes) {
+          final lessonId = lesson["id"];
+
+          final found = progressList.any(
+            (p) => p["classId"] == lessonId && p["isCompleted"] == true,
+          );
+
+          if (found) {
+            completedLessons++;
+          }
+        }
+        double progress = completedLessons / classes.length;
+
+        courseProgress[course.id] = progress;
+
+        courseCompleted[course.id] = completedLessons == classes.length;
+        print(
+          "${course.title} => "
+          "$completedLessons/${classes.length}",
+        );
+
+        if (completedLessons > 0) {
+          enrolled++;
+        }
+
+        if (completedLessons > 0 && completedLessons < classes.length) {
+          inProgress++;
+        }
+
+        if (completedLessons == classes.length) {
+          completed++;
+        }
+      }
+      print("PROGRESS LIST => ${progressResponse["data"]}");
+
+      for (final c in courses) {
+        print(
+          "COURSE => ${c.title}"
+          " enrolled=${c.enrolled}"
+          " completed=${c.completed}"
+          " progress=${c.progress}",
+        );
+      }
+
       setState(() {
-        courses = list.map((e) => CourseModel.fromJson(e)).toList();
+        enrolledCount = enrolled;
+        inProgressCount = inProgress;
+        completedCount = completed;
+
         isLoading = false;
       });
     } else {
@@ -64,6 +161,22 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     }
   }
 
+  Future<void> loadSubscription() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final subscriptionService = SubscriptionService();
+
+    final response = await subscriptionService.getMySubscription(token);
+
+    if (response["success"] == true && response["data"]["enrolled"] == true) {
+      setState(() {
+        hasActiveSubscription = true;
+      });
+    }
+  }
+
   Future<void> enrollCourse(CourseModel course) async {
     final token = await AuthManager.getToken();
 
@@ -73,13 +186,20 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     }
 
     final response = await selfPacedService.initiatePayment(token, course.id);
-
+    print("INITIATE RESPONSE => $response");
     if (ApiHelper.isSuccess(response) && response["data"] != null) {
       AppSnackbar.showSuccess(context, "Proceed to payment");
+
+      Navigator.pushNamed(
+        context,
+        AppRoutes.payments, // or your payment route
+      );
     } else {
-      AppSnackbar.showError(context, response["message"]);
+      AppSnackbar.showError(
+        context,
+        response["message"] ?? "Payment initiation failed",
+      );
     }
-    return;
   }
 
   Widget _courseCard(CourseModel course) {
@@ -153,12 +273,14 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
               ),
 
               /// STATUS
-              if (course.enrolled)
+              if ((courseProgress[course.id] ?? 0) > 0)
                 Positioned(
                   top: 16,
                   right: 14,
                   child: _pill(
-                    course.completed ? "✓ Completed" : "Enrolled",
+                    (courseCompleted[course.id] ?? false)
+                        ? "✓ Completed"
+                        : "Enrolled",
                     Colors.white,
                     Colors.deepPurple,
                     borderColor: Colors.deepPurple,
@@ -199,7 +321,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                 ),
 
                 /// PROGRESS
-                if (course.progress > 0) ...[
+                if ((courseProgress[course.id] ?? 0) > 0) ...[
                   const SizedBox(height: 8),
 
                   Row(
@@ -207,7 +329,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                     children: [
                       Text(course.lessonsText ?? ""),
                       Text(
-                        "${((course.progress ?? 0) * 100).toInt()}%",
+                        "${((courseProgress[course.id] ?? 0) * 100).toInt()}%",
                         style: const TextStyle(
                           color: Colors.deepPurple,
                           fontWeight: FontWeight.bold,
@@ -221,7 +343,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
-                      value: course.progress ?? 0,
+                      value: courseProgress[course.id] ?? 0,
                       minHeight: 10,
                     ),
                   ),
@@ -239,26 +361,24 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        if (!course.enrolled) {
+                        if (!course.enrolled && !hasActiveSubscription) {
                           handleCTA("enroll", course);
-                        } else if (course.completed) {
-                          handleCTA("review");
+                        } else if (courseCompleted[course.id] ?? false) {
+                          handleCTA("review", course);
                         } else {
-                          handleCTA("continue");
+                          handleCTA("continue", course);
                         }
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: Text(
-                        !course.enrolled
+                        (courseProgress[course.id] ?? 0) == 0
                             ? "Enroll Now"
-                            : course.completed
+                            : (courseCompleted[course.id] ?? false)
                             ? "Review Course"
-                            : (course.enrolled
-                                  ? "Continue Learning"
-                                  : "Enroll Now"),
+                            : "Continue Learning",
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: !course.enrolled
+                        backgroundColor: (courseProgress[course.id] ?? 0) == 0
                             ? Colors.deepOrange
                             : Colors.deepPurple,
                         foregroundColor: Colors.white,
@@ -289,13 +409,64 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     "Fitness",
     "Wellness",
   ];
+  Future<void> continueLearning(CourseModel course) async {
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null) return;
+
+      final classesResponse = await selfPacedService.getClasses(
+        token,
+        course.id,
+      );
+
+      final List classes = classesResponse["data"] ?? [];
+
+      if (classes.isEmpty) return;
+
+      final progressResponse = await progressService.getMyProgress(token);
+
+      final List progressList = progressResponse["data"] ?? [];
+
+      Map<String, bool> completedMap = {};
+
+      for (final item in progressList) {
+        completedMap[item["classId"].toString()] = item["isCompleted"] == true;
+      }
+
+      final firstUnfinished = classes.firstWhere(
+        (lesson) => completedMap[lesson["id"].toString()] != true,
+        orElse: () => classes.first,
+      );
+      print("OPENING LESSON ID => ${firstUnfinished["id"]}");
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelfPacedLessonScreen(
+            lesson: ClassModel.fromJson(firstUnfinished),
+          ),
+        ),
+      );
+    } catch (e) {
+      print("CONTINUE LEARNING ERROR => $e");
+    }
+  }
+
   void handleCTA(String type, [CourseModel? course]) {
-    if (type == "continue") {
-      Navigator.pushNamed(context, "/courseDetails");
-    } else if (type == "review") {
-      Navigator.pushNamed(context, "/courseReview");
+    if (type == "continue" && course != null) {
+      continueLearning(course);
+    } else if (type == "review" && course != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              SelfPacedClassesScreen(moduleId: course.id, title: course.title),
+        ),
+      );
     } else if (type == "enroll" && course != null) {
-      enrollCourse(course);
+      Navigator.pushNamed(context, "/payments");
     } else {
       ScaffoldMessenger.of(
         context,
@@ -428,25 +599,35 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                           _statCard(
                             icon: Icons.menu_book_outlined,
                             title: "Enrolled Courses",
-                            count: "3",
+                            count: enrolledCount.toString(),
+                            onTap: () {
+                              setState(() {
+                                selectedStat = "enrolled";
+                              });
+                            },
                           ),
-
-                          const SizedBox(height: 10),
 
                           _statCard(
                             icon: Icons.trending_up,
                             title: "In Progress",
-                            count: "2",
+                            count: inProgressCount.toString(),
+                            onTap: () {
+                              setState(() {
+                                selectedStat = "progress";
+                              });
+                            },
                           ),
-
-                          const SizedBox(height: 10),
 
                           _statCard(
                             icon: Icons.workspace_premium_outlined,
                             title: "Completed",
-                            count: "1",
+                            count: completedCount.toString(),
+                            onTap: () {
+                              setState(() {
+                                selectedStat = "completed";
+                              });
+                            },
                           ),
-
                           const SizedBox(height: 10),
                         ],
                       ),
@@ -652,9 +833,9 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                       : ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: courses.length,
+                          itemCount: filteredCourses.length,
                           itemBuilder: (context, index) {
-                            final course = courses[index];
+                            final course = filteredCourses[index];
                             return Animate(
                               delay: Duration(milliseconds: 150 * index),
                               effects: const [
@@ -685,60 +866,50 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     required IconData icon,
     required String title,
     required String count,
+    required VoidCallback onTap,
   }) {
-    return Container(
-      width: double.infinity,
-
-      padding: const EdgeInsets.all(14),
-
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.12),
-
-        borderRadius: BorderRadius.circular(24),
-
-        border: Border.all(color: Colors.white.withOpacity(.18)),
-      ),
-
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.15),
-
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.12),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(.18)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white),
             ),
-
-            child: Icon(icon, color: Colors.white),
-          ),
-
-          const SizedBox(width: 10),
-
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-
-            children: [
-              Text(
-                title,
-
-                style: const TextStyle(color: Colors.white70, fontSize: 13),
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                count,
-
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(color: Colors.white70, fontSize: 13),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(height: 6),
+                Text(
+                  count,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

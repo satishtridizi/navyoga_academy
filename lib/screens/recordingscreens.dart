@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
+import 'package:navyoga_academy/models/recording_stat_model.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
@@ -9,6 +10,7 @@ import '../data/recordings_data.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
+import 'package:navyoga_academy/models/recording_model.dart';
 
 class RecordingsDashboard extends StatefulWidget {
   const RecordingsDashboard({super.key});
@@ -19,7 +21,9 @@ class RecordingsDashboard extends StatefulWidget {
 
 class _RecordingsDashboardState extends State<RecordingsDashboard> {
   final recordingService = RecordingService();
-
+  int totalRecordings = 0;
+  int completedRecordings = 0;
+  double hoursWatched = 0;
   List<RecordingApiModel> recordings = [];
 
   @override
@@ -42,6 +46,10 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
 
     setState(() {
       recordings = list.map((e) => RecordingApiModel.fromJson(e)).toList();
+
+      totalRecordings = recordings.length;
+      completedRecordings = recordings.length;
+      hoursWatched = recordings.length.toDouble();
     });
 
     print("PARSED RECORDINGS = ${recordings.length}");
@@ -50,7 +58,32 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
   @override
   Widget build(BuildContext context) {
     /// 📊 STATS DATA (DYNAMIC)
-
+    final stats = [
+      RecordingStatModel(
+        title: "Total Recordings",
+        value: totalRecordings.toString(),
+        color: Colors.deepOrange,
+        icon: Icons.videocam,
+      ),
+      RecordingStatModel(
+        title: "Completed",
+        value: completedRecordings.toString(),
+        color: Colors.green,
+        icon: Icons.star,
+      ),
+      RecordingStatModel(
+        title: "Hours Watched",
+        value: hoursWatched.toStringAsFixed(1),
+        color: Colors.purple,
+        icon: Icons.access_time,
+      ),
+      RecordingStatModel(
+        title: "Avg. Attendance",
+        value: "N/A",
+        color: Colors.pink,
+        icon: Icons.favorite,
+      ),
+    ];
     return AppScaffold(
       currentIndex: 1,
       drawer: const CustomDrawer(currentPage: "Recordings"),
@@ -151,13 +184,13 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: RecordingsData.stats.length,
+              itemCount: stats.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.2,
               ),
               itemBuilder: (context, index) {
-                final item = RecordingsData.stats[index];
+                final item = stats[index];
 
                 return Animate(
                   delay: Duration(milliseconds: 120 * index),

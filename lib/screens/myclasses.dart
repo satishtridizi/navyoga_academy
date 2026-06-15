@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/myclasses_available_classes.dart';
 import 'package:navyoga_academy/models/live_enrollment_model.dart';
+import 'package:navyoga_academy/models/myclasses_stats_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/workshop_service.dart';
 import 'package:navyoga_academy/services/ytt_live_service.dart';
@@ -21,6 +22,10 @@ class MyClassesScreen extends StatefulWidget {
 }
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
+  int enrolledCount = 0;
+  int completedCount = 0;
+  int progressCount = 0;
+  double attendance = 0;
   List<LiveEnrollmentModel> enrolledClasses = [];
   bool loading = true;
   String selectedLevel = "All Levels";
@@ -63,6 +68,18 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
             duration: e["totalDuration"] ?? 0,
           );
         }).toList();
+
+        enrolledCount = enrolledClasses.length;
+
+        completedCount = enrolledClasses
+            .where((e) => e.status == "COMPLETED")
+            .length;
+
+        progressCount = enrolledClasses
+            .where((e) => e.status == "ACTIVE")
+            .length;
+
+        attendance = 0.0;
 
         loading = false;
       });
@@ -111,6 +128,32 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final stats = [
+      StatsModel(
+        title: "Enrolled Classes",
+        value: enrolledCount.toString(),
+        color: Colors.deepOrange,
+        icon: Icons.menu_book,
+      ),
+      StatsModel(
+        title: "Completed",
+        value: completedCount.toString(),
+        color: Colors.green,
+        icon: Icons.star,
+      ),
+      StatsModel(
+        title: "In Progress",
+        value: progressCount.toString(),
+        color: Colors.purple,
+        icon: Icons.access_time,
+      ),
+      StatsModel(
+        title: "Avg. Attendance",
+        value: "${attendance.toInt()}%",
+        color: Colors.orange,
+        icon: Icons.calendar_today,
+      ),
+    ];
     return AppScaffold(
       currentIndex: 0,
       drawer: const CustomDrawer(currentPage: "My Classes"),
@@ -177,7 +220,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
             /// 📊 STATS GRID
             GridView.builder(
-              itemCount: statsData.length,
+              itemCount: stats.length,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -185,7 +228,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 childAspectRatio: 1.15,
               ),
               itemBuilder: (context, index) {
-                final item = statsData[index];
+                final item = stats[index];
 
                 return GestureDetector(
                   onTap: () {

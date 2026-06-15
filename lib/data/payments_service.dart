@@ -24,6 +24,7 @@ class SubscriptionService {
 
   List<Plan> getPlans() => [
     Plan(
+      id: "",
       name: "Basic",
       price: "₹499",
       yearly: "₹4990/year",
@@ -38,6 +39,7 @@ class SubscriptionService {
       ],
     ),
     Plan(
+      id: "",
       name: "Premium",
       price: "₹999",
       yearly: "₹9990/year",
@@ -56,6 +58,7 @@ class SubscriptionService {
       ],
     ),
     Plan(
+      id: "",
       name: "Platinum",
       price: "₹1999",
       yearly: "₹19990/year",

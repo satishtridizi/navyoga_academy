@@ -12,13 +12,20 @@ class ClassModel {
   final String schedule;
   final String next;
   final Color color;
-
+  final String description;
+  final String video;
+  final String thumbnail;
+  final int durationMinutes;
   final bool isCompleted;
   final bool isGradient;
   final bool isGradientProgress;
 
   const ClassModel({
     required this.id,
+    required this.description,
+    required this.video,
+    required this.thumbnail,
+    required this.durationMinutes,
     required this.title,
     required this.trainer,
     required this.rating,
@@ -34,25 +41,27 @@ class ClassModel {
     this.isGradientProgress = false,
   });
   factory ClassModel.fromJson(Map<String, dynamic> json) {
+    final thumb = json["thumbnail"]?.toString() ?? "";
+
     return ClassModel(
       id: json["id"] ?? "",
       title: json["title"] ?? "",
-
-      // ✅ FIXED MAPPING
-      trainer: json["yogaType"] ?? "Yoga Instructor",
-
-      rating: "0",
-      level: json["level"] ?? "",
-
-      duration: "60", // fallback (API not giving)
-      students: "0",
-
-      progress: 0.0,
-
-      schedule: json["createdAt"] ?? "",
+      trainer: "",
+      rating: "",
+      level: "",
+      duration: "${json["duration"] ?? 0} min",
+      students: "",
+      progress: 0,
+      schedule: "",
       next: "",
-
       color: Colors.deepPurple,
+
+      description: json["description"] ?? "",
+      video: json["video"] ?? "",
+
+      thumbnail: thumb.startsWith("http") ? thumb : "",
+
+      durationMinutes: json["duration"] ?? 0,
     );
   }
 }

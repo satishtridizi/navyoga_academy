@@ -3,6 +3,10 @@ import 'package:navyoga_academy/models/class_model.dart';
 
 List<ClassModel> enrolledClasses = [
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "1",
     title: "Advanced Hatha Yoga",
     trainer: "Priya Sharma",
@@ -16,6 +20,10 @@ List<ClassModel> enrolledClasses = [
     color: Colors.pink,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "2",
     title: "Pranayama Basics",
     trainer: "Rahul Kumar",
@@ -29,6 +37,10 @@ List<ClassModel> enrolledClasses = [
     color: Colors.green,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "3",
     title: " Meditation & Mindfulness",
     trainer: "Anita Verma",
@@ -43,6 +55,10 @@ List<ClassModel> enrolledClasses = [
     isGradient: true,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "4",
     title: "Power Yoga Flow",
     trainer: "Vikram Singh",
@@ -56,6 +72,10 @@ List<ClassModel> enrolledClasses = [
     color: Colors.orange,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "5",
     title: "Yoga for Flexibility",
     trainer: "Meera Joshi",
@@ -70,6 +90,10 @@ List<ClassModel> enrolledClasses = [
     isCompleted: true,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "6",
     title: "Restorative Yoga",
     trainer: "Priya Sharma",
@@ -84,6 +108,10 @@ List<ClassModel> enrolledClasses = [
     isGradientProgress: true,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "7",
     title: "Vinyasa Flow",
     trainer: "Rahul Kumar",
@@ -98,6 +126,10 @@ List<ClassModel> enrolledClasses = [
     isCompleted: true,
   ),
   ClassModel(
+    description: "",
+    video: "",
+    thumbnail: "",
+    durationMinutes: 60,
     id: "8",
     title: "Yin Yoga",
     trainer: "Anita Verma",

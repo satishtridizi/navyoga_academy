@@ -12,22 +12,22 @@ class SelfPacedService {
     );
   }
 
-  Future<dynamic> initiatePayment(String token, String moduleId) async {
+  Future<dynamic> initiatePayment(
+    String token,
+    String moduleId,
+    // String planId,
+  ) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}/api/payments/initiate",
       token: token,
-      body: {
-        "moduleId": moduleId, // 🔥 important
-      },
+      body: {"moduleId": moduleId, "type": "SELF_PACED"},
     );
   }
 
-  /// 🔥 ENROLL COURSE
-  // Future<dynamic> enrollCourse(String token, String courseId) async {
-  //   return await _api.postRequest(
-  //     url: "${ApiConstants.baseUrl}/self-paced/enroll",
-  //     token: token,
-  //     body: {"courseId": courseId},
-  //   );
-  // }
+  Future<dynamic> getClasses(String token, String moduleId) async {
+    return await _api.getRequest(
+      url: "${ApiConstants.baseUrl}/api/self-paced/modules/$moduleId/classes",
+      token: token,
+    );
+  }
 }

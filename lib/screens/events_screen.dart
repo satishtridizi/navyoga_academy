@@ -22,6 +22,7 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
+  int get totalEvents => events.length;
   bool isLoading = true;
   final eventService = EventService();
 
@@ -77,6 +78,38 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final stats = [
+      AttendanceStatModel(
+        title: "Total Events",
+        value: events.length.toString(),
+        icon: Icons.calendar_today,
+        color: Colors.orange,
+      ),
+
+      AttendanceStatModel(
+        title: "Registered",
+        value: events.where((e) => e.isEnrolled).length.toString(),
+        icon: Icons.school,
+        color: Colors.green,
+      ),
+
+      AttendanceStatModel(
+        title: "Upcoming",
+        value: events
+            .where((e) => DateTime.parse(e.date).isAfter(DateTime.now()))
+            .length
+            .toString(),
+        icon: Icons.self_improvement,
+        color: Colors.purple,
+      ),
+
+      AttendanceStatModel(
+        title: "Featured",
+        value: events.length.toString(),
+        icon: Icons.people,
+        color: Colors.blue,
+      ),
+    ];
     return AppScaffold(
       currentIndex: null,
       drawer: const CustomDrawer(currentPage: "Events"),
@@ -161,7 +194,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: AppData.stats.length,
+                    itemCount: stats.length,
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
@@ -170,14 +203,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           childAspectRatio: 1.25,
                         ),
                     itemBuilder: (context, index) {
-                      return StatCard(
-                        AttendanceStatModel(
-                          title: AppData.stats[index].label,
-                          value: AppData.stats[index].count,
-                          icon: AppData.stats[index].icon,
-                          color: AppData.stats[index].color,
-                        ),
-                      );
+                      return StatCard(stats[index]);
                     },
                   ),
 
@@ -207,8 +233,55 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
 
                   const SizedBox(height: 20),
+
+                  SizedBox(
+                    height: 420,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: events.length > 4 ? 4 : events.length,
+                      itemBuilder: (context, index) {
+                        final event = events[index];
+
+                        return SizedBox(
+                          width: 300,
+                          child: EventCard(
+                            event: EventModel(
+                              isEnrolled: event.isEnrolled,
+                              id: event.id,
+                              title: event.title,
+                              description: event.description,
+                              date: event.date,
+                              location: event.location,
+                              price: "₹${event.price}",
+                              seats: event.capacity.toString(),
+                              image: event.thumbnail,
+                              tags: [],
+                            ),
+                            isCompact: true,
+                            onTap: () => _openDetails(
+                              context,
+                              EventModel(
+                                isEnrolled: event.isEnrolled,
+                                id: event.id,
+                                title: event.title,
+                                description: event.description,
+                                date: event.date,
+                                location: event.location,
+                                price: "₹${event.price}",
+                                seats: event.capacity.toString(),
+                                image: event.thumbnail,
+                                tags: [],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
                   Text(
-                    "All Events (${events.length})",
+                    "All Events (${totalEvents})",
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,

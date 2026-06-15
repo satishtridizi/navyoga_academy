@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/data/attendance_data.dart';
+import 'package:navyoga_academy/models/ClassWiseStatModel.dart';
+import 'package:navyoga_academy/models/MonthlyStatModel.dart';
 import 'package:navyoga_academy/models/attendance_stat_model.dart';
-import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/models/detail_model.dart';
+import 'package:navyoga_academy/models/insight_model.dart';
+import 'package:navyoga_academy/models/progress_model.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/attendance_stat_card.dart';
@@ -15,7 +19,6 @@ import 'package:navyoga_academy/widgets/attandance_section_card.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
 import 'package:navyoga_academy/models/attendance_api_model.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -25,6 +28,13 @@ class AttendanceScreen extends StatefulWidget {
 }
 
 class _AttendanceScreenState extends State<AttendanceScreen> {
+  String formatMinutes(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+
+    return "${hours}h ${mins}m";
+  }
+
   final attendanceService = AttendanceService();
 
   AttendanceApiModel? attendance;
@@ -72,6 +82,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         classesAttended: present,
         missedClasses: absent,
         streak: 0,
+        totalMinutesThisMonth: 0,
+        previousMonthMinutes: 0,
+        monthlyGoalMinutes: 0,
+        monthlyStats: [
+          MonthlyStatModel(
+            month: "January",
+            minutes: 3000,
+            attended: 28,
+            totalClasses: 30,
+            progress: 0.93,
+          ),
+        ],
+
+        classWiseStats: [
+          ClassWiseStatModel(
+            className: "Advanced Hatha Yoga",
+            minutes: 1080,
+            attended: 12,
+            totalClasses: 14,
+            progress: 0.86,
+          ),
+        ],
       );
 
       isLoading = false;
@@ -80,6 +112,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final avgMinutes =
+        (attendance?.totalMinutesThisMonth ?? 0) ~/
+        (DateTime.now().day == 0 ? 1 : DateTime.now().day);
+
+    final goalPercentage =
+        ((attendance?.totalMinutesThisMonth ?? 0) /
+            ((attendance?.monthlyGoalMinutes ?? 1))) *
+        100;
+
     return AppScaffold(
       currentIndex: 3,
       drawer: const CustomDrawer(currentPage: "Attendance"),
@@ -148,44 +189,94 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   const SizedBox(height: 20),
 
                   /// DETAILS
-                  ...AttendanceData.details.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final e = entry.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: AnimatedItem(
-                        index: index + 2,
-                        child: DetailCard(e),
+                  AnimatedItem(
+                    index: 2,
+                    child: DetailCard(
+                      DetailModel(
+                        title: "Total Time This Month",
+                        value: formatMinutes(
+                          attendance?.totalMinutesThisMonth ?? 0,
+                        ),
+                        subtitle:
+                            "+${formatMinutes((attendance?.totalMinutesThisMonth ?? 0) - (attendance?.previousMonthMinutes ?? 0))} from last month",
+                        icon: Icons.timer,
+                        color: Colors.orange,
                       ),
-                    );
-                  }),
+                    ),
+                  ),
 
                   const SizedBox(height: 6),
 
-                  /// INSIGHTS (top)
-                  ...AttendanceData.insights.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final e = entry.value;
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AnimatedItem(
-                        index: index + 5,
-                        child: InsightCard(data: e),
+                  AnimatedItem(
+                    index: 5,
+                    child: InsightCard(
+                      data: InsightModel(
+                        title: "Average Per Day",
+                        value: formatMinutes(avgMinutes),
+                        unit: "",
+                        subtitle: "Last 30 days",
+                        extra: "",
+                        icon: Icons.access_time,
+                        color: Colors.teal,
+                        type: "simple",
                       ),
-                    );
-                  }),
+                    ),
+                  ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+
+                  AnimatedItem(
+                    index: 6,
+                    child: InsightCard(
+                      data: InsightModel(
+                        title: "Current Streak",
+                        value: "${attendance?.streak ?? 0}",
+                        unit: "days",
+                        subtitle: "Current practice streak",
+                        extra: "",
+                        icon: Icons.local_fire_department,
+                        color: Colors.orange,
+                        type: "simple",
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  AnimatedItem(
+                    index: 7,
+                    child: InsightCard(
+                      data: InsightModel(
+                        title: "Monthly Goal",
+                        value: "${goalPercentage.round()}%",
+                        unit: "",
+                        subtitle:
+                            "${formatMinutes(attendance?.totalMinutesThisMonth ?? 0)} of "
+                            "${formatMinutes(attendance?.monthlyGoalMinutes ?? 0)} target",
+                        extra: "",
+                        icon: Icons.gps_fixed,
+                        color: Colors.deepPurple,
+                        type: "simple",
+                      ),
+                    ),
+                  ),
 
                   /// MONTHLY
                   AnimatedItem(
                     index: 8,
                     child: _buildSection(
                       "Monthly Statistics",
-                      AttendanceData.monthly
-                          .map((e) => ProgressRow(e))
+                      (attendance?.monthlyStats ?? [])
+                          .map(
+                            (e) => ProgressRow(
+                              ProgressModel(
+                                title: e.month,
+                                sub1: formatMinutes(e.minutes),
+                                sub2: "${e.attended}/${e.totalClasses} classes",
+                                progress: e.progress,
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -196,8 +287,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     index: 9,
                     child: _buildSection(
                       "Class-wise Time & Attendance",
-                      AttendanceData.classWise
-                          .map((e) => ClassProgressRow(e))
+                      (attendance?.classWiseStats ?? [])
+                          .map(
+                            (e) => ClassProgressRow(
+                              ProgressModel(
+                                title: e.className,
+                                sub1: formatMinutes(e.minutes),
+                                sub2: "${e.attended}/${e.totalClasses}",
+                                progress: e.progress,
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),

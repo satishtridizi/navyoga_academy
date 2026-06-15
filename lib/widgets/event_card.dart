@@ -82,6 +82,8 @@ class EventCard extends StatelessWidget {
                       style: const TextStyle(color: Colors.grey),
                     ),
 
+                  if (isCompact) const SizedBox.shrink(),
+
                   const SizedBox(height: 10),
 
                   /// INFO
@@ -115,7 +117,7 @@ class EventCard extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
           child: CachedNetworkImage(
             imageUrl: event.image,
-            height: isCompact ? 140 : 200,
+            height: isCompact ? 100 : 200,
             width: double.infinity,
             fit: BoxFit.cover,
 

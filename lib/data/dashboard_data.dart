@@ -8,7 +8,7 @@ import 'package:navyoga_academy/models/dashboard_stat_model.dart';
 import 'package:navyoga_academy/models/dashboard_video_model.dart';
 
 class HomeData {
-  static const stats = [
+  static final stats = [
     StatModel(
       title: "Enrolled Classes",
       value: "8",
@@ -36,8 +36,12 @@ class HomeData {
     ),
   ];
 
-  static const classes = [
+  static final classes = [
     ClassModel(
+      description: "",
+      video: "",
+      thumbnail: "",
+      durationMinutes: 60,
       id: "1",
       title: "Advanced Hatha Yoga",
       trainer: "Priya Sharma",
@@ -52,6 +56,10 @@ class HomeData {
     ),
 
     ClassModel(
+      description: "",
+      video: "",
+      thumbnail: "",
+      durationMinutes: 60,
       id: "2",
       title: "Pranayama Basics",
       trainer: "Rahul Kumar",
@@ -66,6 +74,10 @@ class HomeData {
     ),
 
     ClassModel(
+      description: "",
+      video: "",
+      thumbnail: "",
+      durationMinutes: 60,
       id: "3",
       title: "Meditation & Mindfulness",
       trainer: "Anita Verma",
@@ -80,6 +92,10 @@ class HomeData {
     ),
 
     ClassModel(
+      description: "",
+      video: "",
+      thumbnail: "",
+      durationMinutes: 60,
       id: "4",
       title: "Power Yoga Flow",
       trainer: "Vikram Singh",
@@ -94,7 +110,7 @@ class HomeData {
     ),
   ];
 
-  static const videos = [
+  static final videos = [
     VideoModel(
       title: "Introduction to Ashtanga",
       trainer: "Priya Sharma",
@@ -164,7 +180,7 @@ class HomeData {
       color: Colors.orange,
     ),
   ];
-  static const referrals = [
+  static final referrals = [
     ReferralModel(
       value: "12",
       title: "Total Referrals",

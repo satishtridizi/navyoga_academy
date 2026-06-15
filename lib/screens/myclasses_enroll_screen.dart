@@ -131,12 +131,10 @@ class EnrollScreen extends StatelessWidget {
 
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "Successfully enrolled in ${classData.title} 🎉",
-                        ),
-                      ),
+                    Navigator.pushNamed(
+                      context,
+                      '/payment',
+                      arguments: classData,
                     );
                   },
 

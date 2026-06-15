@@ -21,6 +21,7 @@ class Subscription {
 }
 
 class Plan {
+  final String id;
   final String name;
   final String price;
   final String yearly;
@@ -31,6 +32,7 @@ class Plan {
   final List<String> features;
 
   Plan({
+    required this.id,
     required this.name,
     required this.price,
     required this.yearly,

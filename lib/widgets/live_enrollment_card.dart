@@ -55,6 +55,10 @@ class LiveEnrollmentCard extends StatelessWidget {
                 context,
                 AppRoutes.liveClass,
                 arguments: ClassModel(
+                  description: "",
+                  video: "",
+                  thumbnail: "",
+                  durationMinutes: 60,
                   id: enrollment.id,
                   title: enrollment.title,
                   trainer: enrollment.trainer,

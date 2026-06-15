@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 
-Widget paymentCard(PaymentMethod m) {
+Widget paymentCard(PaymentMethod m, {VoidCallback? onDelete}) {
   return TweenAnimationBuilder<double>(
     tween: Tween(begin: 0.96, end: 1),
     duration: const Duration(milliseconds: 400),
@@ -76,7 +76,10 @@ Widget paymentCard(PaymentMethod m) {
           const SizedBox(width: 10),
 
           /// DELETE
-          const Icon(Icons.close, color: Colors.red),
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(Icons.close, color: Colors.red),
+          ),
         ],
       ),
     ),

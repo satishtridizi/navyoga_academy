@@ -43,6 +43,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
       }
       final res = await _eventService.enrollEvent(widget.event.id, token);
 
+      print("EVENT ENROLL RESPONSE = $res");
       if (res["success"] == true) {
         setState(() {
           isEnrolled = true;

@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:navyoga_academy/data/profile_data.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
+import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
-import 'package:navyoga_academy/screens/workshops_screen.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
@@ -322,6 +322,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                 );
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SubscriptionScreen(),
+                                  ),
+                                );
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
@@ -463,77 +470,76 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   const SizedBox(height: 10),
 
-                  sectionHeader(
-                    Icons.videocam,
-                    "Recent Recordings",
-                    onViewAllTap: () {
-                      Navigator.pushNamed(context, AppRoutes.recordings);
-                    },
-                    viewAllText: "View All →",
-                  ),
+                  // sectionHeader(
+                  //   Icons.videocam,
+                  //   "Recent Recordings",
+                  //   onViewAllTap: () {
+                  //     Navigator.pushNamed(context, AppRoutes.recordings);
+                  //   },
+                  //   viewAllText: "View All →",
+                  // ),
 
-                  const SizedBox(height: 10),
+                  // const SizedBox(height: 10),
 
-                  Column(
-                    children: List.generate(
-                      recordings.length > 3 ? 3 : recordings.length,
-                      (index) {
-                        final recording = recordings[index];
+                  // Column(
+                  //   children: List.generate(
+                  //     recordings.length > 3 ? 3 : recordings.length,
+                  //     (index) {
+                  //       final recording = recordings[index];
 
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: const Icon(
-                              Icons.play_circle_fill,
-                              color: Colors.deepPurple,
-                            ),
-                            title: Text(recording.title),
-                            subtitle: Text(recording.yogaType),
-                            trailing: const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 16,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => RecordingPlayerScreen(
-                                    recording: recording,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  //       return Card(
+                  //         margin: const EdgeInsets.only(bottom: 12),
+                  //         child: ListTile(
+                  //           leading: const Icon(
+                  //             Icons.play_circle_fill,
+                  //             color: Colors.deepPurple,
+                  //           ),
+                  //           title: Text(recording.title),
+                  //           subtitle: Text(recording.yogaType),
+                  //           trailing: const Icon(
+                  //             Icons.arrow_forward_ios,
+                  //             size: 16,
+                  //           ),
+                  //           onTap: () {
+                  //             Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                 builder: (_) => RecordingPlayerScreen(
+                  //                   recording: recording,
+                  //                 ),
+                  //               ),
+                  //             );
+                  //           },
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
 
-                  /// 🏆 ACHIEVEMENTS
-                  sectionHeader(
-                    Icons.emoji_events,
-                    "Your Achievements",
-                    onViewAllTap: () {
-                      Navigator.pushNamed(context, AppRoutes.profile);
-                    },
-                    viewAllText: "View All →",
-                  ),
-                  const SizedBox(height: 10),
+                  // /// 🏆 ACHIEVEMENTS
+                  // sectionHeader(
+                  //   Icons.emoji_events,
+                  //   "Your Achievements",
+                  //   onViewAllTap: () {
+                  //     Navigator.pushNamed(context, AppRoutes.profile);
+                  //   },
+                  //   viewAllText: "View All →",
+                  // ),
+                  // const SizedBox(height: 10),
 
-                  if (achievements.isEmpty)
-                    const Center(child: Text("No achievements found"))
-                  else
-                    Column(
-                      children: achievements.map((achievement) {
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.profile);
-                          },
-                          child: AchievementCard(data: achievement),
-                        );
-                      }).toList(),
-                    ),
-
+                  // if (achievements.isEmpty)
+                  //   const Center(child: Text("No achievements found"))
+                  // else
+                  //   Column(
+                  //     children: achievements.map((achievement) {
+                  //       return GestureDetector(
+                  //         onTap: () {
+                  //           Navigator.pushNamed(context, AppRoutes.profile);
+                  //         },
+                  //         child: AchievementCard(data: achievement),
+                  //       );
+                  //     }).toList(),
+                  //   ),
                   const SizedBox(height: 30),
 
                   /// ACTIONS

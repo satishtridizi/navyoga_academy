@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/change_password_screen.dart';
-
 import 'package:navyoga_academy/screens/events_screen.dart';
 import 'package:navyoga_academy/screens/leads_screen.dart';
 import 'package:navyoga_academy/screens/live_classes_list.dart';
@@ -9,12 +8,14 @@ import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/notifications_screen.dart';
 import 'package:navyoga_academy/screens/payment_history_screen.dart';
+import 'package:navyoga_academy/screens/payment_screen.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
 import 'package:navyoga_academy/screens/redeem_screen.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
+import 'package:navyoga_academy/screens/self_paced_progress_screen.dart';
 import 'package:navyoga_academy/screens/splash_screen.dart';
 import '../screens/live_class_screen.dart';
 import '../screens/dashboard.dart';
@@ -45,7 +46,8 @@ class AppRoutes {
 
   static const liveClassesList = "/live-classes-list";
   static const changePassword = "/change-password";
-
+  static const payment = "/payment";
+  static const selfPacedProgress = "/self-paced-progress";
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
 
@@ -87,5 +89,8 @@ class AppRoutes {
     liveClassesList: (_) => const LiveClassesListScreen(),
 
     changePassword: (_) => const ChangePasswordScreen(),
+
+    "/payment": (_) => const PaymentScreen(),
+    selfPacedProgress: (_) => const SelfPacedProgressScreen(),
   };
 }
