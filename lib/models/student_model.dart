@@ -4,6 +4,7 @@ class StudentModel {
   final String email;
   final String phone;
   final String? profileImage;
+  final String? createdAt;
 
   StudentModel({
     required this.id,
@@ -11,6 +12,7 @@ class StudentModel {
     required this.email,
     required this.phone,
     this.profileImage,
+    this.createdAt,
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class StudentModel {
       email: json["email"] ?? "",
       phone: json["phone"] ?? "",
       profileImage: json["profileImage"],
+      createdAt: json['createdAt'],
     );
   }
 }

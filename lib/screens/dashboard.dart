@@ -29,6 +29,7 @@ import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -379,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 0,
                         child: StatCard(
                           "Enrolled Classes",
-                          dashboard?.enrolledClasses.toString() ?? "0",
+                          EnrollmentService.enrolledClasses.length.toString(),
                           "+2 this month",
                           Color.fromARGB(255, 255, 89, 24),
                           onTap: () {
@@ -391,11 +392,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 1,
                         child: StatCard(
                           "Hours Completed",
-                          dashboard?.practiceHours.toString() ?? "0",
+                          EnrollmentService.hoursCompleted.toString(),
                           "+18 this week",
                           Color.fromARGB(255, 169, 43, 191),
                           onTap: () {
-                            Navigator.pushNamed(context, AppRoutes.selfPaced);
+                            Navigator.pushNamed(context, AppRoutes.attendance);
                           },
                         ),
                       ),
@@ -403,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 2,
                         child: StatCard(
                           "Recordings Watched",
-                          dashboard?.recordingsWatched.toString() ?? "0",
+                          EnrollmentService.recordingsWatched.toString(),
                           "+8 this week",
                           Color.fromARGB(255, 43, 191, 117),
                           onTap: () {
@@ -416,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 3,
                         child: StatCard(
                           "Attendance Rate",
-                          "${dashboard?.attendanceRate ?? 0}%",
+                          "${EnrollmentService.attendanceRate}%",
                           "+5% improvement",
                           Colors.orange,
                           onTap: () {
@@ -440,34 +441,54 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     viewAllText: showAllUpcoming ? "Show Less ↑" : "View All →",
                   ),
+                  // Column(
+                  //   children: List.generate(
+                  //     showAllUpcoming
+                  //         ? upcomingClasses.length
+                  //         : (upcomingClasses.length > 2
+                  //               ? 2
+                  //               : upcomingClasses.length),
+                  //     (index) {
+                  //       final cls = upcomingClasses[index];
+
+                  //       return ClassCard(
+                  //         cls["name"] ?? "Class",
+                  //         cls["instructor"] ?? "Instructor",
+                  //         "${cls["duration"] ?? 0} mins",
+                  //         onJoin: () {
+                  //           final classModel = ClassModel.fromJson(cls);
+
+                  //           Navigator.pushNamed(
+                  //             context,
+                  //             AppRoutes.liveClass,
+                  //             arguments: classModel,
+                  //           );
+                  //         },
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                   Column(
                     children: List.generate(
-                      showAllUpcoming
-                          ? upcomingClasses.length
-                          : (upcomingClasses.length > 2
-                                ? 2
-                                : upcomingClasses.length),
+                      EnrollmentService.enrolledClasses.length,
                       (index) {
-                        final cls = upcomingClasses[index];
+                        final cls = EnrollmentService.enrolledClasses[index];
 
                         return ClassCard(
-                          cls["name"] ?? "Class",
-                          cls["instructor"] ?? "Instructor",
-                          "${cls["duration"] ?? 0} mins",
+                          cls.title,
+                          cls.trainer,
+                          cls.duration,
                           onJoin: () {
-                            final classModel = ClassModel.fromJson(cls);
-
                             Navigator.pushNamed(
                               context,
                               AppRoutes.liveClass,
-                              arguments: classModel,
+                              arguments: cls,
                             );
                           },
                         );
                       },
                     ),
                   ),
-
                   const SizedBox(height: 10),
 
                   // sectionHeader(

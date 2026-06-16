@@ -3,7 +3,7 @@ import 'package:navyoga_academy/models/settings_security_field_model.dart';
 
 class SettingsSecuritySection extends StatelessWidget {
   final List<SecurityField> securityFields;
-  final bool twoFactorEnabled;
+  //final bool twoFactorEnabled;
   final ValueChanged<bool> onTwoFactorChanged;
   final VoidCallback onUpdatePassword;
 
@@ -15,7 +15,7 @@ class SettingsSecuritySection extends StatelessWidget {
   const SettingsSecuritySection({
     super.key,
     required this.securityFields,
-    required this.twoFactorEnabled,
+    //required this.twoFactorEnabled,
     required this.onTwoFactorChanged,
     required this.onUpdatePassword,
     // ✅ ADD THESE THREE
@@ -116,52 +116,56 @@ class SettingsSecuritySection extends StatelessWidget {
             );
           }).toList(),
 
-          ElevatedButton(
-            onPressed: onUpdatePassword,
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-            child: const Text(
-              "Update Password",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          Center(
+            child: SizedBox(
+              width: 330,
+              child: ElevatedButton(
+                onPressed: onUpdatePassword,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                ),
+                child: const Text(
+                  "Update Password",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ),
 
-          const SizedBox(height: 20),
+          // const SizedBox(height: 20),
 
-          Container(height: 1, color: Colors.deepOrange.withOpacity(.2)),
+          // Container(height: 1, color: Colors.deepOrange.withOpacity(.2)),
 
-          const SizedBox(height: 16),
+          // const SizedBox(height: 16),
 
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.deepOrange.withOpacity(.2)),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Two-Factor Authentication",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        "Add an extra layer of security",
-                        style: TextStyle(color: Colors.blueGrey),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(value: twoFactorEnabled, onChanged: onTwoFactorChanged),
-              ],
-            ),
-          ),
+          // Container(
+          //   padding: const EdgeInsets.all(16),
+          //   decoration: BoxDecoration(
+          //     border: Border.all(color: Colors.deepOrange.withOpacity(.2)),
+          //     borderRadius: BorderRadius.circular(18),
+          //   ),
+          //   child: Row(
+          //     children: [
+          //       const Expanded(
+          //         child: Column(
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             Text(
+          //               "Two-Factor Authentication",
+          //               style: TextStyle(fontWeight: FontWeight.bold),
+          //             ),
+          //             SizedBox(height: 4),
+          //             Text(
+          //               "Add an extra layer of security",
+          //               style: TextStyle(color: Colors.blueGrey),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //       Switch(value: twoFactorEnabled, onChanged: onTwoFactorChanged),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

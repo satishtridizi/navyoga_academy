@@ -2,7 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 
 class RewardSummarySection extends StatelessWidget {
-  const RewardSummarySection({super.key});
+  final int availableBalance;
+  final int totalEarned;
+  final int redeemed;
+  final int pending;
+
+  const RewardSummarySection({
+    super.key,
+    required this.availableBalance,
+    required this.totalEarned,
+    required this.redeemed,
+    required this.pending,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +70,16 @@ class RewardSummarySection extends StatelessWidget {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Available Balance", style: TextStyle(fontSize: 14)),
-                    SizedBox(height: 8),
+                  children: [
                     Text(
-                      "₹ 2400",
-                      style: TextStyle(
+                      "₹ $availableBalance",
+                      style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.deepPurple,
                       ),
                     ),
+                    const SizedBox(height: 8),
                   ],
                 ),
                 const Icon(Icons.star_border, color: Colors.orange),
@@ -80,17 +90,35 @@ class RewardSummarySection extends StatelessWidget {
           const SizedBox(height: 16),
 
           /// 🔹 Stats
-          _rowItem("Total Earned", "₹ 3600"),
-          _rowItem("Redeemed", "₹ 1200"),
-          _rowItem("Pending", "₹ 600"),
-
+          _rowItem("Total Earned", "₹ $totalEarned"),
+          _rowItem("Redeemed", "₹ 0"),
+          _rowItem("Pending", "₹ 0"),
           const SizedBox(height: 16),
 
           /// 🔹 Button
           InkWell(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
             onTap: () {
-              Navigator.pushNamed(context, AppRoutes.redeem);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: const Color(0xFFEFF5FB),
+                  duration: const Duration(seconds: 3),
+                  content: Row(
+                    children: const [
+                      Icon(Icons.info, color: Colors.blue),
+                      SizedBox(width: 10),
+                      Text(
+                        "Redemption flow coming soon",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 0, 128, 233),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
             child: Container(
               width: double.infinity,

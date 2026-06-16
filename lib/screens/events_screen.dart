@@ -209,7 +209,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                   const SizedBox(height: 30),
 
-                  /// 🔥 FEATURED TITLE
+                  /// 🔥 FEATURED EVENTS
                   Row(
                     children: [
                       Container(
@@ -221,10 +221,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         child: const Icon(Icons.star, color: Colors.white),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        "Featured Events",
-                        style: TextStyle(
-                          fontSize: 20,
+                      Text(
+                        "Featured Events (${events.length > 4 ? 4 : events.length})",
+                        style: const TextStyle(
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.deepOrange,
                         ),
@@ -234,52 +234,48 @@ class _EventsScreenState extends State<EventsScreen> {
 
                   const SizedBox(height: 20),
 
-                  SizedBox(
-                    height: 420,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: events.length > 4 ? 4 : events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: events.length > 4 ? 4 : events.length,
+                    itemBuilder: (context, index) {
+                      final event = events[index];
 
-                        return SizedBox(
-                          width: 300,
-                          child: EventCard(
-                            event: EventModel(
-                              isEnrolled: event.isEnrolled,
-                              id: event.id,
-                              title: event.title,
-                              description: event.description,
-                              date: event.date,
-                              location: event.location,
-                              price: "₹${event.price}",
-                              seats: event.capacity.toString(),
-                              image: event.thumbnail,
-                              tags: [],
-                            ),
-                            isCompact: true,
-                            onTap: () => _openDetails(
-                              context,
-                              EventModel(
-                                isEnrolled: event.isEnrolled,
-                                id: event.id,
-                                title: event.title,
-                                description: event.description,
-                                date: event.date,
-                                location: event.location,
-                                price: "₹${event.price}",
-                                seats: event.capacity.toString(),
-                                image: event.thumbnail,
-                                tags: [],
-                              ),
-                            ),
+                      return EventCard(
+                        event: EventModel(
+                          isEnrolled: event.isEnrolled,
+                          id: event.id,
+                          title: event.title,
+                          description: event.description,
+                          date: event.date,
+                          location: event.location,
+                          price: "₹${event.price}",
+                          seats: event.capacity.toString(),
+                          image: event.thumbnail,
+                          tags: [],
+                        ),
+                        isCompact: true,
+                        onTap: () => _openDetails(
+                          context,
+                          EventModel(
+                            isEnrolled: event.isEnrolled,
+                            id: event.id,
+                            title: event.title,
+                            description: event.description,
+                            date: event.date,
+                            location: event.location,
+                            price: "₹${event.price}",
+                            seats: event.capacity.toString(),
+                            image: event.thumbnail,
+                            tags: [],
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
+
                   Text(
                     "All Events (${totalEvents})",
                     style: const TextStyle(
@@ -288,6 +284,7 @@ class _EventsScreenState extends State<EventsScreen> {
                       color: Colors.deepOrange,
                     ),
                   ),
+
                   const SizedBox(height: 20),
 
                   events.isEmpty
@@ -337,6 +334,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             );
                           },
                         ),
+
                   const SizedBox(height: 30),
                 ],
               ),
@@ -344,10 +342,14 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  void _openDetails(BuildContext context, EventModel event) {
-    Navigator.push(
+  Future<void> _openDetails(BuildContext context, EventModel event) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => EventDetailsScreen(event: event)),
     );
+
+    if (result == true) {
+      await loadEvents();
+    }
   }
 }

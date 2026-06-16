@@ -82,11 +82,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       student = studentData;
       achievements = response["data"]["achievements"] ?? [];
-      nameController.text = studentData.name;
-      emailController.text = studentData.email;
-      phoneController.text = studentData.phone;
-      profileImageUrl = studentData.profileImage;
+      // nameController.text = studentData.name;
+      // emailController.text = studentData.email;
+      // phoneController.text = studentData.phone;
+      // profileImageUrl = studentData.profileImage;
     });
+    print("PROFILE DATA = ${response["data"]}");
   }
 
   Future<void> pickImage() async {
@@ -160,6 +161,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  String getMemberSince() {
+    if (student?.createdAt == null) {
+      return "Member";
+    }
+
+    final date = DateTime.parse(student!.createdAt!);
+
+    const months = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return "Member since ${months[date.month]} ${date.year}";
+  }
+
   @override
   void dispose() {
     nameController.dispose();
@@ -224,6 +251,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
+            Align(alignment: Alignment.centerRight, child: buildMemberSince()),
+
+            const SizedBox(height: 12),
+
             /// 👤 PERSONAL INFO
             ProfileSection(
               title: "Personal Information",
@@ -253,23 +284,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 20),
 
                   /// 📊 STATS
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: ProfileData.stats.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.1,
-                        ),
-                    itemBuilder: (_, i) =>
-                        ProfileStatCard(ProfileData.stats[i]),
-                  ),
-
-                  const SizedBox(height: 20),
-
+                  // GridView.builder(
+                  //   shrinkWrap: true,
+                  //   physics: const NeverScrollableScrollPhysics(),
+                  //   itemCount: ProfileData.stats.length,
+                  //   gridDelegate:
+                  //       const SliverGridDelegateWithFixedCrossAxisCount(
+                  //         crossAxisCount: 2,
+                  //         crossAxisSpacing: 12,
+                  //         mainAxisSpacing: 12,
+                  //         childAspectRatio: 1.1,
+                  //       ),
+                  //   itemBuilder: (_, i) =>
+                  //       ProfileStatCard(ProfileData.stats[i]),
+                  // ),
+                  // const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -300,87 +329,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            ProfileSection(
-              title: "Security",
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.changePassword);
-                      },
-                      icon: const Icon(Icons.lock, color: Colors.white),
-                      label: const Text(
-                        "Change Password",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // ProfileSection(
+            //   title: "Security",
+            //   child: Column(
+            //     children: [
+            //       SizedBox(
+            //         width: double.infinity,
+            //         child: ElevatedButton.icon(
+            //           onPressed: () {
+            //             Navigator.pushNamed(context, AppRoutes.changePassword);
+            //           },
+            //           icon: const Icon(Icons.lock, color: Colors.white),
+            //           label: const Text(
+            //             "Change Password",
+            //             style: TextStyle(color: Colors.white),
+            //           ),
+            //           style: ElevatedButton.styleFrom(
+            //             backgroundColor: Colors.purple,
+            //             padding: const EdgeInsets.symmetric(vertical: 16),
+            //             shape: RoundedRectangleBorder(
+            //               borderRadius: BorderRadius.circular(30),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             /// 🎯 HEALTH GOALS
-            ProfileSection(
-              title: "Health Goals",
-              child: Column(
-                children: [
-                  ...ProfileData.goals.map((e) => GoalWidget(data: e)),
+            // ProfileSection(
+            //   title: "Health Goals",
+            //   child: Column(
+            //     children: [
+            //       ...ProfileData.goals.map((e) => GoalWidget(data: e)),
 
-                  const SizedBox(height: 16),
+            //       const SizedBox(height: 16),
 
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   child: OutlinedButton.icon(
-                  //     onPressed: () {
-                  //       // future: open add goal screen
-                  //     },
-                  //     icon: const Icon(
-                  //       Icons.track_changes,
-                  //       color: Colors.purple,
-                  //     ),
-                  //     label: const Text("Set New Goal"),
-                  //     style: OutlinedButton.styleFrom(
-                  //       side: const BorderSide(
-                  //         color: Colors.purple,
-                  //         width: 1.5,
-                  //       ),
-                  //       padding: const EdgeInsets.symmetric(vertical: 14),
-                  //       shape: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(30),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: OutlinedButton.icon(
+            //     onPressed: () {
+            //       // future: open add goal screen
+            //     },
+            //     icon: const Icon(
+            //       Icons.track_changes,
+            //       color: Colors.purple,
+            //     ),
+            //     label: const Text("Set New Goal"),
+            //     style: OutlinedButton.styleFrom(
+            //       side: const BorderSide(
+            //         color: Colors.purple,
+            //         width: 1.5,
+            //       ),
+            //       padding: const EdgeInsets.symmetric(vertical: 14),
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(30),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            //     ],
+            //   ),
+            // ),
 
             /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
-            ProfileSection(
-              title: "Your Achievements",
-              child: achievements.isEmpty
-                  ? const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text(
-                        "No achievements yet",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : Column(
-                      children: achievements.map((achievement) {
-                        return AchievementCard(data: achievement);
-                      }).toList(),
-                    ),
-            ),
+            // ProfileSection(
+            //   title: "Your Achievements",
+            //   child: achievements.isEmpty
+            //       ? const Padding(
+            //           padding: EdgeInsets.all(16),
+            //           child: Text(
+            //             "No achievements yet",
+            //             style: TextStyle(color: Colors.grey),
+            //           ),
+            //         )
+            //       : Column(
+            //           children: achievements.map((achievement) {
+            //             return AchievementCard(data: achievement);
+            //           }).toList(),
+            //         ),
+            // ),
 
             /// 🏥 MEDICAL INFO
             ProfileSection(
@@ -428,6 +457,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildMemberSince() {
+    return InkWell(
+      onTap: () {
+        print("Member badge clicked");
+      },
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.deepOrange.shade200),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.calendar_today_outlined,
+              color: Colors.deepOrange,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              getMemberSince(),
+              style: const TextStyle(
+                color: Colors.deepOrange,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),

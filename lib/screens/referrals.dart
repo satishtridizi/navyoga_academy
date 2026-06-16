@@ -332,7 +332,12 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     FadeEffect(duration: Duration(milliseconds: 500)),
                     SlideEffect(begin: Offset(0, 0.1), end: Offset(0, 0)),
                   ],
-                  child: RewardSummarySection(),
+                  child: RewardSummarySection(
+                    availableBalance: availableBalance,
+                    totalEarned: totalEarned,
+                    redeemed: 0,
+                    pending: 0,
+                  ),
                 ),
 
                 const SizedBox(height: 20),

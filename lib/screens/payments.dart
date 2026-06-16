@@ -242,7 +242,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
 
     return AppScaffold(
       currentIndex: null,
-      drawer: const CustomDrawer(currentPage: "Payments"),
+      drawer: const CustomDrawer(currentPage: "Subscription"),
 
       /// 🔥 APP BAR
       appBar: AppBar(

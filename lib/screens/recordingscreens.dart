@@ -11,6 +11,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
 import 'package:navyoga_academy/models/recording_model.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class RecordingsDashboard extends StatefulWidget {
   const RecordingsDashboard({super.key});
@@ -93,25 +94,14 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-
-                decoration: const BoxDecoration(
-                  color: Colors.deepPurple,
-                  shape: BoxShape.circle,
-                ),
-
-                child: const Icon(Icons.menu, color: Colors.white),
-              ),
-
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
+
         title: Image.asset(
           'assets/logo/logo_transparent_clean.png',
           height: 60,
@@ -374,6 +364,10 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                       subtitle: Text(recording.yogaType),
 
                       onTap: () {
+                        EnrollmentService.recordingsWatched++;
+
+                        setState(() {});
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import '../routes/app_routes.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class AvailableClassCard extends StatelessWidget {
   final ClassModel data;
@@ -9,6 +10,9 @@ class AvailableClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnrolled = EnrollmentService.enrolledClasses.any(
+      (e) => e.title == data.title,
+    );
     final Color mainColor = data.color;
 
     return Container(
@@ -77,29 +81,34 @@ class AvailableClassCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRoutes.enrollClass,
-                  arguments: data,
-                );
-              },
+              onPressed: isEnrolled
+                  ? null
+                  : () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.enrollClass,
+                        arguments: data,
+                      );
+                    },
+
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepOrange,
+                backgroundColor: isEnrolled ? Colors.green : Colors.deepOrange,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 elevation: 6,
               ),
-              icon: const Icon(
-                Icons.auto_awesome,
+
+              icon: Icon(
+                isEnrolled ? Icons.check_circle : Icons.auto_awesome,
                 color: Colors.white,
                 size: 18,
               ),
-              label: const Text(
-                "Enroll Now",
-                style: TextStyle(
+
+              label: Text(
+                isEnrolled ? "Enrolled" : "Enroll Now",
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),

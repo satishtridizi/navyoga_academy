@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/payments_models.dart';
 import 'package:navyoga_academy/services/payment_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
@@ -25,6 +26,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
     });
 
     print("INITIATE RESPONSE => $response");
+
+    if (response["success"] != true) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response["message"] ?? "Unable to initiate payment"),
+        ),
+      );
+
+      return;
+    }
 
     final data = response["data"];
 
@@ -98,7 +111,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final Plan plan = ModalRoute.of(context)!.settings.arguments as Plan;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Checkout")),
+      // currentIndex: null,
+      drawer: const CustomDrawer(currentPage: "Payments"),
+
+      /// 🔥 APP BAR
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black54),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 60,
+        ),
+        centerTitle: true,
+      ),
 
       body: Padding(
         padding: const EdgeInsets.all(20),

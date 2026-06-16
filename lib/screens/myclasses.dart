@@ -5,14 +5,11 @@ import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import 'package:navyoga_academy/models/myclasses_stats_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/workshop_service.dart';
-import 'package:navyoga_academy/services/ytt_live_service.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/widgets/live_enrollment_card.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 import 'package:navyoga_academy/widgets/myclasses_available_class_card.dart';
-import 'package:navyoga_academy/widgets/myclasses_course_card.dart';
-import 'package:navyoga_academy/data/myclasses_stats_data.dart';
-import 'package:navyoga_academy/services/dashboard_service.dart';
 
 class MyClassesScreen extends StatefulWidget {
   const MyClassesScreen({super.key});
@@ -69,7 +66,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
           );
         }).toList();
 
-        enrolledCount = enrolledClasses.length;
+        enrolledCount = EnrollmentService.enrolledClasses.length;
 
         completedCount = enrolledClasses
             .where((e) => e.status == "COMPLETED")
@@ -163,13 +160,13 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
         elevation: 0,
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.deepPurple),
-
+            icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
           ),
         ),
+
         title: Image.asset(
           'assets/logo/logo_transparent_clean.png',
           height: 60,
@@ -379,7 +376,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  "Enrolled Classes (${enrolledClasses.length})",
+                  "Enrolled Classes (${EnrollmentService.enrolledClasses.length})",
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -397,7 +394,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 selectedSection == "progress") ...[
               Builder(
                 builder: (context) {
-                  final filteredEnrolled = getFilteredClasses();
+                  final filteredEnrolled = EnrollmentService.enrolledClasses;
 
                   if (filteredEnrolled.isEmpty) {
                     return const Padding(
@@ -411,7 +408,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
                   return Column(
                     children: filteredEnrolled
-                        .map((e) => LiveEnrollmentCard(enrollment: e))
+                        .map((e) => AvailableClassCard(data: e))
                         .toList(),
                   );
                 },

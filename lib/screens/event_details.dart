@@ -5,6 +5,8 @@ import 'package:navyoga_academy/widgets/app_background.dart';
 import '../models/event_model.dart';
 import '../services/event_service.dart';
 import '../utils/auth_manager.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:navyoga_academy/services/payment_service.dart';
 
 class EventDetailsScreen extends StatefulWidget {
   final EventModel event;
@@ -20,11 +22,19 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   bool isEnrolled = false;
   bool isLoading = false;
-
+  final Razorpay _razorpay = Razorpay();
+  final PaymentService _paymentService = PaymentService();
   @override
   void initState() {
     super.initState();
+
     isEnrolled = widget.event.isEnrolled;
+
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   Future<void> _enrollEvent() async {
@@ -66,6 +76,91 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  Future<void> startPayment() async {
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null) return;
+
+      final response = await _paymentService.initiatePayment(token, {
+        "type": "EVENT",
+        "entityId": widget.event.id,
+      });
+
+      print("PAYMENT RESPONSE = $response");
+
+      if (response["success"] == true) {
+        final data = response["data"];
+
+        var options = {
+          "key": data["key"],
+          "amount": data["amount"],
+          "order_id": data["orderId"],
+          "name": "Navyoga",
+          "description": widget.event.title,
+          "timeout": 300,
+        };
+
+        _razorpay.open(options);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response["message"] ?? "Payment initiation failed"),
+          ),
+        );
+      }
+    } catch (e) {
+      print("PAYMENT ERROR = $e");
+    }
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null) return;
+
+      final verifyResponse = await _paymentService.verifyPayment(token, {
+        "razorpayOrderId": response.orderId,
+        "razorpayPaymentId": response.paymentId,
+        "razorpaySignature": response.signature,
+      });
+
+      print("VERIFY RESPONSE = $verifyResponse");
+
+      if (verifyResponse["success"] == true) {
+        setState(() {
+          isEnrolled = true;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Payment Successful & Enrolled")),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Payment Failed: ${response.message}")),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("External Wallet: ${response.walletName}")),
+    );
   }
 
   @override
@@ -297,7 +392,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 child: const Text("Already Enrolled"),
                               )
                             : ElevatedButton(
-                                onPressed: isLoading ? null : _enrollEvent,
+                                onPressed: isLoading ? null : startPayment,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.deepOrange,
                                   elevation: 6,
@@ -309,7 +404,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                   ),
                                 ),
                                 child: const Text(
-                                  "Register Now",
+                                  "Pay & Register",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 17,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
+import 'package:navyoga_academy/services/enrollment_service.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
 
 class EnrollScreen extends StatelessWidget {
   const EnrollScreen({super.key});
@@ -131,10 +131,17 @@ class EnrollScreen extends StatelessWidget {
 
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Navigator.pushNamed(
+                    final alreadyEnrolled = EnrollmentService.enrolledClasses
+                        .any((e) => e.title == classData.title);
+
+                    if (!alreadyEnrolled) {
+                      EnrollmentService.enrolledClasses.add(classData);
+                    }
+
+                    Navigator.pushNamedAndRemoveUntil(
                       context,
-                      '/payment',
-                      arguments: classData,
+                      AppRoutes.myClasses,
+                      (route) => false,
                     );
                   },
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/YttLiveClassesScreen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
+import 'package:navyoga_academy/screens/payment_screen.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/recordingscreens.dart';
@@ -68,9 +70,7 @@ class CustomBottomBar extends StatelessWidget {
         children: const [
           BottomItem(Icons.menu_book, "My Classes"),
           BottomItem(Icons.videocam, "Recordings"),
-
-          SizedBox(width: 50), // space for FAB
-
+          BottomItem(Icons.dashboard, "Dashboard"),
           BottomItem(Icons.calendar_today, "Attendance"),
           BottomItem(Icons.person_outline, "Profile"),
         ],
@@ -99,6 +99,8 @@ class BottomItem extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (_) => const RecordingsDashboard()),
           );
+        } else if (label == "Dashboard") {
+          Navigator.pushNamed(context, AppRoutes.dashboard);
         } else if (label == "Attendance") {
           Navigator.push(
             context,
@@ -114,9 +116,12 @@ class BottomItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.deepPurple),
+          Icon(icon, color: Colors.grey.shade500),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
         ],
       ),
     );
@@ -136,12 +141,13 @@ class CustomDrawer extends StatelessWidget {
       {"icon": Icons.videocam, "title": "Recordings"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
       {"icon": Icons.event, "title": "Events"},
-      {"icon": Icons.school, "title": "Workshops"},
-      {"icon": Icons.live_tv, "title": "Live Classes"},
+      // {"icon": Icons.school, "title": "Workshops"},
+      // {"icon": Icons.live_tv, "title": "Live Classes"},
       {"icon": Icons.card_giftcard, "title": "Referrals"},
       {"icon": Icons.person_outline, "title": "Profile"},
-      {"icon": Icons.payment, "title": "Payments"},
+      {"icon": Icons.subscriptions_outlined, "title": "Subscription"},
       {"icon": Icons.settings, "title": "Settings"},
+      {"icon": Icons.cast_for_education, "title": "YTT Live Classes"},
     ];
 
     return Drawer(
@@ -266,16 +272,18 @@ class CustomDrawer extends StatelessWidget {
                         );
                       } else if (item["title"] == "Events") {
                         Navigator.pushNamed(context, AppRoutes.events);
-                      } else if (item["title"] == "Workshops") {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const WorkshopsScreen(),
-                          ),
-                        );
-                      } else if (item["title"] == "Live Classes") {
-                        Navigator.pushNamed(context, AppRoutes.liveClassesList);
-                      } else if (item["title"] == "Profile") {
+                      }
+                      // else if (item["title"] == "Workshops") {
+                      //   Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(
+                      //       builder: (_) => const WorkshopsScreen(),
+                      //     ),
+                      //   );
+                      // } else if (item["title"] == "Live Classes") {
+                      //   Navigator.pushNamed(context, AppRoutes.liveClassesList);
+                      // }
+                      else if (item["title"] == "Profile") {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -291,11 +299,18 @@ class CustomDrawer extends StatelessWidget {
                             builder: (_) => const AttendanceScreen(),
                           ),
                         );
-                      } else if (item["title"] == "Payments") {
+                      } else if (item["title"] == "Subscription") {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const SubscriptionScreen(),
+                          ),
+                        );
+                      } else if (item["title"] == "YTT Live Classes") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const YttLiveClassesScreen(),
                           ),
                         );
                       }

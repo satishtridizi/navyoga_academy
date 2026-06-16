@@ -487,13 +487,13 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.black),
-
+            icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
           ),
         ),
+
         title: Image.asset(
           'assets/logo/logo_transparent_clean.png',
           height: 60,
