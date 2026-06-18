@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/LiveClassData.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 
 class YttLiveClassesScreen extends StatelessWidget {
   const YttLiveClassesScreen({super.key});

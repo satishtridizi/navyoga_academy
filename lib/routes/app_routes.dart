@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/screens/YttLiveClassesScreen.dart';
+import 'package:navyoga_academy/screens/YttRecordedScreen.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
 import 'package:navyoga_academy/screens/change_password_screen.dart';
 import 'package:navyoga_academy/screens/enrollment_success_screen.dart';
@@ -19,7 +20,6 @@ import 'package:navyoga_academy/screens/self-paced_learning.dart';
 import 'package:navyoga_academy/screens/log_in.dart';
 import 'package:navyoga_academy/screens/self_paced_progress_screen.dart';
 import 'package:navyoga_academy/screens/splash_screen.dart';
-import 'package:navyoga_academy/services/ytt_live_service.dart';
 import '../screens/live_class_screen.dart';
 import '../screens/dashboard.dart';
 import '../screens/settings.dart';
@@ -52,6 +52,7 @@ class AppRoutes {
   static const payment = "/payment";
   static const selfPacedProgress = "/self-paced-progress";
   static const yttLiveClassesScreen = "/YttLiveClassesScreen";
+  static const yttrecorded = "/YttRecorded";
 
   static Map<String, WidgetBuilder> routes = {
     splash: (_) => const SplashScreen(),
@@ -102,5 +103,7 @@ class AppRoutes {
     enrollmentsuccess: (_) => const EnrollmentSuccessScreen(),
 
     yttLiveClassesScreen: (_) => const YttLiveClassesScreen(),
+
+    yttrecorded: (_) => const YttRecordedScreen(),
   };
 }

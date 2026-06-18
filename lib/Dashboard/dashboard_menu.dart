@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/YttLiveClassesScreen.dart';
+import 'package:navyoga_academy/screens/YttRecordedScreen.dart';
 import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/myprofile.dart';
 import 'package:navyoga_academy/screens/attendance.dart';
@@ -148,6 +149,7 @@ class CustomDrawer extends StatelessWidget {
       {"icon": Icons.subscriptions_outlined, "title": "Subscription"},
       {"icon": Icons.settings, "title": "Settings"},
       {"icon": Icons.cast_for_education, "title": "YTT Live Classes"},
+      {"icon": Icons.video_camera_front, "title": "YTT Recorded"},
     ];
 
     return Drawer(
@@ -311,6 +313,13 @@ class CustomDrawer extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const YttLiveClassesScreen(),
+                          ),
+                        );
+                      } else if (item["title"] == "YTT Recorded") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const YttRecordedScreen(),
                           ),
                         );
                       }
