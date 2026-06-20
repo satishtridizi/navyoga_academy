@@ -48,6 +48,7 @@ class AppData {
       seats: "18/30 seats",
       image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
       tags: ["Retreat", "Featured"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -61,6 +62,7 @@ class AppData {
       seats: "45/50 seats",
       image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
       tags: ["Workshop", "Featured"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -74,6 +76,7 @@ class AppData {
       seats: "22/25 seats",
       image: "https://images.unsplash.com/photo-1518611012118-696072aa579a",
       tags: ["Retreat", "Featured"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -87,6 +90,7 @@ class AppData {
       seats: "234/500 seats",
       image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
       tags: ["Special Event", "Featured"],
+      occupancy: '',
     ),
   ];
 
@@ -103,6 +107,7 @@ class AppData {
       seats: "18/30",
       image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
       tags: ["Retreat"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -116,6 +121,7 @@ class AppData {
       seats: "45/50",
       image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
       tags: ["Workshop"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -129,6 +135,7 @@ class AppData {
       seats: "67/100",
       image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
       tags: ["Masterclass"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -142,6 +149,7 @@ class AppData {
       seats: "22/25",
       image: "https://images.unsplash.com/photo-1518611012118-696072aa579a",
       tags: ["Retreat"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -155,6 +163,7 @@ class AppData {
       seats: "142/200",
       image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
       tags: ["Webinar"],
+      occupancy: '',
     ),
 
     EventModel(
@@ -168,6 +177,7 @@ class AppData {
       seats: "234/500",
       image: "https://images.unsplash.com/photo-1552196563-55cd4e45efb3",
       tags: ["Special Event"],
+      occupancy: '',
     ),
   ];
   // static final courses = [

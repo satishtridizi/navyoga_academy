@@ -138,6 +138,7 @@ class CustomDrawer extends StatelessWidget {
     final List<Map<String, dynamic>> menuItems = [
       {"icon": Icons.dashboard, "title": "Dashboard"},
       {"icon": Icons.menu_book, "title": "My Classes"},
+      //{"icon": Icons.check_circle, "title": "Enrollment Success"},
       {"icon": Icons.school, "title": "Self-Paced"},
       {"icon": Icons.videocam, "title": "Recordings"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
@@ -323,6 +324,12 @@ class CustomDrawer extends StatelessWidget {
                           ),
                         );
                       }
+                      // else if (item["title"] == "Enrollment Success") {
+                      //   Navigator.pushNamed(
+                      //     context,
+                      //     AppRoutes.enrollmentsuccess,
+                      //   );
+                      // }
                     },
                   ),
                 );

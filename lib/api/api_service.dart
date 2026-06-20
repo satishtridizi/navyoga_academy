@@ -18,16 +18,16 @@ class ApiService {
       final response = await http
           .post(
             Uri.parse(url),
-
             headers: {
               "Content-Type": "application/json",
-
               if (token != null) "Authorization": "Bearer $token",
             },
-
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 15));
+
+      print("STATUS CODE = ${response.statusCode}");
+      print("RESPONSE BODY = ${response.body}");
 
       final data = jsonDecode(response.body);
 

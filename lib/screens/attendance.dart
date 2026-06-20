@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/data/attendance_data.dart';
+
 import 'package:navyoga_academy/models/ClassWiseStatModel.dart';
 import 'package:navyoga_academy/models/MonthlyStatModel.dart';
 import 'package:navyoga_academy/models/attendance_stat_model.dart';
@@ -81,29 +81,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         attendanceRate: attendanceRate,
         classesAttended: present,
         missedClasses: absent,
-        streak: 0,
-        totalMinutesThisMonth: 0,
-        previousMonthMinutes: 0,
-        monthlyGoalMinutes: 0,
-        monthlyStats: [
-          MonthlyStatModel(
-            month: "January",
-            minutes: 3000,
-            attended: 28,
-            totalClasses: 30,
-            progress: 0.93,
-          ),
-        ],
+        streak: null,
+        totalMinutesThisMonth: null,
+        previousMonthMinutes: null,
+        monthlyGoalMinutes: null,
+        monthlyStats: [],
 
-        classWiseStats: [
-          ClassWiseStatModel(
-            className: "Advanced Hatha Yoga",
-            minutes: 1080,
-            attended: 12,
-            totalClasses: 14,
-            progress: 0.86,
-          ),
-        ],
+        classWiseStats: [],
       );
 
       isLoading = false;
@@ -189,140 +173,124 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   const SizedBox(height: 20),
 
                   /// DETAILS
-                  AnimatedItem(
-                    index: 2,
-                    child: DetailCard(
-                      DetailModel(
-                        title: "Total Time This Month",
-                        value: formatMinutes(
-                          attendance?.totalMinutesThisMonth ?? 0,
+                  if (attendance?.totalMinutesThisMonth != null)
+                    AnimatedItem(
+                      index: 2,
+                      child: DetailCard(
+                        DetailModel(
+                          title: "Total Time This Month",
+                          value: formatMinutes(
+                            attendance!.totalMinutesThisMonth!,
+                          ),
+                          subtitle: "",
+                          icon: Icons.timer,
+                          color: Colors.orange,
                         ),
-                        subtitle:
-                            "+${formatMinutes((attendance?.totalMinutesThisMonth ?? 0) - (attendance?.previousMonthMinutes ?? 0))} from last month",
-                        icon: Icons.timer,
-                        color: Colors.orange,
                       ),
                     ),
-                  ),
 
                   const SizedBox(height: 6),
 
-                  AnimatedItem(
-                    index: 5,
-                    child: InsightCard(
-                      data: InsightModel(
-                        title: "Average Per Day",
-                        value: formatMinutes(avgMinutes),
-                        unit: "",
-                        subtitle: "Last 30 days",
-                        extra: "",
-                        icon: Icons.access_time,
-                        color: Colors.teal,
-                        type: "simple",
+                  if (attendance?.totalMinutesThisMonth != null)
+                    AnimatedItem(
+                      index: 5,
+                      child: InsightCard(
+                        data: InsightModel(
+                          title: "Average Per Day",
+                          value: formatMinutes(avgMinutes),
+                          unit: "",
+                          subtitle: "Last 30 days",
+                          extra: "",
+                          icon: Icons.access_time,
+                          color: Colors.teal,
+                          type: "simple",
+                        ),
                       ),
                     ),
-                  ),
 
                   const SizedBox(height: 12),
 
-                  AnimatedItem(
-                    index: 6,
-                    child: InsightCard(
-                      data: InsightModel(
-                        title: "Current Streak",
-                        value: "${attendance?.streak ?? 0}",
-                        unit: "days",
-                        subtitle: "Current practice streak",
-                        extra: "",
-                        icon: Icons.local_fire_department,
-                        color: Colors.orange,
-                        type: "simple",
+                  if (attendance?.streak != null)
+                    AnimatedItem(
+                      index: 6,
+                      child: InsightCard(
+                        data: InsightModel(
+                          title: "Current Streak",
+                          value: "${attendance!.streak}",
+                          unit: "days",
+                          subtitle: "Current practice streak",
+                          extra: "",
+                          icon: Icons.local_fire_department,
+                          color: Colors.orange,
+                          type: "simple",
+                        ),
                       ),
                     ),
-                  ),
 
                   const SizedBox(height: 12),
 
-                  AnimatedItem(
-                    index: 7,
-                    child: InsightCard(
-                      data: InsightModel(
-                        title: "Monthly Goal",
-                        value: "${goalPercentage.round()}%",
-                        unit: "",
-                        subtitle:
-                            "${formatMinutes(attendance?.totalMinutesThisMonth ?? 0)} of "
-                            "${formatMinutes(attendance?.monthlyGoalMinutes ?? 0)} target",
-                        extra: "",
-                        icon: Icons.gps_fixed,
-                        color: Colors.deepPurple,
-                        type: "simple",
+                  if (attendance?.monthlyGoalMinutes != null)
+                    AnimatedItem(
+                      index: 7,
+                      child: InsightCard(
+                        data: InsightModel(
+                          title: "Monthly Goal",
+                          value: "${goalPercentage.round()}%",
+                          unit: "",
+                          subtitle: "",
+                          extra: "",
+                          icon: Icons.gps_fixed,
+                          color: Colors.deepPurple,
+                          type: "simple",
+                        ),
                       ),
                     ),
-                  ),
 
                   /// MONTHLY
-                  AnimatedItem(
-                    index: 8,
-                    child: _buildSection(
-                      "Monthly Statistics",
-                      (attendance?.monthlyStats ?? [])
-                          .map(
-                            (e) => ProgressRow(
-                              ProgressModel(
-                                title: e.month,
-                                sub1: formatMinutes(e.minutes),
-                                sub2: "${e.attended}/${e.totalClasses} classes",
-                                progress: e.progress,
+                  if ((attendance?.monthlyStats ?? []).isNotEmpty)
+                    AnimatedItem(
+                      index: 8,
+                      child: _buildSection(
+                        "Monthly Statistics",
+                        (attendance?.monthlyStats ?? [])
+                            .map(
+                              (e) => ProgressRow(
+                                ProgressModel(
+                                  title: e.month,
+                                  sub1: formatMinutes(e.minutes),
+                                  sub2:
+                                      "${e.attended}/${e.totalClasses} classes",
+                                  progress: e.progress,
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(),
+                            )
+                            .toList(),
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 20),
 
                   /// CLASS-WISE
-                  AnimatedItem(
-                    index: 9,
-                    child: _buildSection(
-                      "Class-wise Time & Attendance",
-                      (attendance?.classWiseStats ?? [])
-                          .map(
-                            (e) => ClassProgressRow(
-                              ProgressModel(
-                                title: e.className,
-                                sub1: formatMinutes(e.minutes),
-                                sub2: "${e.attended}/${e.totalClasses}",
-                                progress: e.progress,
+                  if ((attendance?.classWiseStats ?? []).isNotEmpty)
+                    AnimatedItem(
+                      index: 9,
+                      child: _buildSection(
+                        "Class-wise Time & Attendance",
+                        (attendance?.classWiseStats ?? [])
+                            .map(
+                              (e) => ClassProgressRow(
+                                ProgressModel(
+                                  title: e.className,
+                                  sub1: formatMinutes(e.minutes),
+                                  sub2: "${e.attended}/${e.totalClasses}",
+                                  progress: e.progress,
+                                ),
                               ),
-                            ),
-                          )
-                          .toList(),
+                            )
+                            .toList(),
+                      ),
                     ),
-                  ),
 
                   const SizedBox(height: 20),
-
-                  /// EXTRA INSIGHTS
-                  AnimatedItem(
-                    index: 10,
-                    child: InsightCard(data: AttendanceData.practiceStreak),
-                  ),
-                  const SizedBox(height: 20),
-
-                  AnimatedItem(
-                    index: 11,
-                    child: InsightCard(data: AttendanceData.goalProgress),
-                  ),
-                  const SizedBox(height: 20),
-
-                  AnimatedItem(
-                    index: 12,
-                    child: InsightCard(
-                      data: AttendanceData.excellentAttendance,
-                    ),
-                  ),
                 ],
               ),
             ),

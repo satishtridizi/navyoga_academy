@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import '../routes/app_routes.dart';
 import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class AvailableClassCard extends StatelessWidget {
-  final ClassModel data;
+  final LiveEnrollmentModel data;
 
   const AvailableClassCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
-    final isEnrolled = EnrollmentService.enrolledClasses.any(
-      (e) => e.title == data.title,
-    );
-    final Color mainColor = data.color;
-
+    const bool isEnrolled = true;
+    const Color mainColor = Colors.deepOrange;
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       padding: const EdgeInsets.all(18),
@@ -59,37 +56,19 @@ class AvailableClassCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
-
-          /// SCHEDULE
-          Text(data.schedule, style: const TextStyle(color: Colors.blueGrey)),
-
-          const SizedBox(height: 12),
-
-          /// RATING + STUDENTS
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              chip("⭐ ${data.rating}", Colors.yellow.shade100, Colors.black),
-              chip("👥 ${data.students}", Colors.grey.shade200, Colors.black),
-            ],
-          ),
-
           const SizedBox(height: 16),
 
           /// ENROLL BUTTON
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: isEnrolled
-                  ? null
-                  : () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.enrollClass,
-                        arguments: data,
-                      );
-                    },
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.enrollmentsuccess,
+                  arguments: data,
+                );
+              },
 
               style: ElevatedButton.styleFrom(
                 backgroundColor: isEnrolled ? Colors.green : Colors.deepOrange,
@@ -107,7 +86,7 @@ class AvailableClassCard extends StatelessWidget {
               ),
 
               label: Text(
-                isEnrolled ? "Enrolled" : "Enroll Now",
+                isEnrolled ? "Watch Class" : "Enroll Now",
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

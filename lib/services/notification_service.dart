@@ -10,7 +10,7 @@ class NotificationService {
       url: "${ApiConstants.baseUrl}/api/notifications",
       token: token,
     );
-
+    print("NOTIFICATIONS RESPONSE = $res");
     // 🔥 FIXED
     if (res["unauthorized"] == true) {
       throw Exception("UNAUTHORIZED");

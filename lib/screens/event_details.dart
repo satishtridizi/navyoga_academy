@@ -39,8 +39,10 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
   Future<void> _enrollEvent() async {
     setState(() {
-      isLoading = true;
+      isEnrolled = true;
     });
+
+    Navigator.pop(context, true);
 
     try {
       final token = await AuthManager.getToken();
@@ -365,7 +367,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                             _detailRow(
                               Icons.people,
-                              "Seats Registered",
+                              "Capacity",
                               "${widget.event.seats}",
                             ),
                           ],
@@ -392,7 +394,12 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                                 child: const Text("Already Enrolled"),
                               )
                             : ElevatedButton(
-                                onPressed: isLoading ? null : startPayment,
+                                onPressed: isLoading
+                                    ? null
+                                    : (widget.event.price == "₹0.0" ||
+                                          widget.event.price == "₹0")
+                                    ? _enrollEvent
+                                    : startPayment,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.deepOrange,
                                   elevation: 6,

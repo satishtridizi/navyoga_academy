@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/data/myclasses_available_classes.dart';
+
 import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import 'package:navyoga_academy/models/myclasses_stats_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
@@ -20,9 +20,7 @@ class MyClassesScreen extends StatefulWidget {
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
   int enrolledCount = 0;
-  int completedCount = 0;
-  int progressCount = 0;
-  double attendance = 0;
+
   List<LiveEnrollmentModel> enrolledClasses = [];
   bool loading = true;
   String selectedLevel = "All Levels";
@@ -43,8 +41,6 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
     if (res["success"] == true) {
       final List items = res["data"]["items"] ?? [];
-      print("WORKSHOP ITEM:");
-      print(items.first);
 
       final enrolledItems = items
           .where((e) => e["isEnrolled"] == true)
@@ -66,17 +62,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
           );
         }).toList();
 
-        enrolledCount = EnrollmentService.enrolledClasses.length;
-
-        completedCount = enrolledClasses
-            .where((e) => e.status == "COMPLETED")
-            .length;
-
-        progressCount = enrolledClasses
-            .where((e) => e.status == "ACTIVE")
-            .length;
-
-        attendance = 0.0;
+        enrolledCount = enrolledItems.length;
 
         loading = false;
       });
@@ -128,27 +114,9 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
     final stats = [
       StatsModel(
         title: "Enrolled Classes",
-        value: enrolledCount.toString(),
+        value: enrolledClasses.length.toString(),
         color: Colors.deepOrange,
         icon: Icons.menu_book,
-      ),
-      StatsModel(
-        title: "Completed",
-        value: completedCount.toString(),
-        color: Colors.green,
-        icon: Icons.star,
-      ),
-      StatsModel(
-        title: "In Progress",
-        value: progressCount.toString(),
-        color: Colors.purple,
-        icon: Icons.access_time,
-      ),
-      StatsModel(
-        title: "Avg. Attendance",
-        value: "${attendance.toInt()}%",
-        color: Colors.orange,
-        icon: Icons.calendar_today,
       ),
     ];
     return AppScaffold(
@@ -376,7 +344,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  "Enrolled Classes (${EnrollmentService.enrolledClasses.length})",
+                  "Enrolled Classes (${enrolledClasses.length})",
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -394,7 +362,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 selectedSection == "progress") ...[
               Builder(
                 builder: (context) {
-                  final filteredEnrolled = EnrollmentService.enrolledClasses;
+                  final filteredEnrolled = enrolledClasses;
 
                   if (filteredEnrolled.isEmpty) {
                     return const Padding(
@@ -407,9 +375,18 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                   }
 
                   return Column(
-                    children: filteredEnrolled
-                        .map((e) => AvailableClassCard(data: e))
-                        .toList(),
+                    children: filteredEnrolled.map((e) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.enrollmentsuccess,
+                            arguments: e,
+                          );
+                        },
+                        child: AvailableClassCard(data: e),
+                      );
+                    }).toList(),
                   );
                 },
               ),
@@ -418,35 +395,60 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
             const SizedBox(height: 24),
 
             /// 🆕 AVAILABLE CLASSES HEADER
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.menu_book, color: Colors.white),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Available Classes",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     Container(
+            //       padding: const EdgeInsets.all(10),
+            //       decoration: BoxDecoration(
+            //         color: Colors.deepPurple,
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       child: const Icon(Icons.menu_book, color: Colors.white),
+            //     ),
+            //     const SizedBox(width: 10),
+            //     const Text(
+            //       "Available Classes",
+            //       style: TextStyle(
+            //         fontSize: 18,
+            //         fontWeight: FontWeight.bold,
+            //         color: Colors.deepOrange,
+            //       ),
+            //     ),
+            //   ],
+            // ),
 
-            const SizedBox(height: 16),
+            // const SizedBox(height: 16),
 
-            Column(
-              children: availableClasses
-                  .map((e) => AvailableClassCard(data: e))
-                  .toList(),
-            ),
+            // Builder(
+            //   builder: (context) {
+            //     final availableNotEnrolled = availableClasses
+            //         .where(
+            //           (e) => !EnrollmentService.enrolledClasses.any(
+            //             (enrolled) => enrolled.title == e.title,
+            //           ),
+            //         )
+            //         .toList();
+
+            //     if (availableNotEnrolled.isEmpty) {
+            //       return const Padding(
+            //         padding: EdgeInsets.all(20),
+            //         child: Text(
+            //           "All classes enrolled",
+            //           style: TextStyle(
+            //             fontSize: 16,
+            //             fontWeight: FontWeight.w600,
+            //           ),
+            //         ),
+            //       );
+            //     }
+
+            //     return Column(
+            //       children: availableNotEnrolled
+            //           .map((e) => AvailableClassCard(data: e))
+            //           .toList(),
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),

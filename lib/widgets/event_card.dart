@@ -70,7 +70,7 @@ class EventCard extends StatelessWidget {
                   /// SEATS
                   Align(
                     alignment: Alignment.centerRight,
-                    child: _chip("${event.seats} registered"),
+                    child: _chip("${event.seats} seats"),
                   ),
 
                   const SizedBox(height: 8),

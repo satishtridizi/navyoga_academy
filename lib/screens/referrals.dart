@@ -9,7 +9,7 @@ import 'package:navyoga_academy/widgets/referral_invite_section.dart';
 import 'package:navyoga_academy/widgets/referral_reward_summary_section.dart';
 import 'package:navyoga_academy/widgets/referral_share_section.dart';
 import 'package:navyoga_academy/widgets/referral_user_card.dart';
-import '../data/referral_data.dart';
+
 import '../models/referral_user_model.dart';
 import '../widgets/referral_stat_card.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -27,6 +27,8 @@ class ReferralScreen extends StatefulWidget {
 }
 
 class _ReferralScreenState extends State<ReferralScreen> {
+  String referralCode = "";
+  String referralLink = "";
   int totalReferrals = 0;
   int activeReferrals = 0;
   int totalEarned = 0;
@@ -50,7 +52,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
 
     if (res["success"] == true) {
       final data = res["data"];
-
+      referralCode = data["referralCode"] ?? "";
+      referralLink = "https://navyoga.academy/join/$referralCode";
       final List referralList = data["items"];
 
       final referralsData = referralList
@@ -69,6 +72,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
         return e.status.toLowerCase() == "active" ? sum + reward : sum;
       });
       setState(() {
+        referralCode = data["referralCode"] ?? "";
+        referralLink = "https://navyoga.academy/join/$referralCode";
         referrals = referralsData;
 
         totalReferrals = totalReferralsCount;
@@ -221,40 +226,6 @@ class _ReferralScreenState extends State<ReferralScreen> {
                 const SizedBox(height: 20),
 
                 /// ================= BADGES =================
-                const Text(
-                  "Achievement Badges",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                ...ReferralData.badges.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final e = entry.value;
-
-                  return Animate(
-                    delay: Duration(milliseconds: 150 * index),
-
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
-
-                      ScaleEffect(
-                        begin: Offset(0.95, 0.95),
-                        end: Offset(1, 1),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
-
-                    child: BadgeCard(badge: e),
-                  );
-                }).toList(),
-
-                const SizedBox(height: 20),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -310,9 +281,11 @@ class _ReferralScreenState extends State<ReferralScreen> {
                   effects: const [
                     FadeEffect(duration: Duration(milliseconds: 500)),
                   ],
-                  child: ShareSection(),
+                  child: ShareSection(
+                    referralCode: referralCode,
+                    referralLink: referralLink,
+                  ),
                 ),
-
                 const SizedBox(height: 20),
 
                 Animate(

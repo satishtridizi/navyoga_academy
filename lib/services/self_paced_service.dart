@@ -15,18 +15,25 @@ class SelfPacedService {
   Future<dynamic> initiatePayment(
     String token,
     String moduleId,
-    // String planId,
+    String planId,
   ) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}/api/payments/initiate",
       token: token,
-      body: {"moduleId": moduleId, "type": "SELF_PACED"},
+      body: {"moduleId": moduleId, "planId": planId, "type": "SELF_PACED"},
     );
   }
 
   Future<dynamic> getClasses(String token, String moduleId) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}/api/self-paced/modules/$moduleId/classes",
+      token: token,
+    );
+  }
+
+  Future<dynamic> getPlans(String token) async {
+    return await _api.getRequest(
+      url: "${ApiConstants.baseUrl}/api/self-paced/plans",
       token: token,
     );
   }

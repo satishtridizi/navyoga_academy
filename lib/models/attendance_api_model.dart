@@ -5,11 +5,10 @@ class AttendanceApiModel {
   final int attendanceRate;
   final int classesAttended;
   final int missedClasses;
-  final int streak;
-
-  final int totalMinutesThisMonth;
-  final int previousMonthMinutes;
-  final int monthlyGoalMinutes;
+  final int? streak;
+  final int? totalMinutesThisMonth;
+  final int? previousMonthMinutes;
+  final int? monthlyGoalMinutes;
   final List<MonthlyStatModel> monthlyStats;
   final List<ClassWiseStatModel> classWiseStats;
 
@@ -17,10 +16,10 @@ class AttendanceApiModel {
     required this.attendanceRate,
     required this.classesAttended,
     required this.missedClasses,
-    required this.streak,
-    required this.totalMinutesThisMonth,
-    required this.previousMonthMinutes,
-    required this.monthlyGoalMinutes,
+    this.streak,
+    this.totalMinutesThisMonth,
+    this.previousMonthMinutes,
+    this.monthlyGoalMinutes,
     required this.monthlyStats,
     required this.classWiseStats,
   });
@@ -42,13 +41,13 @@ class AttendanceApiModel {
       attendanceRate: json["attendanceRate"] ?? 0,
       classesAttended: json["classesAttended"] ?? 0,
       missedClasses: json["missedClasses"] ?? 0,
-      streak: json["streak"] ?? 0,
+      streak: json["streak"],
 
-      totalMinutesThisMonth: json["totalMinutesThisMonth"] ?? 0,
+      totalMinutesThisMonth: json["totalMinutesThisMonth"],
 
-      previousMonthMinutes: json["previousMonthMinutes"] ?? 0,
+      previousMonthMinutes: json["previousMonthMinutes"],
 
-      monthlyGoalMinutes: json["monthlyGoalMinutes"] ?? 0,
+      monthlyGoalMinutes: json["monthlyGoalMinutes"],
     );
   }
 }

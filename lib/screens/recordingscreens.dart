@@ -49,8 +49,8 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
       recordings = list.map((e) => RecordingApiModel.fromJson(e)).toList();
 
       totalRecordings = recordings.length;
-      completedRecordings = recordings.length;
-      hoursWatched = recordings.length.toDouble();
+      completedRecordings = 0;
+      hoursWatched = 0;
     });
 
     print("PARSED RECORDINGS = ${recordings.length}");
@@ -65,24 +65,6 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
         value: totalRecordings.toString(),
         color: Colors.deepOrange,
         icon: Icons.videocam,
-      ),
-      RecordingStatModel(
-        title: "Completed",
-        value: completedRecordings.toString(),
-        color: Colors.green,
-        icon: Icons.star,
-      ),
-      RecordingStatModel(
-        title: "Hours Watched",
-        value: hoursWatched.toStringAsFixed(1),
-        color: Colors.purple,
-        icon: Icons.access_time,
-      ),
-      RecordingStatModel(
-        title: "Avg. Attendance",
-        value: "N/A",
-        color: Colors.pink,
-        icon: Icons.favorite,
       ),
     ];
     return AppScaffold(

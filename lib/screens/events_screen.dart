@@ -4,15 +4,13 @@ import 'package:navyoga_academy/models/attendance_stat_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import '../data/app_data.dart';
+//import '../data/app_data.dart';
 import '../widgets/stat_card.dart';
 import '../widgets/event_card.dart';
 import '../models/event_model.dart';
 import 'event_details.dart';
 import 'package:navyoga_academy/models/event_api_model.dart';
 import 'package:navyoga_academy/services/event_service.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
-import 'package:navyoga_academy/utils/api_helper.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -45,7 +43,9 @@ class _EventsScreenState extends State<EventsScreen> {
     }
     try {
       final list = await eventService.getEvents(token);
-
+      print("EVENTS API RESPONSE");
+      print(list);
+      print("EVENT RESPONSE = $list");
       final mapped = list.map((e) => EventApiModel.fromJson(e)).toList();
 
       setState(() {
@@ -78,6 +78,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final featuredEvents = events.where((e) => e.featured).toList();
     final stats = [
       AttendanceStatModel(
         title: "Total Events",
@@ -105,7 +106,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
       AttendanceStatModel(
         title: "Featured",
-        value: events.length.toString(),
+        value: events.where((e) => e.featured).length.toString(),
         icon: Icons.people,
         color: Colors.blue,
       ),
@@ -165,7 +166,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             ),
                             SizedBox(width: 10),
                             Text(
-                              "Events &\nWorkshops",
+                              "Events & Workshops",
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -222,7 +223,7 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        "Featured Events (${events.length > 4 ? 4 : events.length})",
+                        "Featured Events (${featuredEvents.length})",
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -237,12 +238,13 @@ class _EventsScreenState extends State<EventsScreen> {
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: events.length > 4 ? 4 : events.length,
+                    itemCount: featuredEvents.length,
                     itemBuilder: (context, index) {
-                      final event = events[index];
+                      final event = featuredEvents[index];
 
                       return EventCard(
                         event: EventModel(
+                          occupancy: event.occupancy.toString(),
                           isEnrolled: event.isEnrolled,
                           id: event.id,
                           title: event.title,
@@ -258,6 +260,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         onTap: () => _openDetails(
                           context,
                           EventModel(
+                            occupancy: event.occupancy.toString(),
                             isEnrolled: event.isEnrolled,
                             id: event.id,
                             title: event.title,
@@ -304,6 +307,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemBuilder: (context, index) {
                             return EventCard(
                               event: EventModel(
+                                occupancy: events[index].occupancy.toString(),
                                 isEnrolled: events[index].isEnrolled,
                                 id: events[index].id,
                                 title: events[index].title,
@@ -319,6 +323,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               onTap: () => _openDetails(
                                 context,
                                 EventModel(
+                                  occupancy: events[index].occupancy.toString(),
                                   isEnrolled: events[index].isEnrolled,
                                   id: events[index].id,
                                   title: events[index].title,

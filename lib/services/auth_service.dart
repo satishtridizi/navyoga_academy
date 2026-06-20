@@ -48,12 +48,21 @@ class AuthService {
   }
 
   Future<dynamic> studentRegister({
+    required String name,
+    required String phone,
     required String email,
     required String password,
+    String? referralCode,
   }) async {
     final response = await _api.postRequest(
       url: "${ApiConstants.baseUrl}/api/auth/student/register",
-      body: {"email": email, "password": password},
+      body: {
+        "name": name,
+        "phone": phone,
+        "email": email,
+        "password": password,
+        "referralCode": referralCode,
+      },
     );
 
     return response;

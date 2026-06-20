@@ -9,7 +9,7 @@ class EventModel {
   final String image;
   final List<String> tags;
   final bool isEnrolled;
-
+  final String occupancy;
   const EventModel({
     required this.id,
     required this.title,
@@ -21,5 +21,6 @@ class EventModel {
     required this.image,
     required this.tags,
     required this.isEnrolled,
+    required this.occupancy,
   });
 }

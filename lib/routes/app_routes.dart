@@ -93,7 +93,6 @@ class AppRoutes {
     notifications: (_) => const NotificationsScreen(),
 
     liveClassesList: (_) => const LiveClassesListScreen(),
-
     changePassword: (_) => const ChangePasswordScreen(),
 
     "/payment": (_) => const PaymentScreen(),

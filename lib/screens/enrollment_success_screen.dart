@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/models/class_model.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 
 class EnrollmentSuccessScreen extends StatelessWidget {
   const EnrollmentSuccessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final classData = ModalRoute.of(context)!.settings.arguments as ClassModel;
     return Scaffold(
       body: Center(
         child: Column(
@@ -25,9 +28,35 @@ class EnrollmentSuccessScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
+            Card(
+              child: ListTile(
+                leading: const Icon(
+                  Icons.play_circle_fill,
+                  color: Colors.deepOrange,
+                ),
+                title: Text(classData.title),
+                subtitle: Text(classData.trainer),
+                trailing: const Icon(Icons.arrow_forward_ios),
+
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.liveClass, // change later if needed
+                    arguments: classData,
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
             ElevatedButton(
               onPressed: () {
-                Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.myClasses,
+                  (route) => false,
+                );
               },
               child: const Text("Go To Classes"),
             ),

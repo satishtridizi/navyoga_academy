@@ -1,22 +1,34 @@
 class DashboardModel {
   final int enrolledClasses;
-  final int practiceHours;
+  final int enrolledChangeMonth;
+  final int hoursCompleted;
+  final int hoursChangeWeek;
   final int recordingsWatched;
+  final int recordingsChangeWeek;
   final int attendanceRate;
+  final int attendanceImprovement;
 
   DashboardModel({
     required this.enrolledClasses,
-    required this.practiceHours,
+    required this.enrolledChangeMonth,
+    required this.hoursCompleted,
+    required this.hoursChangeWeek,
     required this.recordingsWatched,
+    required this.recordingsChangeWeek,
     required this.attendanceRate,
+    required this.attendanceImprovement,
   });
 
-  factory DashboardModel.fromJson(Map<String, dynamic> metrics) {
+  factory DashboardModel.fromJson(Map<String, dynamic> json) {
     return DashboardModel(
-      enrolledClasses: metrics["enrolledClasses"] ?? 0,
-      practiceHours: metrics["hoursCompleted"] ?? 0,
-      recordingsWatched: metrics["recordingsWatched"] ?? 0,
-      attendanceRate: metrics["attendanceRate"] ?? 0,
+      enrolledClasses: json["enrolledClasses"] ?? 0,
+      enrolledChangeMonth: json["enrolledChangeMonth"] ?? 0,
+      hoursCompleted: json["hoursCompleted"] ?? 0,
+      hoursChangeWeek: json["hoursChangeWeek"] ?? 0,
+      recordingsWatched: json["recordingsWatched"] ?? 0,
+      attendanceRate: json["attendanceRate"] ?? 0,
+      attendanceImprovement: json["attendanceImprovement"] ?? 0,
+      recordingsChangeWeek: json["recordingsChangeWeek"] ?? 0,
     );
   }
 }

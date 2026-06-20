@@ -9,7 +9,8 @@ class EventApiModel {
   final int capacity;
   final double price;
   final bool isEnrolled;
-
+  final bool featured;
+  final int occupancy;
   EventApiModel({
     required this.id,
     required this.title,
@@ -21,6 +22,8 @@ class EventApiModel {
     required this.capacity,
     required this.price,
     required this.isEnrolled,
+    required this.featured,
+    required this.occupancy,
   });
 
   factory EventApiModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +38,8 @@ class EventApiModel {
       capacity: json["capacity"] ?? 0,
       price: double.tryParse(json["price"]?.toString() ?? "0") ?? 0,
       isEnrolled: json["isEnrolled"] ?? false,
+      featured: json["featured"] ?? false,
+      occupancy: json["occupancy"] ?? 0,
     );
   }
 }

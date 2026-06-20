@@ -3,7 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ShareSection extends StatelessWidget {
-  const ShareSection({super.key});
+  final String referralCode;
+  final String referralLink;
+
+  const ShareSection({
+    super.key,
+    required this.referralCode,
+    required this.referralLink,
+  });
 
   Widget _socialButton(
     BuildContext context,
@@ -73,15 +80,15 @@ class ShareSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: const Text("NAVYOGA-SARAH-2026"),
+                  child: Text(referralCode),
                 ),
               ),
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  const code = "NAVYOGA-SARAH-2026";
+                  final code = referralCode;
 
-                  Clipboard.setData(const ClipboardData(text: code));
+                  Clipboard.setData(ClipboardData(text: code));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Referral code copied 🎉")),
@@ -124,18 +131,14 @@ class ShareSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: const Text(
-                    "https://navyoga.academy/join/NAVY",
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: Text(referralLink, overflow: TextOverflow.ellipsis),
                 ),
               ),
               const SizedBox(width: 10),
               GestureDetector(
                 onTap: () {
-                  const link = "https://navyoga.academy/join/NAVY";
-
-                  Clipboard.setData(const ClipboardData(text: link));
+                  final link = referralLink;
+                  Clipboard.setData(ClipboardData(text: link));
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Referral link copied ✅")),
@@ -176,7 +179,7 @@ class ShareSection extends StatelessWidget {
                 Icons.chat,
                 () async {
                   final url = Uri.parse(
-                    "https://wa.me/?text=Join NavYoga using my code NAVYOGA-SARAH-2026",
+                    "https://wa.me/?text=Join NavYoga using my referral code $referralCode $referralLink",
                   );
                   await launchUrl(url);
                 },
@@ -184,7 +187,7 @@ class ShareSection extends StatelessWidget {
               const SizedBox(width: 10),
               _socialButton(context, "Email", Colors.blue, Icons.email, () async {
                 final url = Uri.parse(
-                  "mailto:?subject=Join NavYoga&body=Use my referral code NAVYOGA-SARAH-2026",
+                  "mailto:?subject=Join NavYoga&body=Use my referral code $referralCode $referralLink",
                 );
                 await launchUrl(url);
               }),
@@ -202,7 +205,7 @@ class ShareSection extends StatelessWidget {
                 Icons.facebook,
                 () async {
                   final url = Uri.parse(
-                    "https://www.facebook.com/sharer/sharer.php?u=https://navyoga.academy/join/NAVY",
+                    "https://www.facebook.com/sharer/sharer.php?u=$referralLink",
                   );
                   await launchUrl(url);
                 },
@@ -215,7 +218,7 @@ class ShareSection extends StatelessWidget {
                 Icons.flutter_dash,
                 () async {
                   final url = Uri.parse(
-                    "https://twitter.com/intent/tweet?text=Join NavYoga using my code NAVYOGA-SARAH-2026",
+                    "https://twitter.com/intent/tweet?text=Join NavYoga using my referral code $referralCode $referralLink",
                   );
                   await launchUrl(url);
                 },

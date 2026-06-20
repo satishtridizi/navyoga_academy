@@ -17,11 +17,11 @@ class ReferralStatCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
-        margin: EdgeInsets.only(bottom: 20),
-        padding: EdgeInsets.all(24),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(color: stat.borderColor),
         ),
         child: Row(
@@ -30,18 +30,24 @@ class ReferralStatCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(stat.title, style: TextStyle(color: Colors.blueGrey)),
-                SizedBox(height: 6),
+                Text(
+                  stat.title,
+                  style: const TextStyle(color: Colors.blueGrey, fontSize: 13),
+                ),
+                SizedBox(height: 4),
                 Text(
                   stat.value,
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
             CircleAvatar(
               backgroundColor: stat.iconBg,
-              radius: 28,
-              child: Icon(stat.icon, color: stat.iconColor),
+              radius: 22,
+              child: Icon(stat.icon, color: stat.iconColor, size: 22),
             ),
           ],
         ),

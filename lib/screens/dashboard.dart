@@ -6,6 +6,7 @@ import 'package:navyoga_academy/screens/myclasses.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/screens/referrals.dart';
 import 'package:navyoga_academy/services/attendance_service.dart';
+//import 'package:navyoga_academy/services/enrollment_service.dart';
 import 'package:navyoga_academy/services/leads_service.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
@@ -29,7 +30,7 @@ import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:navyoga_academy/services/enrollment_service.dart';
+//import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,8 +88,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> loadStudentDashboard() async {
     final token = await AuthManager.getToken();
 
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
+    if (token == null || token.isEmpty) {
+      if (!mounted) return;
+
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (route) => false,
+      );
       return;
     }
 
@@ -97,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (res["success"] == true) {
         final data = res["data"];
-
+        print("DASHBOARD METRICS = ${data["metrics"]}");
         setState(() {
           dashboard = DashboardModel.fromJson(data["metrics"] ?? {});
 
@@ -380,8 +387,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 0,
                         child: StatCard(
                           "Enrolled Classes",
-                          EnrollmentService.enrolledClasses.length.toString(),
-                          "+2 this month",
+                          "${dashboard?.enrolledClasses ?? 0}",
+                          "+${dashboard?.enrolledChangeMonth ?? 0} this month",
                           Color.fromARGB(255, 255, 89, 24),
                           onTap: () {
                             Navigator.pushNamed(context, AppRoutes.myClasses);
@@ -392,8 +399,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 1,
                         child: StatCard(
                           "Hours Completed",
-                          EnrollmentService.hoursCompleted.toString(),
-                          "+18 this week",
+                          "${dashboard?.hoursCompleted ?? 0}",
+                          "+${dashboard?.hoursChangeWeek ?? 0} this week",
                           Color.fromARGB(255, 169, 43, 191),
                           onTap: () {
                             Navigator.pushNamed(context, AppRoutes.attendance);
@@ -404,8 +411,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 2,
                         child: StatCard(
                           "Recordings Watched",
-                          EnrollmentService.recordingsWatched.toString(),
-                          "+8 this week",
+                          "${dashboard?.recordingsWatched ?? 0}",
+                          "+${dashboard?.recordingsChangeWeek ?? 0} this week",
                           Color.fromARGB(255, 43, 191, 117),
                           onTap: () {
                             Navigator.pushNamed(context, AppRoutes.recordings);
@@ -417,8 +424,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         index: 3,
                         child: StatCard(
                           "Attendance Rate",
-                          "${EnrollmentService.attendanceRate}%",
-                          "+5% improvement",
+                          "${dashboard?.attendanceRate ?? 0}%",
+                          "+${dashboard?.attendanceImprovement ?? 0}% improvement",
                           Colors.orange,
                           onTap: () {
                             Navigator.pushNamed(context, AppRoutes.attendance);
@@ -427,7 +434,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 30),
 
                   /// 📅 UPCOMING
@@ -441,48 +447,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     viewAllText: showAllUpcoming ? "Show Less ↑" : "View All →",
                   ),
-                  // Column(
-                  //   children: List.generate(
-                  //     showAllUpcoming
-                  //         ? upcomingClasses.length
-                  //         : (upcomingClasses.length > 2
-                  //               ? 2
-                  //               : upcomingClasses.length),
-                  //     (index) {
-                  //       final cls = upcomingClasses[index];
 
-                  //       return ClassCard(
-                  //         cls["name"] ?? "Class",
-                  //         cls["instructor"] ?? "Instructor",
-                  //         "${cls["duration"] ?? 0} mins",
-                  //         onJoin: () {
-                  //           final classModel = ClassModel.fromJson(cls);
-
-                  //           Navigator.pushNamed(
-                  //             context,
-                  //             AppRoutes.liveClass,
-                  //             arguments: classModel,
-                  //           );
-                  //         },
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
                   Column(
                     children: List.generate(
-                      EnrollmentService.enrolledClasses.length,
+                      showAllUpcoming
+                          ? upcomingClasses.length
+                          : (upcomingClasses.length > 2
+                                ? 2
+                                : upcomingClasses.length),
                       (index) {
-                        final cls = EnrollmentService.enrolledClasses[index];
+                        final cls = upcomingClasses[index];
 
                         return ClassCard(
-                          cls.title,
-                          cls.trainer,
-                          cls.duration,
+                          cls["name"] ?? "Class",
+                          cls["instructor"] ?? "Instructor",
+                          "${cls["duration"] ?? 0} mins",
                           onJoin: () {
+                            final classModel = ClassModel.fromJson(cls);
+
                             Navigator.pushNamed(
                               context,
                               AppRoutes.liveClass,
-                              arguments: cls,
+                              arguments: classModel,
                             );
                           },
                         );

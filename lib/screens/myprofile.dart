@@ -82,10 +82,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       student = studentData;
       achievements = response["data"]["achievements"] ?? [];
-      // nameController.text = studentData.name;
-      // emailController.text = studentData.email;
-      // phoneController.text = studentData.phone;
-      // profileImageUrl = studentData.profileImage;
+      nameController.text = studentData.name;
+      emailController.text = studentData.email;
+      phoneController.text = studentData.phone;
+      profileImageUrl = studentData.profileImage;
     });
     print("PROFILE DATA = ${response["data"]}");
   }
@@ -116,11 +116,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (ApiHelper.isSuccess(response)) {
-      setState(() {
-        profileImageUrl = response["image_url"];
-      });
+      await loadProfile();
 
-      AppSnackbar.showSuccess(context, "Profile image updated");
+      AppSnackbar.showSuccess(context, response["message"]);
     }
   }
 

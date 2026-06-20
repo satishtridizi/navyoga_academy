@@ -23,6 +23,7 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
+  String? selectedPlanId;
   Map<String, double> courseProgress = {};
   Map<String, bool> courseCompleted = {};
   final progressService = SelfPacedProgressService();
@@ -61,6 +62,23 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
     super.initState();
     loadCourses();
     loadSubscription();
+    loadPlans();
+  }
+
+  Future<void> loadPlans() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final response = await selfPacedService.getPlans(token);
+
+    if (response["success"] == true &&
+        response["data"] != null &&
+        response["data"].isNotEmpty) {
+      selectedPlanId = response["data"][0]["id"];
+
+      print("PLAN ID => $selectedPlanId");
+    }
   }
 
   Future<void> loadCourses() async {
@@ -73,6 +91,8 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
     final response = await selfPacedService.getCourses(token);
 
+    print("SELF PACED RESPONSE => $response");
+
     if (ApiHelper.isSuccess(response) && response["data"] != null) {
       final List list = response["data"];
       if (!mounted) return;
@@ -84,7 +104,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       int enrolled = 0;
       int inProgress = 0;
       int completed = 0;
-
+      print("TOTAL COURSES => ${courses.length}");
       for (final course in courses) {
         final classesResponse = await selfPacedService.getClasses(
           token,
@@ -159,6 +179,9 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         isLoading = false;
       });
     }
+    final plans = await selfPacedService.getPlans(token);
+
+    print("SELF PACED PLANS => $plans");
   }
 
   Future<void> loadSubscription() async {
@@ -185,7 +208,11 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       return;
     }
 
-    final response = await selfPacedService.initiatePayment(token, course.id);
+    final response = await selfPacedService.initiatePayment(
+      token,
+      course.id,
+      selectedPlanId!,
+    );
     print("INITIATE RESPONSE => $response");
     if (ApiHelper.isSuccess(response) && response["data"] != null) {
       AppSnackbar.showSuccess(context, "Proceed to payment");
@@ -361,7 +388,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        if (!course.enrolled && !hasActiveSubscription) {
+                        if (!hasActiveSubscription) {
                           handleCTA("enroll", course);
                         } else if (courseCompleted[course.id] ?? false) {
                           handleCTA("review", course);
@@ -371,14 +398,14 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                       },
                       icon: const Icon(Icons.play_arrow),
                       label: Text(
-                        (courseProgress[course.id] ?? 0) == 0
+                        !hasActiveSubscription
                             ? "Enroll Now"
                             : (courseCompleted[course.id] ?? false)
                             ? "Review Course"
                             : "Continue Learning",
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (courseProgress[course.id] ?? 0) == 0
+                        backgroundColor: !hasActiveSubscription
                             ? Colors.deepOrange
                             : Colors.deepPurple,
                         foregroundColor: Colors.white,
@@ -466,7 +493,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         ),
       );
     } else if (type == "enroll" && course != null) {
-      Navigator.pushNamed(context, "/payments");
+      enrollCourse(course);
     } else {
       ScaffoldMessenger.of(
         context,

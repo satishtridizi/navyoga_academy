@@ -338,48 +338,6 @@ class _LoginScreen extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 50),
-
-                  /// DIVIDER WITH TEXT
-                  Row(
-                    children: [
-                      const Expanded(child: Divider()),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 2,
-                        ),
-                        color: const Color.fromARGB(255, 255, 255, 255),
-                        child: const Text("or continue with"),
-                      ),
-                      const Expanded(child: Divider()),
-                    ],
-                  ),
-
-                  const SizedBox(height: 18),
-
-                  /// SOCIAL BUTTONS
-                  Row(
-                    children: [
-                      Expanded(
-                        child: socialButton(
-                          icon: Icons.g_mobiledata,
-                          text: "Google",
-                          onTap: _handleGoogleLogin,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: socialButton(
-                          icon: Icons.facebook,
-                          text: "Facebook",
-                          onTap: _handleFacebookLogin,
-                        ),
-                      ),
-                    ],
-                  ),
-
                   const SizedBox(height: 30),
 
                   /// SIGN UP
