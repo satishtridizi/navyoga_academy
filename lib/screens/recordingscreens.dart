@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-import 'package:navyoga_academy/models/recording_model.dart';
+
 import 'package:navyoga_academy/models/recording_stat_model.dart';
 import 'package:navyoga_academy/screens/recording_player_screen.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/widgets/recording_card.dart';
-import '../data/recordings_data.dart';
+
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/models/recording_api_model.dart';
 import 'package:navyoga_academy/services/recording_service.dart';
-import 'package:navyoga_academy/models/recording_model.dart';
+
 import 'package:navyoga_academy/services/enrollment_service.dart';
 
 class RecordingsDashboard extends StatefulWidget {
@@ -131,7 +130,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                         Icon(Icons.videocam, color: Colors.white),
                         SizedBox(width: 10),
                         Text(
-                          "Class\nRecordings",
+                          "Class Recordings",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -276,20 +275,6 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: "All Categories",
-                  isExpanded: true,
-                  items: const [
-                    DropdownMenuItem(
-                      value: "All Categories",
-                      child: Text("All Categories"),
-                    ),
-                    DropdownMenuItem(value: "Yoga", child: Text("Yoga")),
-                  ],
-                  onChanged: (value) {},
-                ),
               ),
             ),
             const SizedBox(height: 20),

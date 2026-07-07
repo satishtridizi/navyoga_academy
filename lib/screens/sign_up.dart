@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
@@ -7,6 +8,7 @@ import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -517,8 +519,29 @@ class _SignupScreenState extends State<SignupScreen> {
 
                                         Future.delayed(
                                           const Duration(milliseconds: 500),
-                                          () {
-                                            Navigator.pop(context);
+                                          () async {
+                                            // Save login token
+                                            await AuthManager.saveToken(
+                                              response["data"]["token"],
+                                            );
+
+                                            // Save onboarding flag
+                                            final prefs =
+                                                await SharedPreferences.getInstance();
+                                            await prefs.setBool(
+                                              "show_onboarding",
+                                              true,
+                                            );
+
+                                            print(
+                                              "show_onboarding = ${prefs.getBool("show_onboarding")}",
+                                            );
+
+                                            Navigator.pushNamedAndRemoveUntil(
+                                              context,
+                                              AppRoutes.dashboard,
+                                              (route) => false,
+                                            );
                                           },
                                         );
                                       } else {

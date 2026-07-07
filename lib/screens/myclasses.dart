@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
-
+import 'package:navyoga_academy/services/dashboard_service.dart';
 import 'package:navyoga_academy/models/live_enrollment_model.dart';
 import 'package:navyoga_academy/models/myclasses_stats_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
@@ -20,6 +20,9 @@ class MyClassesScreen extends StatefulWidget {
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
   int enrolledCount = 0;
+  int completedCount = 0;
+  int progressCount = 0;
+  int attendanceRate = 0;
 
   List<LiveEnrollmentModel> enrolledClasses = [];
   bool loading = true;
@@ -29,7 +32,10 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   @override
   void initState() {
     super.initState();
+
     loadEnrollments();
+
+    loadDashboardStats();
   }
 
   Future<void> loadEnrollments() async {
@@ -39,11 +45,20 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
     final res = await WorkshopService().getWorkshops(token);
 
+    print(res);
     if (res["success"] == true) {
       final List items = res["data"]["items"] ?? [];
 
       final enrolledItems = items
           .where((e) => e["isEnrolled"] == true)
+          .toList();
+
+      final completedItems = enrolledItems
+          .where((e) => e["status"] == "COMPLETED")
+          .toList();
+
+      final activeItems = enrolledItems
+          .where((e) => e["status"] == "ACTIVE")
           .toList();
 
       setState(() {
@@ -64,7 +79,36 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
 
         enrolledCount = enrolledItems.length;
 
+        completedCount = completedItems.length;
+
+        progressCount = activeItems.length;
+
         loading = false;
+      });
+    }
+  }
+
+  Future<void> loadDashboardStats() async {
+    final token = await AuthManager.getToken();
+
+    if (token == null) return;
+
+    final res = await DashboardService().getDashboard(token);
+
+    print("DASHBOARD RESPONSE = $res");
+
+    if (res["success"] == true) {
+      final metrics = res["data"]["metrics"];
+
+      setState(() {
+        enrolledCount = metrics["enrolledClasses"] ?? 0;
+
+        attendanceRate = metrics["attendanceRate"] ?? 0;
+
+        // Backend doesn't provide these yet
+        completedCount = metrics["completedClasses"] ?? 0;
+
+        progressCount = metrics["inProgressClasses"] ?? 0;
       });
     }
   }
@@ -114,9 +158,30 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
     final stats = [
       StatsModel(
         title: "Enrolled Classes",
-        value: enrolledClasses.length.toString(),
+        value: enrolledCount.toString(),
         color: Colors.deepOrange,
         icon: Icons.menu_book,
+      ),
+
+      StatsModel(
+        title: "Completed",
+        value: completedCount.toString(),
+        color: Colors.green,
+        icon: Icons.check_circle,
+      ),
+
+      StatsModel(
+        title: "In Progress",
+        value: progressCount.toString(),
+        color: Colors.purple,
+        icon: Icons.timelapse,
+      ),
+
+      StatsModel(
+        title: "Avg. Attendance",
+        value: "$attendanceRate%",
+        color: Colors.orange,
+        icon: Icons.calendar_today,
       ),
     ];
     return AppScaffold(
@@ -362,7 +427,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
                 selectedSection == "progress") ...[
               Builder(
                 builder: (context) {
-                  final filteredEnrolled = enrolledClasses;
+                  final filteredEnrolled = getFilteredClasses();
 
                   if (filteredEnrolled.isEmpty) {
                     return const Padding(

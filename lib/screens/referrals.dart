@@ -92,6 +92,144 @@ class _ReferralScreenState extends State<ReferralScreen> {
     }
   }
 
+  Widget buildAchievementSection() {
+    final badges = [
+      {"title": "First Steps", "target": 1, "icon": Icons.track_changes},
+      {"title": "Social Butterfly", "target": 5, "icon": Icons.person_add},
+      {"title": "Rising Star", "target": 10, "icon": Icons.star_border},
+      {"title": "Top Performer", "target": 20, "icon": Icons.military_tech},
+      {"title": "Champion", "target": 50, "icon": Icons.emoji_events},
+      {"title": "Legend", "target": 100, "icon": Icons.workspace_premium},
+    ];
+
+    final unlocked = badges
+        .where((b) => activeReferrals >= (b["target"] as int))
+        .length;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.orange.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.emoji_events, color: Colors.deepOrange),
+              const SizedBox(width: 8),
+
+              const Expanded(
+                child: Text(
+                  "Achievement Badges",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
+                ),
+              ),
+
+              Chip(label: Text("$unlocked/${badges.length} Unlocked")),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            "Unlock special rewards by reaching referral milestones",
+            style: TextStyle(color: Colors.blueGrey),
+          ),
+
+          const SizedBox(height: 20),
+
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: badges.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 1.0,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemBuilder: (context, index) {
+              final badge = badges[index];
+
+              final target = badge["target"] as int;
+
+              final progress = (activeReferrals / target).clamp(0.0, 1.0);
+
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: activeReferrals >= target
+                      ? Colors.green.shade50
+                      : Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: activeReferrals >= target
+                        ? Colors.green
+                        : Colors.grey.shade200,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      badge["icon"] as IconData,
+                      color: activeReferrals >= target
+                          ? Colors.green
+                          : Colors.grey,
+                    ),
+
+                    const SizedBox(height: 4),
+                    Text(
+                      "Refer $target friends",
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "${(progress * 100).round()}% Complete",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "${activeReferrals > target ? target : activeReferrals}/$target",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    LinearProgressIndicator(
+                      value: progress,
+                      color: activeReferrals >= target
+                          ? Colors.green
+                          : Colors.deepPurple,
+                      backgroundColor: Colors.grey.shade300,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
@@ -155,6 +293,7 @@ class _ReferralScreenState extends State<ReferralScreen> {
                       const Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               "Referral Program",
@@ -222,6 +361,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
                     ),
                   ],
                 ),
+
+                const SizedBox(height: 20),
+
+                buildAchievementSection(),
 
                 const SizedBox(height: 20),
 

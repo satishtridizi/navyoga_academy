@@ -12,6 +12,7 @@ class CourseModel {
   final bool enrolled;
   final bool completed;
   final double progress;
+  final String category;
 
   final String? lessonsText;
   CourseModel({
@@ -27,6 +28,7 @@ class CourseModel {
     required this.completed,
     required this.progress,
     this.lessonsText,
+    required this.category,
   });
   factory CourseModel.fromJson(Map<String, dynamic> json) {
     return CourseModel(
@@ -55,6 +57,7 @@ class CourseModel {
       progress: (json["progress"] ?? 0).toDouble(),
 
       lessonsText: json["lessonsText"],
+      category: json["category"] ?? "All",
     );
   }
 }

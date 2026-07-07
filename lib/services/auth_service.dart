@@ -87,4 +87,16 @@ class AuthService {
       body: {},
     );
   }
+
+  /// ================= VERIFY PHONE =================
+  Future<dynamic> verifyPhone({
+    required String token,
+    required String accessToken,
+  }) async {
+    return await _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/verify-phone",
+      token: token,
+      body: {"accessToken": accessToken},
+    );
+  }
 }

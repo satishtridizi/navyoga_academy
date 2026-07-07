@@ -45,7 +45,7 @@ class ApiService {
       }
 
       if (response.statusCode == 401) {
-        return {"success": false, "message": "Unauthorized"};
+        return {"success": false, "message": data["message"] ?? "Unauthorized"};
       }
 
       return {

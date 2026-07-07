@@ -9,7 +9,7 @@ class WorkshopService {
   /// GET ALL WORKSHOPS
   Future<dynamic> getWorkshops(String token) async {
     return await _api.getRequest(
-      url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/upcoming",
+      url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/my-enrollments",
       token: token,
     );
   }

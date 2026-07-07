@@ -511,243 +511,242 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               );
             }).toList(),
 
-            const SizedBox(height: 20),
+            // const SizedBox(height: 20),
 
-            Animate(
-              effects: const [
-                FadeEffect(duration: Duration(milliseconds: 600)),
+            // Animate(
+            //   effects: const [
+            //     FadeEffect(duration: Duration(milliseconds: 600)),
 
-                SlideEffect(
-                  begin: Offset(0, 0.2),
-                  end: Offset(0, 0),
-                  duration: Duration(milliseconds: 600),
-                ),
-              ],
+            //     SlideEffect(
+            //       begin: Offset(0, 0.2),
+            //       end: Offset(0, 0),
+            //       duration: Duration(milliseconds: 600),
+            //     ),
+            //   ],
 
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: const Color(0xffF3F4F6), // 🔥 light grey bg
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: Colors.deepOrange.withOpacity(
-                      0.2,
-                    ), // 🔥 subtle border
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// HEADER
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Payment Methods",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepOrange,
-                          ),
-                        ),
+            //   child: Container(
+            //     padding: const EdgeInsets.all(16),
+            //     margin: const EdgeInsets.only(bottom: 20),
+            //     decoration: BoxDecoration(
+            //       color: const Color(0xffF3F4F6), // 🔥 light grey bg
+            //       borderRadius: BorderRadius.circular(24),
+            //       border: Border.all(
+            //         color: Colors.deepOrange.withOpacity(
+            //           0.2,
+            //         ), // 🔥 subtle border
+            //       ),
+            //     ),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         /// HEADER
+            //         Row(
+            //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //           children: [
+            //             const Text(
+            //               "Payment Methods",
+            //               style: TextStyle(
+            //                 fontSize: 22,
+            //                 fontWeight: FontWeight.bold,
+            //                 color: Colors.deepOrange,
+            //               ),
+            //             ),
 
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              paymentMethods.add(
-                                PaymentMethod(
-                                  brand: "Visa",
-                                  number: "9999",
-                                  expiry: "12/30",
-                                ),
-                              );
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.add,
-                            size: 19,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          label: const Text(
-                            "Add Card",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+            //             ElevatedButton.icon(
+            //               onPressed: () {
+            //                 setState(() {
+            //                   paymentMethods.add(
+            //                     PaymentMethod(
+            //                       brand: "Visa",
+            //                       number: "9999",
+            //                       expiry: "12/30",
+            //                     ),
+            //                   );
+            //                 });
+            //               },
+            //               icon: const Icon(
+            //                 Icons.add,
+            //                 size: 19,
+            //                 color: Colors.white,
+            //                 fontWeight: FontWeight.bold,
+            //               ),
+            //               label: const Text(
+            //                 "Add Card",
+            //                 style: TextStyle(
+            //                   color: Colors.white,
+            //                   fontWeight: FontWeight.bold,
+            //                 ),
+            //               ),
+            //               style: ElevatedButton.styleFrom(
+            //                 backgroundColor: Colors.purple,
+            //                 shape: RoundedRectangleBorder(
+            //                   borderRadius: BorderRadius.circular(30),
+            //                 ),
+            //               ),
+            //             ),
+            //           ],
+            //         ),
 
-                    const SizedBox(height: 16),
+            //         const SizedBox(height: 16),
 
-                    /// CARDS
-                    ...paymentMethods.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final c = entry.value;
+            //         /// CARDS
+            //         ...paymentMethods.asMap().entries.map((entry) {
+            //           final index = entry.key;
+            //           final c = entry.value;
 
-                      return Animate(
-                        delay: Duration(milliseconds: 120 * index),
+            //           return Animate(
+            //             delay: Duration(milliseconds: 120 * index),
 
-                        effects: const [
-                          FadeEffect(duration: Duration(milliseconds: 400)),
+            //             effects: const [
+            //               FadeEffect(duration: Duration(milliseconds: 400)),
 
-                          SlideEffect(
-                            begin: Offset(0.2, 0),
-                            end: Offset(0, 0),
-                            duration: Duration(milliseconds: 400),
-                          ),
-                        ],
+            //               SlideEffect(
+            //                 begin: Offset(0.2, 0),
+            //                 end: Offset(0, 0),
+            //                 duration: Duration(milliseconds: 400),
+            //               ),
+            //             ],
 
-                        child: paymentCard(
-                          c,
-                          onDelete: () {
-                            setState(() {
-                              paymentMethods.removeAt(index);
-                            });
-                          },
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-            ),
+            //             child: paymentCard(
+            //               c,
+            //               onDelete: () {
+            //                 setState(() {
+            //                   paymentMethods.removeAt(index);
+            //                 });
+            //               },
+            //             ),
+            //           );
+            //         }).toList(),
+            //       ],
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 28),
 
-            const SizedBox(height: 28),
+            // /// ================= RECENT PAYMENTS =================
+            // Animate(
+            //   effects: const [
+            //     FadeEffect(duration: Duration(milliseconds: 600)),
 
-            /// ================= RECENT PAYMENTS =================
-            Animate(
-              effects: const [
-                FadeEffect(duration: Duration(milliseconds: 600)),
+            //     SlideEffect(
+            //       begin: Offset(0, 0.2),
+            //       end: Offset(0, 0),
+            //       duration: Duration(milliseconds: 600),
+            //     ),
+            //   ],
 
-                SlideEffect(
-                  begin: Offset(0, 0.2),
-                  end: Offset(0, 0),
-                  duration: Duration(milliseconds: 600),
-                ),
-              ],
+            //   child: Container(
+            //     padding: const EdgeInsets.all(16),
+            //     decoration: BoxDecoration(
+            //       color: const Color.fromARGB(255, 255, 255, 255),
+            //       borderRadius: BorderRadius.circular(24),
+            //       border: Border.all(color: Colors.deepOrange.withOpacity(0.2)),
+            //     ),
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       children: [
+            //         /// HEADER
+            //         /// HEADER
+            //         Row(
+            //           children: [
+            //             Expanded(
+            //               child: Text(
+            //                 "Recent Payments (0)",
+            //                 overflow: TextOverflow.ellipsis,
+            //               ),
+            //             ),
+            //             const SizedBox(width: 10),
+            //             ElevatedButton(
+            //               onPressed: () {},
+            //               child: const Text("Download"),
+            //             ),
+            //           ],
+            //         ),
+            //         const SizedBox(height: 16),
 
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.deepOrange.withOpacity(0.2)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// HEADER
-                    /// HEADER
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "Recent Payments (0)",
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: const Text("Download"),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+            //         /// LIST
+            //         /// EMPTY STATE
+            //         if (payments.isEmpty)
+            //           const Padding(
+            //             padding: EdgeInsets.all(16),
+            //             child: Text(
+            //               "No payment history available",
+            //               style: TextStyle(color: Colors.grey),
+            //             ),
+            //           ),
 
-                    /// LIST
-                    /// EMPTY STATE
-                    if (payments.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text(
-                          "No payment history available",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ),
+            //         /// LIST
+            //         ...payments.asMap().entries.map((entry) {
+            //           final index = entry.key;
+            //           final p = entry.value;
 
-                    /// LIST
-                    ...payments.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final p = entry.value;
+            //           return Animate(
+            //             delay: Duration(milliseconds: 120 * index),
 
-                      return Animate(
-                        delay: Duration(milliseconds: 120 * index),
+            //             effects: const [
+            //               FadeEffect(duration: Duration(milliseconds: 400)),
 
-                        effects: const [
-                          FadeEffect(duration: Duration(milliseconds: 400)),
+            //               SlideEffect(
+            //                 begin: Offset(0.2, 0),
+            //                 end: Offset(0, 0),
+            //                 duration: Duration(milliseconds: 400),
+            //               ),
+            //             ],
 
-                          SlideEffect(
-                            begin: Offset(0.2, 0),
-                            end: Offset(0, 0),
-                            duration: Duration(milliseconds: 400),
-                          ),
-                        ],
+            //             child: paymentHistoryCard(
+            //               PaymentHistory(
+            //                 title: p.title,
+            //                 amount: p.amount,
+            //                 date: p.date,
+            //               ),
+            //             ),
+            //           );
+            //         }),
 
-                        child: paymentHistoryCard(
-                          PaymentHistory(
-                            title: p.title,
-                            amount: p.amount,
-                            date: p.date,
-                          ),
-                        ),
-                      );
-                    }),
+            //         const SizedBox(height: 20),
 
-                    const SizedBox(height: 20),
-
-                    /// BUTTON
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PaymentHistoryScreen(
-                                payments: payments.map((p) {
-                                  return PaymentHistory(
-                                    title: p.title,
-                                    amount: p.amount,
-                                    date: p.date,
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            214,
-                            214,
-                            214,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: const Text(
-                          "View All Payment History",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            //         /// BUTTON
+            //         SizedBox(
+            //           width: double.infinity,
+            //           child: ElevatedButton(
+            //             onPressed: () {
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (_) => PaymentHistoryScreen(
+            //                     payments: payments.map((p) {
+            //                       return PaymentHistory(
+            //                         title: p.title,
+            //                         amount: p.amount,
+            //                         date: p.date,
+            //                       );
+            //                     }).toList(),
+            //                   ),
+            //                 ),
+            //               );
+            //             },
+            //             style: ElevatedButton.styleFrom(
+            //               backgroundColor: const Color.fromARGB(
+            //                 255,
+            //                 214,
+            //                 214,
+            //                 214,
+            //               ),
+            //               padding: const EdgeInsets.symmetric(vertical: 16),
+            //               shape: RoundedRectangleBorder(
+            //                 borderRadius: BorderRadius.circular(30),
+            //               ),
+            //             ),
+            //             child: const Text(
+            //               "View All Payment History",
+            //               style: TextStyle(color: Colors.black),
+            //             ),
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

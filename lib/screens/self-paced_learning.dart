@@ -23,6 +23,7 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
+  String searchQuery = "";
   String? selectedPlanId;
   Map<String, double> courseProgress = {};
   Map<String, bool> courseCompleted = {};
@@ -31,30 +32,55 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
   int enrolledCount = 0;
   int inProgressCount = 0;
   int completedCount = 0;
+  int totalClasses = 0;
   List<CourseModel> courses = [];
   bool isLoading = true;
   bool hasActiveSubscription = false;
   String selectedStat = "all";
   List<CourseModel> get filteredCourses {
+    List<CourseModel> filtered = List.from(courses);
+
+    // Search Filter
+    if (searchQuery.isNotEmpty) {
+      filtered = filtered.where((course) {
+        return course.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            course.instructor.toLowerCase().contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // Category Filter
+    if (selectedCategory != "All") {
+      filtered = filtered.where((course) {
+        return course.category.toLowerCase() == selectedCategory.toLowerCase();
+      }).toList();
+    }
+
+    // Stat Filter
     switch (selectedStat) {
       case "enrolled":
-        return courses.where((c) => (courseProgress[c.id] ?? 0) > 0).toList();
+        filtered = filtered
+            .where((c) => (courseProgress[c.id] ?? 0) > 0)
+            .toList();
+        break;
 
       case "progress":
-        return courses
+        filtered = filtered
             .where(
               (c) =>
                   (courseProgress[c.id] ?? 0) > 0 &&
                   !(courseCompleted[c.id] ?? false),
             )
             .toList();
+        break;
 
       case "completed":
-        return courses.where((c) => courseCompleted[c.id] ?? false).toList();
-
-      default:
-        return courses;
+        filtered = filtered
+            .where((c) => courseCompleted[c.id] ?? false)
+            .toList();
+        break;
     }
+
+    return filtered;
   }
 
   @override
@@ -104,6 +130,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       int enrolled = 0;
       int inProgress = 0;
       int completed = 0;
+      totalClasses = 0;
       print("TOTAL COURSES => ${courses.length}");
       for (final course in courses) {
         final classesResponse = await selfPacedService.getClasses(
@@ -112,7 +139,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         );
 
         final List classes = classesResponse["data"] ?? [];
-
+        totalClasses += classes.length;
         if (classes.isEmpty) continue;
 
         int completedLessons = 0;
@@ -623,265 +650,339 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
 
                           const SizedBox(height: 35),
 
-                          _statCard(
-                            icon: Icons.menu_book_outlined,
-                            title: "Enrolled Courses",
-                            count: enrolledCount.toString(),
-                            onTap: () {
-                              setState(() {
-                                selectedStat = "enrolled";
-                              });
-                            },
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildTopStat(
+                                  Icons.menu_book_outlined,
+                                  "Modules",
+                                  courses.length.toString(),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: buildTopStat(
+                                  Icons.play_circle_outline,
+                                  "Classes",
+                                  totalClasses.toString(),
+                                ),
+                              ),
+                            ],
                           ),
 
-                          _statCard(
-                            icon: Icons.trending_up,
-                            title: "In Progress",
-                            count: inProgressCount.toString(),
-                            onTap: () {
-                              setState(() {
-                                selectedStat = "progress";
-                              });
-                            },
-                          ),
+                          const SizedBox(height: 12),
 
-                          _statCard(
-                            icon: Icons.workspace_premium_outlined,
-                            title: "Completed",
-                            count: completedCount.toString(),
-                            onTap: () {
-                              setState(() {
-                                selectedStat = "completed";
-                              });
-                            },
+                          Row(
+                            children: [
+                              Expanded(
+                                child: buildTopStat(
+                                  Icons.trending_up,
+                                  "Progress",
+                                  "${(courseProgress.values.isEmpty ? 0 : (courseProgress.values.reduce((a, b) => a + b) / courseProgress.length * 100)).toInt()}%",
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+
+                              Expanded(
+                                child: buildTopStat(
+                                  Icons.workspace_premium_outlined,
+                                  "Active Plan",
+                                  hasActiveSubscription
+                                      ? "Active"
+                                      : "Not Enrolled",
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 10),
+                          if (!hasActiveSubscription)
+                            Container(
+                              margin: const EdgeInsets.all(20),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: const Color(0xffF7F1F3),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.orange.shade200,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade100,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: const Icon(
+                                      Icons.lock_outline,
+                                      color: Colors.deepOrange,
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 16),
+
+                                  const Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Subscribe to unlock self-paced classes",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          "Browse the catalogue below and enroll to start watching at your own pace.",
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.payments,
+                                      );
+                                    },
+                                    child: const Text("View Plans"),
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),
                   ),
 
                   /// FLOATING SEARCH FILTER CARD
-                  Animate(
-                    delay: const Duration(milliseconds: 200),
+                  if (hasActiveSubscription)
+                    Animate(
+                      delay: const Duration(milliseconds: 200),
+                      effects: const [
+                        FadeEffect(duration: Duration(milliseconds: 500)),
+                        SlideEffect(
+                          begin: Offset(0, 0.15),
+                          end: Offset(0, 0),
+                          duration: Duration(milliseconds: 500),
+                        ),
+                      ],
+                      child: Transform.translate(
+                        offset: const Offset(0, 25),
 
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22),
 
-                      SlideEffect(
-                        begin: Offset(0, 0.15),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
 
-                    child: Transform.translate(
-                      offset: const Offset(0, 25),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
 
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22),
+                              borderRadius: BorderRadius.circular(20),
 
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(.08),
 
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+                                  blurRadius: 18,
 
-                            borderRadius: BorderRadius.circular(20),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(.08),
-
-                                blurRadius: 18,
-
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-
-                            children: [
-                              /// SEARCH
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 10,
+                                  offset: const Offset(0, 6),
                                 ),
+                              ],
+                            ),
 
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
 
-                                  border: Border.all(
-                                    color: Colors.orange.shade100,
+                              children: [
+                                /// SEARCH
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+
+                                    border: Border.all(
+                                      color: Colors.orange.shade100,
+                                    ),
+                                  ),
+
+                                  child: TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        searchQuery = value;
+                                      });
+                                    },
+                                    decoration: const InputDecoration(
+                                      border: InputBorder.none,
+                                      icon: Icon(
+                                        Icons.search,
+                                        color: Colors.blueGrey,
+                                      ),
+                                      hintText:
+                                          "Search courses, instructors...",
+                                    ),
                                   ),
                                 ),
 
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.search, color: Colors.blueGrey),
+                                const SizedBox(height: 6),
 
-                                    SizedBox(width: 12),
+                                /// FILTER
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                  ),
 
-                                    Expanded(
-                                      child: Text(
-                                        "Search courses, instructors...",
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+
+                                    border: Border.all(
+                                      color: Colors.orange.shade100,
+                                    ),
+                                  ),
+
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+
+                                    children: [
+                                      Icon(Icons.filter_alt_outlined),
+
+                                      SizedBox(width: 10),
+
+                                      Text(
+                                        "All Courses",
 
                                         style: TextStyle(
-                                          color: Colors.blueGrey,
-                                          fontSize: 13,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 6),
-
-                              /// FILTER
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-
-                                  border: Border.all(
-                                    color: Colors.orange.shade100,
+                                    ],
                                   ),
                                 ),
 
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                const SizedBox(height: 10),
 
-                                  children: [
-                                    Icon(Icons.filter_alt_outlined),
+                                /// CATEGORY CHIPS
+                                // Wrap(
+                                //   spacing: 6,
+                                //   runSpacing: 6,
 
-                                    SizedBox(width: 10),
+                                //   children: categories.map((cat) {
+                                //     bool selected = cat == selectedCategory;
 
-                                    Text(
-                                      "All Courses",
+                                //     return Animate(
+                                //       delay: Duration(
+                                //         milliseconds:
+                                //             80 * categories.indexOf(cat).toInt(),
+                                //       ),
 
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                //       effects: const [
+                                //         FadeEffect(
+                                //           duration: Duration(milliseconds: 400),
+                                //         ),
 
-                              const SizedBox(height: 10),
+                                //         ScaleEffect(
+                                //           begin: Offset(0.9, 0.9),
+                                //           end: Offset(1, 1),
+                                //           duration: Duration(milliseconds: 400),
+                                //         ),
+                                //       ],
 
-                              /// CATEGORY CHIPS
-                              Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
+                                //       child: GestureDetector(
+                                //         onTap: () {
+                                //           setState(() {
+                                //             selectedCategory = cat;
+                                //           });
+                                //         },
 
-                                children: categories.map((cat) {
-                                  bool selected = cat == selectedCategory;
+                                //         child: Container(
+                                //           padding: const EdgeInsets.symmetric(
+                                //             horizontal: 12,
+                                //             vertical: 6,
+                                //           ),
 
-                                  return Animate(
-                                    delay: Duration(
-                                      milliseconds:
-                                          80 * categories.indexOf(cat).toInt(),
-                                    ),
+                                //           decoration: BoxDecoration(
+                                //             color: selected
+                                //                 ? Colors.deepOrange
+                                //                 : Colors.white,
 
-                                    effects: const [
-                                      FadeEffect(
-                                        duration: Duration(milliseconds: 400),
-                                      ),
+                                //             borderRadius: BorderRadius.circular(
+                                //               24,
+                                //             ),
 
-                                      ScaleEffect(
-                                        begin: Offset(0.9, 0.9),
-                                        end: Offset(1, 1),
-                                        duration: Duration(milliseconds: 400),
-                                      ),
-                                    ],
+                                //             border: Border.all(
+                                //               color: Colors.orange.shade100,
+                                //             ),
+                                //           ),
 
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          selectedCategory = cat;
-                                        });
-                                      },
+                                //           child: Text(
+                                //             cat,
 
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 6,
-                                        ),
+                                //             style: TextStyle(
+                                //               fontSize: 13,
 
-                                        decoration: BoxDecoration(
-                                          color: selected
-                                              ? Colors.deepOrange
-                                              : Colors.white,
-
-                                          borderRadius: BorderRadius.circular(
-                                            24,
-                                          ),
-
-                                          border: Border.all(
-                                            color: Colors.orange.shade100,
-                                          ),
-                                        ),
-
-                                        child: Text(
-                                          cat,
-
-                                          style: TextStyle(
-                                            fontSize: 13,
-
-                                            color: selected
-                                                ? Colors.white
-                                                : Colors.black87,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ],
+                                //               color: selected
+                                //                   ? Colors.white
+                                //                   : Colors.black87,
+                                //             ),
+                                //           ),
+                                //         ),
+                                //       ),
+                                //     );
+                                //   }).toList(),
+                                // ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 50),
+                  SizedBox(height: hasActiveSubscription ? 50 : 20),
 
-                  courses.isEmpty
-                      ? const Center(child: Text("No courses available"))
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: filteredCourses.length,
-                          itemBuilder: (context, index) {
-                            final course = filteredCourses[index];
-                            return Animate(
-                              delay: Duration(milliseconds: 150 * index),
-                              effects: const [
-                                FadeEffect(
-                                  duration: Duration(milliseconds: 500),
+                  if (hasActiveSubscription)
+                    courses.isEmpty
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Text("No courses available"),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: filteredCourses.length,
+                            itemBuilder: (context, index) {
+                              final course = filteredCourses[index];
+
+                              return Animate(
+                                delay: Duration(milliseconds: 150 * index),
+                                effects: const [
+                                  FadeEffect(
+                                    duration: Duration(milliseconds: 500),
+                                  ),
+                                  SlideEffect(
+                                    begin: Offset(0, 0.12),
+                                    end: Offset(0, 0),
+                                    duration: Duration(milliseconds: 500),
+                                  ),
+                                ],
+                                child: Padding(
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  child: _courseCard(course),
                                 ),
-                                SlideEffect(
-                                  begin: Offset(0, 0.12),
-                                  end: Offset(0, 0),
-                                  duration: Duration(milliseconds: 500),
-                                ),
-                              ],
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: 20),
-                                child: _courseCard(course),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          ),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -958,6 +1059,44 @@ Widget _pill(String text, Color bg, Color fg, {Color? borderColor}) {
       text,
 
       style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
+    ),
+  );
+}
+
+Widget buildTopStat(IconData icon, String title, String value) {
+  return Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(.12),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.white.withOpacity(.2)),
+    ),
+    child: Row(
+      children: [
+        CircleAvatar(
+          backgroundColor: Colors.white24,
+          child: Icon(icon, color: Colors.white),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.white70)),
+              Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }
