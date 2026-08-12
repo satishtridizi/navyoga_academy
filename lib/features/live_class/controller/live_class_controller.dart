@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:mediasfu_mediasoup_client/mediasfu_mediasoup_client.dart';
@@ -7,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:navyoga_academy/features/live_class/models/sfu_join_response_model.dart';
 
 import '../models/live_class_arguments.dart';
+import '../models/live_class_message.dart';
 import '../models/sfu_participant.dart';
 import '../services/sfu_socket_service.dart';
 
@@ -39,6 +41,7 @@ class LiveClassController extends ChangeNotifier {
 
   int waitingCount = 0;
   List<SfuParticipant> participants = [];
+  final List<LiveClassMessage> messages = [];
   SfuParticipant? self;
   String? errorMessage;
 
@@ -229,6 +232,26 @@ class LiveClassController extends ChangeNotifier {
     _subscriptions.add(
       socketService.errorStream.listen((message) {
         errorMessage = message;
+        _notify();
+      }),
+    );
+
+    _subscriptions.add(
+      socketService.chatMessageStream.listen((data) {
+        final message = LiveClassMessage.fromJson(data);
+        if (message.text.isEmpty ||
+            messages.any((item) => item.id == message.id)) {
+          return;
+        }
+        messages.removeWhere(
+          (item) =>
+              item.id.startsWith('local-') &&
+              item.senderId == message.senderId &&
+              item.text == message.text &&
+              message.sentAt.difference(item.sentAt).abs() <
+                  const Duration(seconds: 15),
+        );
+        messages.add(message);
         _notify();
       }),
     );
@@ -427,7 +450,10 @@ class LiveClassController extends ChangeNotifier {
   // ─── Send transport ───────────────────────────────────────────────────────
 
   Future<void> _createSendTransport() async {
-    final transportData = await socketService.createTransport(direction: 'send');
+    final transportData = await socketService.createTransport(
+      direction: 'send',
+      sctpCapabilities: _device!.sctpCapabilities.toMap(),
+    );
     debugPrint('Send transport data received: ${transportData.keys.toList()}');
 
     _sendTransport = _device!.createSendTransportFromMap(
@@ -442,6 +468,7 @@ class LiveClassController extends ChangeNotifier {
 
       try {
         await socketService.connectTransport(
+          transportId: _sendTransport!.id,
           direction: 'send',
           dtlsParameters: dtlsParameters.toMap(),
         );
@@ -454,13 +481,19 @@ class LiveClassController extends ChangeNotifier {
     _sendTransport!.on('produce', (Map data) async {
       final kind = data['kind'] as String;
       final rtpParameters = data['rtpParameters'] as RtpParameters;
+      final appData = Map<String, dynamic>.from(data['appData'] as Map? ?? {});
+      final source = appData['source']?.toString() ??
+          (kind == 'audio' ? 'mic' : 'camera');
       final callback = data['callback'] as Function;
       final errback = data['errback'] as Function;
 
       try {
         final producerId = await socketService.produce(
+          transportId: _sendTransport!.id,
           kind: kind,
+          source: source,
           rtpParameters: rtpParameters.toMap(),
+          appData: appData,
         );
         callback(producerId);
       } catch (e) {
@@ -609,7 +642,10 @@ class LiveClassController extends ChangeNotifier {
   // ─── Recv transport ───────────────────────────────────────────────────────
 
   Future<void> _createRecvTransport() async {
-    final transportData = await socketService.createTransport(direction: 'recv');
+    final transportData = await socketService.createTransport(
+      direction: 'recv',
+      sctpCapabilities: _device!.sctpCapabilities.toMap(),
+    );
     debugPrint('Recv transport data received: ${transportData.keys.toList()}');
 
     _recvTransport = _device!.createRecvTransportFromMap(
@@ -624,6 +660,7 @@ class LiveClassController extends ChangeNotifier {
 
       try {
         await socketService.connectTransport(
+          transportId: _recvTransport!.id,
           direction: 'recv',
           dtlsParameters: dtlsParameters.toMap(),
         );
@@ -673,19 +710,30 @@ class LiveClassController extends ChangeNotifier {
     try {
       final rtpCapabilities = _device!.rtpCapabilities;
       final consumeData = await socketService.consume(
+        transportId: _recvTransport!.id,
         producerId: producerId,
         rtpCapabilities: rtpCapabilities.toMap(),
       );
-
-      debugPrint('Consume response for $producerId: ${consumeData.keys}');
 
       final consumerId = consumeData['id']?.toString() ?? '';
       final kindStr = consumeData['kind']?.toString() ?? 'audio';
       final rtpParamsRaw =
           consumeData['rtpParameters'] ?? consumeData['rtp_parameters'];
 
-      if (consumerId.isEmpty || rtpParamsRaw == null) {
-        debugPrint('Invalid consume response for producer $producerId');
+      // Keep this at the application boundary: setRemoteDescription failures
+      // originate from the SDP generated from these server RTP parameters.
+      debugPrint(
+        'Consume response for $producerId: '
+        '${jsonEncode(consumeData)}',
+        wrapWidth: 1024,
+      );
+
+      if (consumerId.isEmpty || rtpParamsRaw is! Map) {
+        debugPrint(
+          'Invalid consume response for producer $producerId: '
+          'id=${consumeData['id']}, kind=${consumeData['kind']}, '
+          'rtpParametersType=${rtpParamsRaw.runtimeType}',
+        );
         return;
       }
 
@@ -693,7 +741,7 @@ class LiveClassController extends ChangeNotifier {
           ? RTCRtpMediaType.RTCRtpMediaTypeVideo
           : RTCRtpMediaType.RTCRtpMediaTypeAudio;
 
-      final rtpParameters = RtpParameters.fromMap(rtpParamsRaw as Map);
+      final rtpParameters = RtpParameters.fromMap(rtpParamsRaw);
 
       _recvTransport!.consume(
         id: consumerId,
@@ -713,7 +761,7 @@ class LiveClassController extends ChangeNotifier {
   }
 
   /// Called by the Transport via consumerCallback when a Consumer is ready.
-  void _onConsumerCreated(Consumer consumer, Function? accept) {
+  void _onConsumerCreated(Consumer consumer, Function? accept) async {
     final producerId = consumer.producerId;
     _consumers[producerId] = consumer;
 
@@ -728,6 +776,19 @@ class LiveClassController extends ChangeNotifier {
 
     // Call accept if provided (some server implementations require it).
     accept?.call();
+
+    final recvTransport = _recvTransport;
+    if (recvTransport != null) {
+      try {
+        await socketService.resumeConsumer(
+          transportId: recvTransport.id,
+          consumerId: consumer.id,
+        );
+        debugPrint('Consumer resumed: ${consumer.id}');
+      } catch (error) {
+        debugPrint('Failed to resume consumer ${consumer.id}: $error');
+      }
+    }
 
     _notify();
   }
@@ -804,6 +865,26 @@ class LiveClassController extends ChangeNotifier {
           'Unable to change the microphone. Check its permission and connection.';
     }
 
+    _notify();
+  }
+
+  void sendChatMessage(String value) {
+    final text = value.trim();
+    if (text.isEmpty || !socketService.isConnected) return;
+    socketService.sendChatMessage(
+      classId: arguments.classId,
+      message: text,
+    );
+    final now = DateTime.now();
+    messages.add(
+      LiveClassMessage(
+        id: 'local-${now.microsecondsSinceEpoch}',
+        text: text,
+        senderId: self?.userId ?? '',
+        senderName: self?.name ?? arguments.studentName,
+        sentAt: now,
+      ),
+    );
     _notify();
   }
 

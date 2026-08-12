@@ -81,6 +81,10 @@ class SfuSocketService {
       _reconnectController =
       StreamController<void>.broadcast();
 
+  final StreamController<Map<String, dynamic>>
+      _chatMessageController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
   Stream<SfuConnectionStatus>
       get connectionStatusStream =>
           _connectionController.stream;
@@ -115,6 +119,9 @@ class SfuSocketService {
 
   Stream<void> get reconnectStream =>
       _reconnectController.stream;
+
+  Stream<Map<String, dynamic>> get chatMessageStream =>
+      _chatMessageController.stream;
 
   bool get isConnected =>
       _socket?.connected == true;
@@ -381,6 +388,25 @@ class SfuSocketService {
     socket.on('sfu:room-ended', classEndedHandler);
     socket.on('room-ended', classEndedHandler);
     socket.on('sfu:host-left', classEndedHandler);
+
+    void chatMessageHandler(dynamic data) {
+      final payload = _unwrapEventData(data);
+      debugPrint('SFU event ← chat message: $payload');
+      if (!_chatMessageController.isClosed) {
+        _chatMessageController.add(payload);
+      }
+    }
+
+    // The web client and backend have used different chat broadcast names over
+    // time. Socket.IO's catch-all listener lets the mobile client receive the
+    // active contract without registering the same payload multiple times.
+    socket.onAny((String event, dynamic data) {
+      final eventName = event.toLowerCase();
+      if (eventName.contains('chat') || eventName.contains('message')) {
+        debugPrint('SFU chat event name: $event');
+        chatMessageHandler(data);
+      }
+    });
   }
 
   Future<SfuJoinResponse> joinRoom({
@@ -427,6 +453,7 @@ class SfuSocketService {
   Future<Map<String, dynamic>>
       createTransport({
     required String direction,
+    Map<String, dynamic>? sctpCapabilities,
   }) async {
     assert(
       direction == 'send' ||
@@ -440,6 +467,8 @@ class SfuSocketService {
       event: SfuEvents.createTransport,
       payload: {
         'direction': direction,
+        if (sctpCapabilities != null)
+          'sctpCapabilities': sctpCapabilities,
       },
     );
 
@@ -455,6 +484,7 @@ class SfuSocketService {
   }
 
   Future<void> connectTransport({
+    required String transportId,
     required String direction,
     required Map<String, dynamic>
         dtlsParameters,
@@ -465,6 +495,7 @@ class SfuSocketService {
       socket: socket,
       event: SfuEvents.connectTransport,
       payload: {
+        'transportId': transportId,
         'direction': direction,
         'dtlsParameters': dtlsParameters,
       },
@@ -488,7 +519,9 @@ class SfuSocketService {
   }
 
   Future<String> produce({
+    required String transportId,
     required String kind,
+    required String source,
     required Map<String, dynamic>
         rtpParameters,
     Map<String, dynamic>? appData,
@@ -499,7 +532,9 @@ class SfuSocketService {
       socket: socket,
       event: SfuEvents.produce,
       payload: {
+        'transportId': transportId,
         'kind': kind,
+        'source': source,
         'rtpParameters': rtpParameters,
         if (appData != null)
           'appData': appData,
@@ -553,6 +588,7 @@ class SfuSocketService {
   }
 
   Future<Map<String, dynamic>> consume({
+    required String transportId,
     required String producerId,
     required Map<String, dynamic>
         rtpCapabilities,
@@ -563,6 +599,7 @@ class SfuSocketService {
       socket: socket,
       event: SfuEvents.consume,
       payload: {
+        'transportId': transportId,
         'producerId': producerId,
         'rtpCapabilities':
             rtpCapabilities,
@@ -577,6 +614,53 @@ class SfuSocketService {
         map;
 
     return _asMap(data);
+  }
+
+  Future<void> resumeConsumer({
+    required String transportId,
+    required String consumerId,
+  }) async {
+    final socket = _requireConnectedSocket();
+
+    final response = await _emitWithAck(
+      socket: socket,
+      event: SfuEvents.resumeConsumer,
+      payload: {
+        'transportId': transportId,
+        'consumerId': consumerId,
+      },
+    );
+
+    final payload = _asMap(response);
+    final isOk = payload['ok'] == true ||
+        payload['success'] == true ||
+        payload['resumed'] == true ||
+        payload['status'] == 'ok' ||
+        (payload.isNotEmpty && payload['error'] == null);
+
+    if (!isOk) {
+      throw SfuSocketException(
+        payload['message']?.toString() ??
+            payload['error']?.toString() ??
+            'Unable to resume the remote media consumer.',
+      );
+    }
+  }
+
+  void sendChatMessage({
+    required String classId,
+    required String message,
+  }) {
+    final socket = _requireConnectedSocket();
+    final payload = {
+      'classId': classId,
+      'roomId': classId,
+      'message': message,
+      'text': message,
+      'content': message,
+    };
+    debugPrint('SFU emit → ${SfuEvents.sendChatMessage}: $payload');
+    socket.emit(SfuEvents.sendChatMessage, payload);
   }
 
   Future<void> toggleMute({
@@ -765,5 +849,6 @@ class SfuSocketService {
     await _producerClosedController.close();
     await _classEndedController.close();
     await _reconnectController.close();
+    await _chatMessageController.close();
   }
 }

@@ -25,6 +25,15 @@ abstract final class SfuEvents {
   static const String consume =
       'sfu:consume';
 
+  static const String resumeConsumer =
+      'sfu:resume-consumer';
+
+  static const String sendChatMessage =
+      'sfu:send-message';
+
+  static const String chatMessage =
+      'sfu:new-message';
+
   static const String toggleMute =
       'sfu:toggle-mute';
 

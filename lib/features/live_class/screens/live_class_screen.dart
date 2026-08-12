@@ -30,6 +30,9 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   final ValueNotifier<int> _sessionSecondsNotifier = ValueNotifier<int>(0);
 
   bool _showParticipantsSheet = false;
+  bool _showChatSheet = false;
+  final TextEditingController _chatController = TextEditingController();
+  final ScrollController _chatScrollController = ScrollController();
 
   @override
   void initState() {
@@ -85,6 +88,8 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
     _sessionSecondsNotifier.dispose();
     _controller?.removeListener(_onControllerStateChanged);
     _controller?.dispose();
+    _chatController.dispose();
+    _chatScrollController.dispose();
     super.dispose();
   }
 
@@ -172,6 +177,15 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
         ],
       ),
       actions: [
+        IconButton(
+          onPressed: controller == null ? null : _toggleChatSheet,
+          icon: Badge(
+            label: Text('${controller?.messages.length ?? 0}'),
+            isLabelVisible: (controller?.messages.isNotEmpty ?? false),
+            child: const Icon(Icons.chat_bubble_outline),
+          ),
+          tooltip: 'Class chat',
+        ),
         IconButton(
           onPressed: () => _toggleParticipantsSheet(),
           icon: Badge(
@@ -470,6 +484,11 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
         if (_showParticipantsSheet)
           Positioned.fill(
             child: _buildParticipantsSheet(controller),
+          ),
+
+        if (_showChatSheet)
+          Positioned.fill(
+            child: _buildChatSheet(controller),
           ),
       ],
     );
@@ -842,6 +861,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
           ),
 
           /// PARTICIPANTS
+          /// PARTICIPANTS
           _buildControlButton(
             icon: Icons.people,
             label: 'Participants',
@@ -924,7 +944,170 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   void _toggleParticipantsSheet() {
     setState(() {
       _showParticipantsSheet = !_showParticipantsSheet;
+      if (_showParticipantsSheet) _showChatSheet = false;
     });
+  }
+
+  void _toggleChatSheet() {
+    setState(() {
+      _showChatSheet = !_showChatSheet;
+      if (_showChatSheet) _showParticipantsSheet = false;
+    });
+    if (_showChatSheet) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollChatToEnd());
+    }
+  }
+
+  void _sendChatMessage(LiveClassController controller) {
+    final text = _chatController.text.trim();
+    if (text.isEmpty) return;
+    controller.sendChatMessage(text);
+    _chatController.clear();
+  }
+
+  void _scrollChatToEnd() {
+    if (!_chatScrollController.hasClients) return;
+    _chatScrollController.animateTo(
+      _chatScrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Widget _buildChatSheet(LiveClassController controller) {
+    final selfId = controller.self?.userId ?? '';
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollChatToEnd());
+
+    return GestureDetector(
+      onTap: _toggleChatSheet,
+      child: Container(
+        color: Colors.black54,
+        alignment: Alignment.bottomCenter,
+        child: GestureDetector(
+          onTap: () {},
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.62,
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 12,
+              // Scaffold already resizes the body for the keyboard. Applying
+              // viewInsets again here caused the bottom sheet to overflow.
+              bottom: 12,
+            ),
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E1E26),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'CLASS CHAT',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: _toggleChatSheet,
+                      icon: const Icon(Icons.close, color: Colors.white70),
+                    ),
+                  ],
+                ),
+                const Divider(color: Colors.white12),
+                Expanded(
+                  child: controller.messages.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No messages yet. Say hello!',
+                            style: TextStyle(color: Colors.white54),
+                          ),
+                        )
+                      : ListView.builder(
+                          controller: _chatScrollController,
+                          itemCount: controller.messages.length,
+                          itemBuilder: (context, index) {
+                            final message = controller.messages[index];
+                            final isMine = message.senderId == selfId;
+                            return Align(
+                              alignment: isMine
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                constraints: const BoxConstraints(maxWidth: 300),
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 9,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isMine
+                                      ? Colors.deepPurple
+                                      : const Color(0xFF30303A),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (!isMine)
+                                      Text(
+                                        message.senderName,
+                                        style: const TextStyle(
+                                          color: Colors.lightBlueAccent,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    Text(
+                                      message.text,
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _chatController,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _sendChatMessage(controller),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Message everyone...',
+                          hintStyle: const TextStyle(color: Colors.white38),
+                          filled: true,
+                          fillColor: const Color(0xFF2A2A33),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filled(
+                      onPressed: () => _sendChatMessage(controller),
+                      icon: const Icon(Icons.send),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildParticipantsSheet(LiveClassController controller) {
