@@ -5,171 +5,109 @@ import 'package:navyoga_academy/models/profile_field_model.dart';
 import '../models/profile_stat_model.dart';
 
 class ProfileData {
-  /// 📊 STATS (keep as is)
   static const stats = [
     ProfileStat(
-      title: "Member Since",
-      value: "Jan 2025",
+      title: 'Member Since',
+      value: '—',
       icon: Icons.menu_book,
       color: Colors.deepOrange,
     ),
     ProfileStat(
-      title: "Total Classes",
-      value: "124",
+      title: 'Total Classes',
+      value: '—',
       icon: Icons.track_changes,
       color: Colors.purple,
     ),
     ProfileStat(
-      title: "Achievements",
-      value: "12",
+      title: 'Achievements',
+      value: '—',
       icon: Icons.emoji_events,
       color: Colors.green,
     ),
     ProfileStat(
-      title: "Skill Level",
-      value: "Intermediate",
+      title: 'Skill Level',
+      value: '—',
       icon: Icons.trending_up,
       color: Colors.amber,
     ),
   ];
 
-  /// 👤 PERSONAL INFO (dynamic + safe structure)
   static List<ProfileFieldModel> personalInfo = [
     ProfileFieldModel(
-      label: "Full Name",
-      value: "",
-      helperText: "Enter your full name",
+      label: 'Full Name',
+      value: '',
+      helperText: 'Enter your full name',
     ),
     ProfileFieldModel(
-      label: "Email Address",
-      value: "",
+      label: 'Email Address',
+      value: '',
       icon: Icons.email_outlined,
-      helperText: "Enter your email address",
+      helperText: 'Enter your email address',
     ),
     ProfileFieldModel(
-      label: "Phone Number",
-      value: "",
+      label: 'Phone Number',
+      value: '',
       icon: Icons.phone_outlined,
-      helperText: "Enter your phone number",
+      helperText: 'Enter your phone number',
     ),
     ProfileFieldModel(
-      label: "Address",
-      value: "",
-      icon: Icons.location_on_outlined,
-      isMultiline: true,
-      helperText: "Enter your address",
+      label: 'City',
+      value: '',
+      icon: Icons.location_city_outlined,
+      helperText: 'Enter your city',
+    ),
+    ProfileFieldModel(
+      label: 'Country',
+      value: '',
+      icon: Icons.public,
+      helperText: 'Enter your country',
     ),
   ];
 
-  /// 🏆 ACHIEVEMENTS (keep model type)
-  static List<AchievementModel> achievements = [
-    AchievementModel(
-      emoji: "🔥",
-      title: "30-Day Streak",
-      subtitle: "Attended classes for 30 consecutive days",
-      date: "Earned on Mar 1, 2026",
-    ),
-    AchievementModel(
-      emoji: "🌅",
-      title: "Early Bird",
-      subtitle: "Attended 10 morning classes",
-      date: "Earned on Feb 15, 2026",
-    ),
-    AchievementModel(
-      emoji: "🧘",
-      title: "Meditation Master",
-      subtitle: "Completed 20 sessions",
-      date: "Earned on Feb 28, 2026",
-    ),
-    AchievementModel(
-      emoji: "💪",
-      title: "Flexible Warrior",
-      subtitle: "Achieved advanced flexibility poses",
-      date: "Earned on Jan 20, 2026",
-    ),
-    AchievementModel(
-      emoji: "⚡",
-      title: "Power House",
-      subtitle: "Completed 15 power yoga sessions",
-      date: "Earned on Feb 10, 2026",
-    ),
-    AchievementModel(
-      emoji: "🌬",
-      title: "Breath Master",
-      subtitle: "Mastered 10 pranayama techniques",
-      date: "Earned on Jan 30, 2026",
-    ),
-  ];
-
-  /// 🎯 GOALS (keep model type)
-  static List<GoalModel> goals = [
-    GoalModel(
-      title: "Improve Flexibility",
-      progress: 0.75,
-      subtitle: "Achieve full splits by June 2026",
-    ),
-    GoalModel(
-      title: "Build Core Strength",
-      progress: 0.60,
-      subtitle: "Hold plank for 5 minutes",
-    ),
-    GoalModel(
-      title: "Master Meditation",
-      progress: 0.85,
-      subtitle: "30 minutes daily meditation",
-    ),
-    GoalModel(
-      title: "Weight Management",
-      progress: 0.45,
-      subtitle: "Reach ideal body weight",
-    ),
-  ];
-
-  /// 🏥 MEDICAL INFO (ADD THIS)
   static List<ProfileFieldModel> medicalInfo = [
-    ProfileFieldModel(label: "Age", value: "", helperText: "Enter your age"),
     ProfileFieldModel(
-      label: "Blood Group",
-      value: "",
-      helperText: "Enter your blood group (e.g. O+)",
+      label: 'Age',
+      value: '',
+      helperText: 'Enter your age',
     ),
     ProfileFieldModel(
-      label: "Emergency Contact",
-      value: "",
+      label: 'Blood Group',
+      value: '',
+      helperText: 'Enter your blood group',
+    ),
+    ProfileFieldModel(
+      label: 'Emergency Contact',
+      value: '',
       icon: Icons.phone_outlined,
-      helperText: "Enter emergency contact number",
+      helperText: 'Enter emergency contact number',
     ),
     ProfileFieldModel(
-      label: "Medical Conditions (if any)",
-      value: "",
+      label: 'Medical Conditions',
+      value: '',
       isMultiline: true,
-      helperText: "List any medical conditions or allergies",
+      helperText: 'List medical conditions or allergies',
     ),
   ];
 
-  /// ⚙️ PREFERENCES (convert to model — not Map)
   static List<ProfileFieldModel> preferences = [
     ProfileFieldModel(
-      label: "Yoga Experience",
-      value: "",
-      helperText: "Enter your experience (e.g. 2 years)",
+      label: 'Yoga Experience',
+      value: '',
+      helperText: 'Example: 2 years',
     ),
     ProfileFieldModel(
-      label: "Current Level",
-      value: "",
-      helperText: "Beginner / Intermediate / Advanced",
+      label: 'Current Level',
+      value: '',
+      helperText: 'Beginner, Intermediate or Advanced',
     ),
     ProfileFieldModel(
-      label: "Areas of Interest",
-      value: "",
+      label: 'Areas of Interest',
+      value: '',
       isMultiline: true,
-      helperText: "Hatha, Vinyasa, Pranayama, etc.",
-    ),
-    ProfileFieldModel(
-      label: "Fitness Goals",
-      value: "",
-      isMultiline: true,
-      helperText: "What do you want to achieve?",
+      helperText: 'Hatha, Vinyasa, Pranayama, etc.',
     ),
   ];
+
+  static List<AchievementModel> achievements = [];
+  static List<GoalModel> goals = [];
 }

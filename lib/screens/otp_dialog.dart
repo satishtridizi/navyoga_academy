@@ -4,7 +4,10 @@ import 'package:flutter/services.dart';
 class OTPDialog extends StatefulWidget {
   final String phone;
   final bool isLoading;
-  final VoidCallback onVerify;
+
+  /// Returns the complete OTP entered by the user.
+  final ValueChanged<String> onVerify;
+
   final VoidCallback onResend;
   final VoidCallback? onEditPhone;
 
@@ -26,6 +29,43 @@ class _OTPDialogState extends State<OTPDialog> {
     4,
     (_) => TextEditingController(),
   );
+
+  final List<FocusNode> focusNodes = List.generate(
+    4,
+    (_) => FocusNode(),
+  );
+
+  String get enteredOtp {
+    return controllers.map((controller) => controller.text).join();
+  }
+
+  void _verifyOtp() {
+    final otp = enteredOtp.trim();
+
+    if (otp.length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter the complete 4-digit OTP."),
+        ),
+      );
+      return;
+    }
+
+    widget.onVerify(otp);
+  }
+
+  @override
+  void dispose() {
+    for (final controller in controllers) {
+      controller.dispose();
+    }
+
+    for (final focusNode in focusNodes) {
+      focusNode.dispose();
+    }
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,11 +94,12 @@ class _OTPDialogState extends State<OTPDialog> {
                 children: [
                   const Text(
                     "Verify your phone number",
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-
                   const SizedBox(height: 14),
-
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
@@ -78,13 +119,13 @@ class _OTPDialogState extends State<OTPDialog> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const TextSpan(text: ". Enter it below to continue."),
+                        const TextSpan(
+                          text: ". Enter it below to continue.",
+                        ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
@@ -95,8 +136,12 @@ class _OTPDialogState extends State<OTPDialog> {
                         margin: const EdgeInsets.symmetric(horizontal: 3),
                         child: TextField(
                           controller: controllers[index],
+                          focusNode: focusNodes[index],
                           textAlign: TextAlign.center,
                           keyboardType: TextInputType.number,
+                          textInputAction: index == 3
+                              ? TextInputAction.done
+                              : TextInputAction.next,
                           maxLength: 1,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -116,21 +161,32 @@ class _OTPDialogState extends State<OTPDialog> {
                           ),
                           onChanged: (value) {
                             if (value.isNotEmpty && index < 3) {
-                              FocusScope.of(context).nextFocus();
+                              focusNodes[index + 1].requestFocus();
+                            }
+
+                            if (value.isEmpty && index > 0) {
+                              focusNodes[index - 1].requestFocus();
+                            }
+
+                            if (enteredOtp.length == 4) {
+                              FocusScope.of(context).unfocus();
+                            }
+                          },
+                          onSubmitted: (_) {
+                            if (index == 3) {
+                              _verifyOtp();
                             }
                           },
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   SizedBox(
                     width: double.infinity,
                     height: 44,
                     child: ElevatedButton(
-                      onPressed: widget.isLoading ? null : widget.onVerify,
+                      onPressed: widget.isLoading ? null : _verifyOtp,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: const Color(0xffFFB089),
@@ -157,13 +213,11 @@ class _OTPDialogState extends State<OTPDialog> {
                             ),
                     ),
                   ),
-
-                  const SizedBox(height: 14),
-
+                  const SizedBox(height: 10),
                   TextButton(
-                    onPressed: widget.onResend,
+                    onPressed: widget.isLoading ? null : widget.onResend,
                     child: const Text(
-                      "Resend OTP in 25s",
+                      "Resend OTP",
                       style: TextStyle(
                         color: Color(0xffA77AD8),
                         fontWeight: FontWeight.w600,
@@ -171,7 +225,6 @@ class _OTPDialogState extends State<OTPDialog> {
                       ),
                     ),
                   ),
-
                   InkWell(
                     onTap: widget.onEditPhone,
                     child: const Padding(
@@ -200,7 +253,6 @@ class _OTPDialogState extends State<OTPDialog> {
                 ],
               ),
             ),
-
             Positioned(
               top: -28,
               left: 0,

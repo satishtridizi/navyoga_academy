@@ -28,12 +28,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> loadNotifications() async {
     final token = await AuthManager.getToken();
 
-    if (token == null) return;
+    if (token == null) {
+      if (mounted) setState(() => isLoading = false);
+      return;
+    }
 
     final list = await service.getNotifications(token);
 
+    if (!mounted) return;
     setState(() {
       notifications = list.map((e) => NotificationModel.fromJson(e)).toList();
+      notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       isLoading = false;
     });
   }

@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Navyoga uses your camera so your teacher and classmates can see you during live classes.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Navyoga uses your microphone so your teacher and classmates can hear you during live classes.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

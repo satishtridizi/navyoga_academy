@@ -267,33 +267,63 @@ class _LoginScreen extends State<LoginScreen> {
                                   password: password,
                                 );
 
+
                                 Navigator.pop(context); // dismiss loader
 
-                                if (ApiHelper.isSuccess(response)) {
-                                  AppSnackbar.showSuccess(
-                                    context,
-                                    "Login successful",
-                                  );
+                               if (ApiHelper.isSuccess(response)) {
+  final dynamic responseData = response["data"];
 
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  if (rememberMe) {
-                                    await prefs.setString('saved_email', email);
-                                    await prefs.setString(
-                                      'saved_password',
-                                      password,
-                                    );
-                                  } else {
-                                    await prefs.remove('saved_email');
-                                    await prefs.remove('saved_password');
-                                  }
+  String? token;
 
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    AppRoutes.dashboard,
-                                    (route) => false,
-                                  );
-                                } else {
+  if (responseData is Map<String, dynamic>) {
+    token =
+        responseData["token"]?.toString() ??
+        responseData["accessToken"]?.toString() ??
+        responseData["access_token"]?.toString();
+  }
+
+  token ??=
+      response["token"]?.toString() ??
+      response["accessToken"]?.toString() ??
+      response["access_token"]?.toString();
+
+  if (token == null || token.trim().isEmpty) {
+    if (!mounted) return;
+
+    AppSnackbar.showError(
+      context,
+      "Login succeeded, but no authentication token was received.",
+    );
+    return;
+  }
+
+  await AuthManager.saveToken(token);
+
+  final prefs = await SharedPreferences.getInstance();
+
+  if (rememberMe) {
+    await prefs.setString('saved_email', email);
+
+    // Avoid saving passwords in SharedPreferences.
+    await prefs.remove('saved_password');
+  } else {
+    await prefs.remove('saved_email');
+    await prefs.remove('saved_password');
+  }
+
+  if (!mounted) return;
+
+  AppSnackbar.showSuccess(
+    context,
+    "Login successful",
+  );
+
+  Navigator.pushNamedAndRemoveUntil(
+    context,
+    AppRoutes.dashboard,
+    (route) => false,
+  );
+} else {
                                   AppSnackbar.showError(
                                     context,
                                     response["message"] ?? "Login failed",

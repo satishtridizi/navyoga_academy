@@ -1,22 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/student_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/services/profile_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
-import 'package:navyoga_academy/utils/auth_manager.dart';
-import 'package:navyoga_academy/widgets/animatedItem.dart';
-import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/widgets/goal_myprofile_widget.dart';
-import '../data/profile_data.dart';
-import '../widgets/profile_stat_card.dart';
-import '../widgets/profile_section.dart';
-import '../widgets/profile_field.dart';
-import '../widgets/achievement_card.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,163 +21,310 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  StudentModel? student;
-  File? selectedImage;
-  String? profileImageUrl;
+  final AuthService _authService = AuthService();
+  final ProfileService _profileService = ProfileService();
   final ImagePicker _picker = ImagePicker();
-  final authService = AuthService();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
-  final addressController = TextEditingController();
-  List<TextEditingController> medicalControllers = [];
-  List<TextEditingController> preferenceControllers = [];
-  List<dynamic> achievements = [];
-  final profileService = ProfileService();
+  final cityController = TextEditingController();
+  final countryController = TextEditingController();
+  final genderController = TextEditingController();
+  final ageController = TextEditingController();
+  final bloodGroupController = TextEditingController();
+  final emergencyContactController = TextEditingController();
+  final medicalConditionsController = TextEditingController();
+  final yogaExperienceController = TextEditingController();
+  final currentLevelController = TextEditingController();
+  final areasOfInterestController = TextEditingController();
 
+  StudentModel? student;
+  File? selectedImage;
+  String? profileImageUrl;
+
+  bool isLoading = true;
   bool isUpdating = false;
+  bool isUploadingImage = false;
+  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-
-    medicalControllers = ProfileData.medicalInfo
-        .map((e) => TextEditingController(text: e.value))
-        .toList();
-
-    preferenceControllers = ProfileData.preferences
-        .map((e) => TextEditingController(text: e.value))
-        .toList();
-
     loadProfile();
   }
 
   Future<void> loadProfile() async {
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null || token.trim().isEmpty) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (_) => false,
+        );
+        return;
+      }
+
+      final response = await _authService.getProfile(token);
+
+      if (response['unauthorized'] == true) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (_) => false,
+        );
+        return;
+      }
+
+      if (!ApiHelper.isSuccess(response) || response['data'] == null) {
+        throw Exception(
+          response['message']?.toString() ?? 'Unable to load profile.',
+        );
+      }
+
+      final rawData = Map<String, dynamic>.from(response['data']);
+      final studentData = StudentModel.fromJson(rawData);
+      debugPrint('RAW AVATAR => ${rawData['avatar']}');
+debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
+
+      if (!mounted) return;
+
+      setState(() {
+        student = studentData;
+        profileImageUrl = studentData.avatar;
+        selectedImage = null;
+
+        nameController.text = studentData.name;
+        emailController.text = studentData.email;
+        phoneController.text = studentData.phone;
+        cityController.text = studentData.city ?? '';
+        countryController.text = studentData.country ?? '';
+        genderController.text = studentData.gender ?? '';
+        ageController.text = studentData.age?.toString() ?? '';
+        bloodGroupController.text = studentData.bloodGroup ?? '';
+        emergencyContactController.text =
+            studentData.emergencyContact ?? '';
+        medicalConditionsController.text =
+            studentData.medicalConditions ?? '';
+        yogaExperienceController.text =
+            studentData.yogaExperience ?? '';
+        currentLevelController.text = studentData.currentLevel ?? '';
+        areasOfInterestController.text =
+            studentData.areasOfInterest ?? '';
+      });
+
+      debugPrint('PROFILE DATA => $rawData');
+    } catch (error, stackTrace) {
+      debugPrint('LOAD PROFILE ERROR => $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        errorMessage = 'Unable to load your profile. Please try again.';
+      });
+    } finally {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> pickImage() async {
+    try {
+      final image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 82,
+        maxWidth: 1200,
+      );
+
+      if (image == null || !mounted) return;
+
+      setState(() {
+        selectedImage = File(image.path);
+      });
+
+      await uploadProfileImage();
+    } catch (error) {
+      if (!mounted) return;
+      AppSnackbar.showError(context, 'Unable to select the image.');
+    }
+  }
+
+  Future<void> uploadProfileImage() async {
+    if (selectedImage == null || isUploadingImage) return;
+
     final token = await AuthManager.getToken();
 
-    if (token == null) return;
-
-    final response = await authService.getProfile(token);
-
-    if (response["unauthorized"] == true) {
+    if (token == null || token.trim().isEmpty) {
+      if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.login,
-        (route) => false,
+        (_) => false,
       );
       return;
     }
 
-    if (!ApiHelper.isSuccess(response) || response["data"] == null) {
-      return;
-    }
-
-    final studentData = StudentModel.fromJson(response["data"]);
-
     setState(() {
-      student = studentData;
-      achievements = response["data"]["achievements"] ?? [];
-      nameController.text = studentData.name;
-      emailController.text = studentData.email;
-      phoneController.text = studentData.phone;
-      profileImageUrl = studentData.profileImage;
-    });
-    print("PROFILE DATA = ${response["data"]}");
-  }
-
-  Future<void> pickImage() async {
-    final XFile? image = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-
-    if (image == null) return;
-
-    setState(() {
-      selectedImage = File(image.path);
+      isUploadingImage = true;
     });
 
-    await uploadProfileImage();
-  }
+    try {
+      final response = await _profileService.uploadProfileImage(
+        token: token,
+        imageFile: selectedImage!,
+      );
 
-  Future<void> uploadProfileImage() async {
-    if (selectedImage == null) return;
+      if (!mounted) return;
 
-    final token = await AuthManager.getToken();
-
-    final response = await profileService.uploadProfileImage(
-      token: token!,
-      imageFile: selectedImage!,
-    );
-
-    if (ApiHelper.isSuccess(response)) {
-      await loadProfile();
-
-      AppSnackbar.showSuccess(context, response["message"]);
+      if (ApiHelper.isSuccess(response)) {
+        AppSnackbar.showSuccess(
+          context,
+          response['message']?.toString() ?? 'Profile photo updated.',
+        );
+        await loadProfile();
+      } else {
+        AppSnackbar.showError(
+          context,
+          response['message']?.toString() ??
+              'Unable to update profile photo.',
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+      AppSnackbar.showError(context, 'Unable to update profile photo.');
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isUploadingImage = false;
+      });
     }
   }
 
   Future<void> updateProfile() async {
+    if (isUpdating) return;
+
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final phone = phoneController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || phone.isEmpty) {
+      AppSnackbar.showError(
+        context,
+        'Name, email and phone number are required.',
+      );
+      return;
+    }
+
+    final ageText = ageController.text.trim();
+    final age = ageText.isEmpty ? null : int.tryParse(ageText);
+
+    if (ageText.isNotEmpty && age == null) {
+      AppSnackbar.showError(context, 'Please enter a valid age.');
+      return;
+    }
+
+    final token = await AuthManager.getToken();
+
+    if (token == null || token.trim().isEmpty) {
+      if (!mounted) return;
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.login,
+        (_) => false,
+      );
+      return;
+    }
+
     setState(() {
       isUpdating = true;
     });
 
-    final token = await AuthManager.getToken();
+    try {
+      final response = await _profileService.updateProfile(
+        token: token,
+        name: name,
+        email: email,
+        phone: phone,
+        city: cityController.text,
+        country: countryController.text,
+        gender: genderController.text,
+        age: age,
+        bloodGroup: bloodGroupController.text,
+        emergencyContact: emergencyContactController.text,
+        medicalConditions: medicalConditionsController.text,
+        yogaExperience: yogaExperienceController.text,
+        currentLevel: currentLevelController.text,
+        areasOfInterest: areasOfInterestController.text,
+      );
 
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, "/login");
+      if (!mounted) return;
 
-      return;
-    }
+      if (ApiHelper.isSuccess(response)) {
+        AppSnackbar.showSuccess(
+          context,
+          response['message']?.toString() ?? 'Profile updated successfully.',
+        );
+        await loadProfile();
+      } else {
+        AppSnackbar.showError(
+          context,
+          response['message']?.toString() ?? 'Unable to update profile.',
+        );
+      }
+    } catch (error, stackTrace) {
+      debugPrint('UPDATE PROFILE ERROR => $error');
+      debugPrintStack(stackTrace: stackTrace);
 
-    final response = await profileService.updateProfile(
-      token: token,
+      if (!mounted) return;
+      AppSnackbar.showError(context, 'Unable to update profile.');
+    } finally {
+      if (!mounted) return;
 
-      name: nameController.text,
-
-      email: emailController.text,
-
-      phone: phoneController.text,
-
-      address: addressController.text,
-    );
-    if (!mounted) return;
-
-    setState(() {
-      isUpdating = false;
-    });
-
-    if (ApiHelper.isSuccess(response)) {
-      AppSnackbar.showSuccess(context, response["message"]);
-    } else {
-      AppSnackbar.showError(context, response["message"]);
+      setState(() {
+        isUpdating = false;
+      });
     }
   }
 
-  String getMemberSince() {
-    if (student?.createdAt == null) {
-      return "Member";
-    }
+  String get memberSince {
+    final createdAt = student?.createdAt;
+    final date = DateTime.tryParse(createdAt ?? '');
 
-    final date = DateTime.parse(student!.createdAt!);
+    if (date == null) return 'Member';
 
-    const months = [
-      '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
+    return 'Member since ${DateFormat('MMM yyyy').format(date.toLocal())}';
+  }
 
-    return "Member since ${months[date.month]} ${date.year}";
+  String get displayName {
+    final value = nameController.text.trim();
+    return value.isEmpty ? 'Student' : value;
+  }
+
+  String get initials {
+    final words = displayName
+        .split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .toList();
+
+    if (words.isEmpty) return 'S';
+    if (words.length == 1) return words.first[0].toUpperCase();
+
+    return '${words.first[0]}${words.last[0]}'.toUpperCase();
   }
 
   @override
@@ -190,7 +332,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
-    addressController.dispose();
+    cityController.dispose();
+    countryController.dispose();
+    genderController.dispose();
+    ageController.dispose();
+    bloodGroupController.dispose();
+    emergencyContactController.dispose();
+    medicalConditionsController.dispose();
+    yogaExperienceController.dispose();
+    currentLevelController.dispose();
+    areasOfInterestController.dispose();
     super.dispose();
   }
 
@@ -198,12 +349,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       currentIndex: 4,
-      drawer: const CustomDrawer(currentPage: "Profile"),
-
-      //backgroundColor: Colors.transparent,
+      drawer: const CustomDrawer(currentPage: 'Profile'),
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 1,
         leading: Builder(
           builder: (context) => IconButton(
+            tooltip: 'Menu',
             icon: const Icon(Icons.menu, color: Colors.black54),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
@@ -211,360 +364,472 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Image.asset(
           'assets/logo/logo_transparent_clean.png',
           height: 60,
+          fit: BoxFit.contain,
         ),
         centerTitle: true,
-        backgroundColor: Colors.grey[200],
-        elevation: 0,
       ),
-
-      body: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔥 HEADER
-            AnimatedItem(
-              index: 0,
-              child: Text(
-                "My Profile",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepOrange,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: loadProfile,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    if (errorMessage != null) _buildErrorCard(),
+                    _buildProfileHeader(),
+                    const SizedBox(height: 18),
+                    _buildSection(
+                      title: 'Personal Information',
+                      icon: Icons.person_outline,
+                      child: Column(
+                        children: [
+                          _buildTextField(
+                            controller: nameController,
+                            label: 'Full Name',
+                            icon: Icons.person_outline,
+                          ),
+                          _buildTextField(
+                            controller: emailController,
+                            label: 'Email Address',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          _buildTextField(
+                            controller: phoneController,
+                            label: 'Phone Number',
+                            icon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            suffix: student?.phoneVerified == true
+                                ? const Tooltip(
+                                    message: 'Phone verified',
+                                    child: Icon(
+                                      Icons.verified,
+                                      color: Colors.green,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: cityController,
+                                  label: 'City',
+                                  icon: Icons.location_city_outlined,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: countryController,
+                                  label: 'Country',
+                                  icon: Icons.public,
+                                ),
+                              ),
+                            ],
+                          ),
+                          _buildTextField(
+                            controller: genderController,
+                            label: 'Gender',
+                            icon: Icons.wc_outlined,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSection(
+                      title: 'Medical Information',
+                      icon: Icons.medical_information_outlined,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: ageController,
+                                  label: 'Age',
+                                  icon: Icons.cake_outlined,
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: bloodGroupController,
+                                  label: 'Blood Group',
+                                  icon: Icons.bloodtype_outlined,
+                                ),
+                              ),
+                            ],
+                          ),
+                          _buildTextField(
+                            controller: emergencyContactController,
+                            label: 'Emergency Contact',
+                            icon: Icons.emergency_outlined,
+                            keyboardType: TextInputType.phone,
+                          ),
+                          _buildTextField(
+                            controller: medicalConditionsController,
+                            label: 'Medical Conditions',
+                            icon: Icons.health_and_safety_outlined,
+                            maxLines: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSection(
+                      title: 'Yoga Preferences',
+                      icon: Icons.self_improvement,
+                      child: Column(
+                        children: [
+                          _buildTextField(
+                            controller: yogaExperienceController,
+                            label: 'Yoga Experience',
+                            icon: Icons.history_toggle_off,
+                          ),
+                          _buildTextField(
+                            controller: currentLevelController,
+                            label: 'Current Level',
+                            icon: Icons.trending_up,
+                          ),
+                          _buildTextField(
+                            controller: areasOfInterestController,
+                            label: 'Areas of Interest',
+                            icon: Icons.interests_outlined,
+                            maxLines: 3,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: isUpdating ? null : updateProfile,
+                        icon: isUpdating
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.save_outlined),
+                        label: Text(
+                          isUpdating ? 'Updating Profile...' : 'Save Changes',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepOrange,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor:
+                              Colors.deepOrange.withOpacity(0.6),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+    );
+  }
 
-            AnimatedItem(
-              index: 1,
-
-              child: const Text(
-                "Manage your personal information and track your progress",
-                style: TextStyle(color: Colors.blueGrey),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Align(alignment: Alignment.centerRight, child: buildMemberSince()),
-
-            const SizedBox(height: 12),
-
-            /// 👤 PERSONAL INFO
-            ProfileSection(
-              title: "Personal Information",
-              child: Column(
-                children: [
-                  _buildAvatar(),
-
-                  const SizedBox(height: 20),
-
-                  Column(
-                    children: [
-                      ProfileField(ProfileData.personalInfo[0], nameController),
-                      ProfileField(
-                        ProfileData.personalInfo[1],
-                        emailController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[2],
-                        phoneController,
-                      ),
-                      ProfileField(
-                        ProfileData.personalInfo[3],
-                        addressController,
-                      ),
-                    ],
+  Widget _buildProfileHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.deepOrange.shade400,
+            Colors.deepOrange.shade700,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.deepOrange.withOpacity(0.22),
+            blurRadius: 20,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: isUploadingImage ? null : pickImage,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  width: 116,
+                  height: 116,
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 20),
-
-                  /// 📊 STATS
-                  // GridView.builder(
-                  //   shrinkWrap: true,
-                  //   physics: const NeverScrollableScrollPhysics(),
-                  //   itemCount: ProfileData.stats.length,
-                  //   gridDelegate:
-                  //       const SliverGridDelegateWithFixedCrossAxisCount(
-                  //         crossAxisCount: 2,
-                  //         crossAxisSpacing: 12,
-                  //         mainAxisSpacing: 12,
-                  //         childAspectRatio: 1.1,
-                  //       ),
-                  //   itemBuilder: (_, i) =>
-                  //       ProfileStatCard(ProfileData.stats[i]),
-                  // ),
-                  // const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: updateProfile,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: isUpdating
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text(
-                              "Update Profile",
-                              style: TextStyle(color: Colors.white),
-                            ),
+                  child: ClipOval(child: _buildAvatarImage()),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.deepOrange.shade100,
                     ),
                   ),
-                ],
-              ),
+                  child: isUploadingImage
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.deepOrange,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.camera_alt_outlined,
+                          size: 18,
+                          color: Colors.deepOrange,
+                        ),
+                ),
+              ],
             ),
-
-            // ProfileSection(
-            //   title: "Security",
-            //   child: Column(
-            //     children: [
-            //       SizedBox(
-            //         width: double.infinity,
-            //         child: ElevatedButton.icon(
-            //           onPressed: () {
-            //             Navigator.pushNamed(context, AppRoutes.changePassword);
-            //           },
-            //           icon: const Icon(Icons.lock, color: Colors.white),
-            //           label: const Text(
-            //             "Change Password",
-            //             style: TextStyle(color: Colors.white),
-            //           ),
-            //           style: ElevatedButton.styleFrom(
-            //             backgroundColor: Colors.purple,
-            //             padding: const EdgeInsets.symmetric(vertical: 16),
-            //             shape: RoundedRectangleBorder(
-            //               borderRadius: BorderRadius.circular(30),
-            //             ),
-            //           ),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-
-            /// 🎯 HEALTH GOALS
-            // ProfileSection(
-            //   title: "Health Goals",
-            //   child: Column(
-            //     children: [
-            //       ...ProfileData.goals.map((e) => GoalWidget(data: e)),
-
-            //       const SizedBox(height: 16),
-
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: OutlinedButton.icon(
-            //     onPressed: () {
-            //       // future: open add goal screen
-            //     },
-            //     icon: const Icon(
-            //       Icons.track_changes,
-            //       color: Colors.purple,
-            //     ),
-            //     label: const Text("Set New Goal"),
-            //     style: OutlinedButton.styleFrom(
-            //       side: const BorderSide(
-            //         color: Colors.purple,
-            //         width: 1.5,
-            //       ),
-            //       padding: const EdgeInsets.symmetric(vertical: 14),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(30),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            //     ],
-            //   ),
-            // ),
-
-            /// 🏆 ACHIEVEMENTS (ADD THIS BELOW HEALTH GOALS)
-            // ProfileSection(
-            //   title: "Your Achievements",
-            //   child: achievements.isEmpty
-            //       ? const Padding(
-            //           padding: EdgeInsets.all(16),
-            //           child: Text(
-            //             "No achievements yet",
-            //             style: TextStyle(color: Colors.grey),
-            //           ),
-            //         )
-            //       : Column(
-            //           children: achievements.map((achievement) {
-            //             return AchievementCard(data: achievement);
-            //           }).toList(),
-            //         ),
-            // ),
-
-            /// 🏥 MEDICAL INFO
-            ProfileSection(
-              title: "Medical Information",
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      ...ProfileData.medicalInfo.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var item = entry.value;
-
-                        return ProfileField(item, medicalControllers[index]);
-                      }).toList(),
-
-                      const SizedBox(height: 12),
-
-                      _secondaryButton("Update Medical Info"),
-                    ],
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            displayName,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
             ),
-
-            /// ⚙️ PREFERENCES
-            ProfileSection(
-              title: "Preferences",
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      ...ProfileData.preferences.asMap().entries.map((entry) {
-                        int index = entry.key;
-                        var item = entry.value;
-
-                        return ProfileField(item, preferenceControllers[index]);
-                      }).toList(),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  _primaryButton("Update Preferences", Colors.deepOrange),
-                ],
-              ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            student?.email ?? '',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
             ),
-            const SizedBox(height: 20),
-          ],
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildHeaderBadge(
+                icon: student?.isActive == true
+                    ? Icons.check_circle
+                    : Icons.cancel,
+                text: student?.isActive == true
+                    ? 'Active Account'
+                    : 'Inactive Account',
+              ),
+              _buildHeaderBadge(
+                icon: Icons.calendar_today_outlined,
+                text: memberSince,
+              ),
+              if ((student?.referralCode ?? '').isNotEmpty)
+                _buildHeaderBadge(
+                  icon: Icons.card_giftcard,
+                  text: student!.referralCode!,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvatarImage() {
+    if (selectedImage != null) {
+      return Image.file(selectedImage!, fit: BoxFit.cover);
+    }
+
+    if (profileImageUrl != null && profileImageUrl!.trim().isNotEmpty) {
+      return Image.network(
+        profileImageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildInitialAvatar(),
+      );
+    }
+
+    return _buildInitialAvatar();
+  }
+
+  Widget _buildInitialAvatar() {
+    return Container(
+      color: Colors.deepOrange.shade50,
+      alignment: Alignment.center,
+      child: Text(
+        initials,
+        style: const TextStyle(
+          fontSize: 38,
+          fontWeight: FontWeight.bold,
+          color: Colors.deepOrange,
         ),
       ),
     );
   }
 
-  Widget buildMemberSince() {
-    return InkWell(
-      onTap: () {
-        print("Member badge clicked");
-      },
-      borderRadius: BorderRadius.circular(30),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.deepOrange.shade200),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.calendar_today_outlined,
+  Widget _buildHeaderBadge({
+    required IconData icon,
+    required String text,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.22)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required IconData icon,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.deepOrange.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: Colors.deepOrange),
+              ),
+              const SizedBox(width: 11),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    Widget? suffix,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        textCapitalization: keyboardType == TextInputType.emailAddress
+            ? TextCapitalization.none
+            : TextCapitalization.sentences,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          suffixIcon: suffix,
+          alignLabelWithHint: maxLines > 1,
+          filled: true,
+          fillColor: const Color(0xFFFAFAFA),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
               color: Colors.deepOrange,
-              size: 18,
+              width: 1.5,
             ),
-            const SizedBox(width: 8),
-            Text(
-              getMemberSince(),
-              style: const TextStyle(
-                color: Colors.deepOrange,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  /// 🔥 AVATAR
-  Widget _buildAvatar() {
-    return Center(
-      child: GestureDetector(
-        onTap: pickImage,
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.deepOrange, width: 3),
-              ),
-              child: ClipOval(
-                child: selectedImage != null
-                    ? Image.file(selectedImage!, fit: BoxFit.cover)
-                    : profileImageUrl != null
-                    ? Image.network(profileImageUrl!, fit: BoxFit.cover)
-                    : const Icon(Icons.person, size: 60, color: Colors.purple),
-              ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: Colors.deepOrange,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
-          ],
-        ),
+  Widget _buildErrorCard() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red),
+          const SizedBox(width: 10),
+          Expanded(child: Text(errorMessage!)),
+          TextButton(
+            onPressed: loadProfile,
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
-}
-
-/// 🔥 PRIMARY BUTTON
-Widget _primaryButton(String text, Color color) {
-  return SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      ),
-      child: Text(text, style: const TextStyle(color: Colors.white)),
-    ),
-  );
-}
-
-/// 🔥 SECONDARY BUTTON
-Widget _secondaryButton(String text) {
-  return SizedBox(
-    width: double.infinity,
-    child: OutlinedButton(
-      onPressed: () {},
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Colors.purple),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      ),
-      child: Text(text, style: const TextStyle(color: Colors.purple)),
-    ),
-  );
 }

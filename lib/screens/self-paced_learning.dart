@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/models/selfpaces_course_model.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/self_paced_classes_screen.dart';
 import 'package:navyoga_academy/screens/self_paced_lesson_screen.dart';
 import 'package:navyoga_academy/services/self_paced_progress_service.dart';
 import 'package:navyoga_academy/services/self_paced_service.dart';
+import 'package:navyoga_academy/services/subscription_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
+import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/widgets/app_scaffold.dart';
-import 'package:navyoga_academy/utils/app_snackbar.dart';
-import 'package:navyoga_academy/routes/app_routes.dart';
-import 'package:navyoga_academy/services/subscription_service.dart';
-import 'package:navyoga_academy/screens/self_paced_classes_screen.dart';
 
 class SelfPacedLearningScreen extends StatefulWidget {
   const SelfPacedLearningScreen({super.key});
@@ -23,251 +23,980 @@ class SelfPacedLearningScreen extends StatefulWidget {
 }
 
 class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
-  String searchQuery = "";
-  String? selectedPlanId;
-  Map<String, double> courseProgress = {};
-  Map<String, bool> courseCompleted = {};
-  final progressService = SelfPacedProgressService();
-  final selfPacedService = SelfPacedService();
-  int enrolledCount = 0;
-  int inProgressCount = 0;
-  int completedCount = 0;
-  int totalClasses = 0;
-  List<CourseModel> courses = [];
+  final SelfPacedService _selfPacedService = SelfPacedService();
+  final SelfPacedProgressService _progressService =
+      SelfPacedProgressService();
+  final SubscriptionService _subscriptionService = SubscriptionService();
+  final TextEditingController _searchController = TextEditingController();
+
   bool isLoading = true;
   bool hasActiveSubscription = false;
-  String selectedStat = "all";
+
+  String searchQuery = '';
+  String? selectedPlanId;
+  String activePlanName = 'Not Enrolled';
+
+  int totalClasses = 0;
+  double overallProgress = 0;
+
+  List<CourseModel> courses = [];
+
+  final Map<String, double> courseProgress = {};
+  final Map<String, bool> courseCompleted = {};
+
   List<CourseModel> get filteredCourses {
-    List<CourseModel> filtered = List.from(courses);
-
-    // Search Filter
-    if (searchQuery.isNotEmpty) {
-      filtered = filtered.where((course) {
-        return course.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            course.instructor.toLowerCase().contains(searchQuery.toLowerCase());
-      }).toList();
+    if (searchQuery.trim().isEmpty) {
+      return courses;
     }
 
-    // Category Filter
-    if (selectedCategory != "All") {
-      filtered = filtered.where((course) {
-        return course.category.toLowerCase() == selectedCategory.toLowerCase();
-      }).toList();
-    }
+    final query = searchQuery.trim().toLowerCase();
 
-    // Stat Filter
-    switch (selectedStat) {
-      case "enrolled":
-        filtered = filtered
-            .where((c) => (courseProgress[c.id] ?? 0) > 0)
-            .toList();
-        break;
-
-      case "progress":
-        filtered = filtered
-            .where(
-              (c) =>
-                  (courseProgress[c.id] ?? 0) > 0 &&
-                  !(courseCompleted[c.id] ?? false),
-            )
-            .toList();
-        break;
-
-      case "completed":
-        filtered = filtered
-            .where((c) => courseCompleted[c.id] ?? false)
-            .toList();
-        break;
-    }
-
-    return filtered;
+    return courses.where((course) {
+      return course.title.toLowerCase().contains(query) ||
+          course.description.toLowerCase().contains(query) ||
+          course.instructor.toLowerCase().contains(query);
+    }).toList();
   }
 
   @override
   void initState() {
     super.initState();
-    loadCourses();
-    loadSubscription();
-    loadPlans();
+    _loadScreenData();
   }
 
-  Future<void> loadPlans() async {
-    final token = await AuthManager.getToken();
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
-    if (token == null) return;
+  Future<void> _loadScreenData() async {
+    setState(() {
+      isLoading = true;
+    });
 
-    final response = await selfPacedService.getPlans(token);
+    try {
+      final token = await AuthManager.getToken();
 
-    if (response["success"] == true &&
-        response["data"] != null &&
-        response["data"].isNotEmpty) {
-      selectedPlanId = response["data"][0]["id"];
+      if (token == null || token.isEmpty) {
+        if (!mounted) return;
 
-      print("PLAN ID => $selectedPlanId");
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+          (route) => false,
+        );
+        return;
+      }
+
+      /*
+       * These calls correspond to:
+       *
+       * GET /api/self-paced/my-subscription
+       * GET /api/self-paced/modules
+       * GET self-paced plans
+       */
+      final responses = await Future.wait([
+        _subscriptionService.getMySubscription(token),
+        _selfPacedService.getCourses(token),
+        _selfPacedService.getPlans(token),
+      ]);
+
+      final subscriptionResponse = responses[0];
+      final modulesResponse = responses[1];
+      final plansResponse = responses[2];
+
+      await _parseSubscription(subscriptionResponse);
+      _parsePlans(plansResponse);
+      await _parseModules(token, modulesResponse);
+    } catch (error, stackTrace) {
+      debugPrint('SELF-PACED SCREEN ERROR: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (mounted) {
+        AppSnackbar.showError(
+          context,
+          'Unable to load self-paced classes',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  Future<void> loadCourses() async {
-    final token = await AuthManager.getToken();
+  Future<void> _parseSubscription(
+    dynamic subscriptionResponse,
+  ) async {
+    final response = Map<String, dynamic>.from(
+      subscriptionResponse as Map,
+    );
 
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, "/login");
+    final data = response['data'];
+
+    if (response['success'] != true || data is! Map) {
+      hasActiveSubscription = false;
+      activePlanName = 'Not Enrolled';
       return;
     }
 
-    final response = await selfPacedService.getCourses(token);
+    final subscriptionData = Map<String, dynamic>.from(data);
+    final enrolled = subscriptionData['enrolled'] == true;
+    final subscription = subscriptionData['subscription'];
 
-    print("SELF PACED RESPONSE => $response");
+    hasActiveSubscription = enrolled;
 
-    if (ApiHelper.isSuccess(response) && response["data"] != null) {
-      final List list = response["data"];
-      if (!mounted) return;
+    if (!enrolled || subscription == null) {
+      activePlanName = 'Not Enrolled';
+      return;
+    }
 
-      courses = list.map((e) => CourseModel.fromJson(e)).toList();
+    if (subscription is Map) {
+      final subscriptionMap = Map<String, dynamic>.from(subscription);
 
-      final progressResponse = await progressService.getMyProgress(token);
-      final progressList = progressResponse["data"] ?? [];
-      int enrolled = 0;
-      int inProgress = 0;
-      int completed = 0;
+      final plan = subscriptionMap['plan'];
+
+      if (plan is Map) {
+        final planMap = Map<String, dynamic>.from(plan);
+
+        activePlanName =
+            planMap['name']?.toString().trim().isNotEmpty == true
+            ? planMap['name'].toString()
+            : 'Active';
+      } else {
+        activePlanName =
+            subscriptionMap['planName']?.toString().trim().isNotEmpty ==
+                true
+            ? subscriptionMap['planName'].toString()
+            : 'Active';
+      }
+    } else {
+      activePlanName = 'Active';
+    }
+  }
+
+  void _parsePlans(dynamic plansResponse) {
+    final response = Map<String, dynamic>.from(plansResponse as Map);
+
+    if (response['success'] != true) {
+      return;
+    }
+
+    final data = response['data'];
+
+    if (data is List && data.isNotEmpty) {
+      final firstPlan = data.first;
+
+      if (firstPlan is Map && firstPlan['id'] != null) {
+        selectedPlanId = firstPlan['id'].toString();
+      }
+    }
+  }
+
+  Future<void> _parseModules(
+    String token,
+    dynamic modulesResponse,
+  ) async {
+    final response = Map<String, dynamic>.from(modulesResponse as Map);
+
+    if (!ApiHelper.isSuccess(response)) {
+      throw Exception(
+        response['message'] ?? 'Unable to load modules',
+      );
+    }
+
+    final data = response['data'];
+
+    if (data is! List || data.isEmpty) {
+      courses = [];
       totalClasses = 0;
-      print("TOTAL COURSES => ${courses.length}");
+      overallProgress = 0;
+      courseProgress.clear();
+      courseCompleted.clear();
+      return;
+    }
+
+    courses = data
+        .whereType<Map>()
+        .map(
+          (item) => CourseModel.fromJson(
+            Map<String, dynamic>.from(item),
+          ),
+        )
+        .toList();
+
+    /*
+     * Do not calculate progress when the user does not have a
+     * subscription unless the backend allows progress access.
+     */
+    if (!hasActiveSubscription || courses.isEmpty) {
+      totalClasses = 0;
+      overallProgress = 0;
+      return;
+    }
+
+    await _loadCourseProgress(token);
+  }
+
+  Future<void> _loadCourseProgress(String token) async {
+    try {
+      final progressResponse =
+          await _progressService.getMyProgress(token);
+
+      final rawProgress = progressResponse['data'];
+      final progressList = rawProgress is List ? rawProgress : [];
+
+      courseProgress.clear();
+      courseCompleted.clear();
+
+      int classesCount = 0;
+      int completedClassesCount = 0;
+
       for (final course in courses) {
-        final classesResponse = await selfPacedService.getClasses(
+        final classesResponse = await _selfPacedService.getClasses(
           token,
           course.id,
         );
 
-        final List classes = classesResponse["data"] ?? [];
-        totalClasses += classes.length;
-        if (classes.isEmpty) continue;
+        final rawClasses = classesResponse['data'];
+        final classes = rawClasses is List ? rawClasses : [];
+
+        classesCount += classes.length;
+
+        if (classes.isEmpty) {
+          courseProgress[course.id] = 0;
+          courseCompleted[course.id] = false;
+          continue;
+        }
 
         int completedLessons = 0;
 
         for (final lesson in classes) {
-          final lessonId = lesson["id"];
+          if (lesson is! Map) continue;
 
-          final found = progressList.any(
-            (p) => p["classId"] == lessonId && p["isCompleted"] == true,
-          );
+          final lessonId = lesson['id']?.toString();
 
-          if (found) {
+          final isCompleted = progressList.any((progress) {
+            if (progress is! Map) return false;
+
+            return progress['classId']?.toString() == lessonId &&
+                progress['isCompleted'] == true;
+          });
+
+          if (isCompleted) {
             completedLessons++;
+            completedClassesCount++;
           }
         }
-        double progress = completedLessons / classes.length;
+
+        final progress = completedLessons / classes.length;
 
         courseProgress[course.id] = progress;
-
-        courseCompleted[course.id] = completedLessons == classes.length;
-        print(
-          "${course.title} => "
-          "$completedLessons/${classes.length}",
-        );
-
-        if (completedLessons > 0) {
-          enrolled++;
-        }
-
-        if (completedLessons > 0 && completedLessons < classes.length) {
-          inProgress++;
-        }
-
-        if (completedLessons == classes.length) {
-          completed++;
-        }
-      }
-      print("PROGRESS LIST => ${progressResponse["data"]}");
-
-      for (final c in courses) {
-        print(
-          "COURSE => ${c.title}"
-          " enrolled=${c.enrolled}"
-          " completed=${c.completed}"
-          " progress=${c.progress}",
-        );
+        courseCompleted[course.id] =
+            completedLessons == classes.length;
       }
 
-      setState(() {
-        enrolledCount = enrolled;
-        inProgressCount = inProgress;
-        completedCount = completed;
+      totalClasses = classesCount;
 
-        isLoading = false;
-      });
-    } else {
+      overallProgress = classesCount == 0
+          ? 0
+          : completedClassesCount / classesCount;
+    } catch (error) {
+      debugPrint('PROGRESS LOAD ERROR: $error');
+
+      totalClasses = 0;
+      overallProgress = 0;
+    }
+  }
+
+  Future<void> _refreshScreen() async {
+    await _loadScreenData();
+  }
+
+  Future<void> _enrollCourse(CourseModel course) async {
+    if (selectedPlanId == null) {
       AppSnackbar.showError(
         context,
-        response["message"] ?? "Failed to load courses",
+        'No self-paced plan is currently available',
       );
-
-      setState(() {
-        courses = [];
-        isLoading = false;
-      });
-    }
-    final plans = await selfPacedService.getPlans(token);
-
-    print("SELF PACED PLANS => $plans");
-  }
-
-  Future<void> loadSubscription() async {
-    final token = await AuthManager.getToken();
-
-    if (token == null) return;
-
-    final subscriptionService = SubscriptionService();
-
-    final response = await subscriptionService.getMySubscription(token);
-
-    if (response["success"] == true && response["data"]["enrolled"] == true) {
-      setState(() {
-        hasActiveSubscription = true;
-      });
-    }
-  }
-
-  Future<void> enrollCourse(CourseModel course) async {
-    final token = await AuthManager.getToken();
-
-    if (token == null) {
-      Navigator.pushReplacementNamed(context, "/login");
       return;
     }
 
-    final response = await selfPacedService.initiatePayment(
-      token,
-      course.id,
-      selectedPlanId!,
-    );
-    print("INITIATE RESPONSE => $response");
-    if (ApiHelper.isSuccess(response) && response["data"] != null) {
-      AppSnackbar.showSuccess(context, "Proceed to payment");
+    final token = await AuthManager.getToken();
 
-      Navigator.pushNamed(
-        context,
-        AppRoutes.payments, // or your payment route
+    if (token == null || token.isEmpty) {
+      return;
+    }
+
+    try {
+      final response = await _selfPacedService.initiatePayment(
+        token,
+        course.id,
+        selectedPlanId!,
       );
-    } else {
+
+      if (!mounted) return;
+
+      if (ApiHelper.isSuccess(response)) {
+        Navigator.pushNamed(context, AppRoutes.payments);
+      } else {
+        AppSnackbar.showError(
+          context,
+          response['message'] ?? 'Payment initiation failed',
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+
       AppSnackbar.showError(
         context,
-        response["message"] ?? "Payment initiation failed",
+        'Unable to initiate payment',
       );
     }
   }
 
-  Widget _courseCard(CourseModel course) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOut,
-      margin: const EdgeInsets.symmetric(horizontal: 22),
+  Future<void> _continueLearning(CourseModel course) async {
+    try {
+      final token = await AuthManager.getToken();
+
+      if (token == null || token.isEmpty) return;
+
+      final results = await Future.wait([
+        _selfPacedService.getClasses(token, course.id),
+        _progressService.getMyProgress(token),
+      ]);
+
+      final classesData = results[0]['data'];
+      final progressData = results[1]['data'];
+
+      final classes = classesData is List ? classesData : [];
+      final progressList = progressData is List ? progressData : [];
+
+      if (classes.isEmpty) {
+        if (mounted) {
+          AppSnackbar.showError(
+            context,
+            'No classes are available in this module',
+          );
+        }
+        return;
+      }
+
+      final completedMap = <String, bool>{};
+
+      for (final item in progressList) {
+        if (item is! Map) continue;
+
+        completedMap[item['classId'].toString()] =
+            item['isCompleted'] == true;
+      }
+
+      final firstUnfinished = classes.firstWhere(
+        (lesson) =>
+            lesson is Map &&
+            completedMap[lesson['id'].toString()] != true,
+        orElse: () => classes.first,
+      );
+
+      if (!mounted || firstUnfinished is! Map) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelfPacedLessonScreen(
+            lesson: ClassModel.fromJson(
+              Map<String, dynamic>.from(firstUnfinished),
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      AppSnackbar.showError(
+        context,
+        'Unable to open the lesson',
+      );
+    }
+  }
+
+  void _handleCourseTap(CourseModel course) {
+    if (!hasActiveSubscription) {
+      _enrollCourse(course);
+      return;
+    }
+
+    if (courseCompleted[course.id] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SelfPacedClassesScreen(
+            moduleId: course.id,
+            title: course.title,
+          ),
+        ),
+      );
+      return;
+    }
+
+    _continueLearning(course);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      currentIndex: 2,
+      drawer: const CustomDrawer(currentPage: 'Self-Paced'),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 0,
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: Color(0xff1E1B39),
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
+        ),
+        title: Image.asset(
+          'assets/logo/logo_transparent_clean.png',
+          height: 52,
+        ),
+        centerTitle: true,
+      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xff7E22CE),
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshScreen,
+              color: const Color(0xff7E22CE),
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: _buildGradientHeader(),
+                  ),
+
+                  if (!hasActiveSubscription)
+                    SliverToBoxAdapter(
+                      child: _buildSubscriptionBanner(),
+                    ),
+
+                  SliverToBoxAdapter(
+                    child: _buildSearchCard(),
+                  ),
+
+                  if (filteredCourses.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildEmptyState(),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(
+                        20,
+                        4,
+                        20,
+                        32,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: filteredCourses.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 18),
+                        itemBuilder: (context, index) {
+                          final course = filteredCourses[index];
+
+                          return _buildCourseCard(course)
+                              .animate(
+                                delay: Duration(
+                                  milliseconds: index * 80,
+                                ),
+                              )
+                              .fadeIn(
+                                duration:
+                                    const Duration(milliseconds: 350),
+                              )
+                              .slideY(
+                                begin: 0.08,
+                                end: 0,
+                                duration:
+                                    const Duration(milliseconds: 350),
+                              );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildGradientHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xffFF6B35),
+            Color(0xff7B0AA5),
+          ],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.school_outlined,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Self-Paced Learning',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        height: 1.15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Learn at your own pace, anytime, anywhere',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 26),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTopStat(
+                  icon: Icons.menu_book_outlined,
+                  title: 'Modules',
+                  value: courses.length.toString(),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTopStat(
+                  icon: Icons.play_circle_outline_rounded,
+                  title: 'Classes',
+                  value: totalClasses.toString(),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTopStat(
+                  icon: Icons.trending_up_rounded,
+                  title: 'Progress',
+                  value:
+                      '${(overallProgress * 100).round()}%',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildTopStat(
+                  icon: Icons.workspace_premium_outlined,
+                  title: 'Active Plan',
+                  value: activePlanName,
+                  valueFontSize:
+                      activePlanName.length > 12 ? 16 : 20,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTopStat({
+    required IconData icon,
+    required String title,
+    required String value,
+    double valueFontSize = 20,
+  }) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 102),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.23),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.17),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 21,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.85),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  value,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: valueFontSize,
+                    height: 1.05,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionBanner() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xffFFF6F1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xffFFB18A),
+        ),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 420;
+
+          final content = Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xffFFE3D4),
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Color(0xffFF641F),
+                ),
+              ),
+              const SizedBox(width: 13),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Subscribe to unlock self-paced classes',
+                      style: TextStyle(
+                        color: Color(0xff16112B),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'Browse the catalogue below and enrol to start '
+                      'watching at your own pace.',
+                      style: TextStyle(
+                        color: Color(0xff5F5871),
+                        fontSize: 12.5,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+
+          final button = ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.payments,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: const Color(0xff72039A),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 11,
+              ),
+              minimumSize: const Size(112, 42),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            child: const Text(
+              'View Plans',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          );
+
+          if (compact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                content,
+                const SizedBox(height: 14),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: button,
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            children: [
+              Expanded(child: content),
+              const SizedBox(width: 14),
+              button,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSearchCard() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(
+        20,
+        hasActiveSubscription ? 24 : 8,
+        20,
+        22,
+      ),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(17),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.06),
-            blurRadius: 14,
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (value) {
+          setState(() {
+            searchQuery = value;
+          });
+        },
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          hintText: 'Search courses...',
+          hintStyle: const TextStyle(
+            color: Color(0xff7A849B),
+            fontSize: 13,
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: Color(0xff52617A),
+          ),
+          suffixIcon: searchQuery.isEmpty
+              ? null
+              : IconButton(
+                  onPressed: _clearSearch,
+                  icon: const Icon(Icons.close_rounded),
+                ),
+          filled: true,
+          fillColor: const Color(0xffFCFDFF),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 15,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(
+              color: Color(0xff7586A3),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(
+              color: Color(0xff7E22CE),
+              width: 1.4,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final isSearching = searchQuery.trim().isNotEmpty;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 50, 24, 80),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            width: 76,
+            height: 76,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xffF3F4F7),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.search_rounded,
+              size: 40,
+              color: Color(0xff98A3B6),
+            ),
+          ),
+          const SizedBox(height: 19),
+          Text(
+            isSearching ? 'No courses found' : 'No courses available',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xff11101B),
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 9),
+          Text(
+            isSearching
+                ? 'Try adjusting your search.'
+                : 'Self-paced courses will appear here once available.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xff677086),
+              fontSize: 13,
+            ),
+          ),
+          if (isSearching) ...[
+            const SizedBox(height: 22),
+            ElevatedButton(
+              onPressed: _clearSearch,
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: const Color(0xffFF641F),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 21,
+                  vertical: 11,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+              ),
+              child: const Text(
+                'Clear Search',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+
+    setState(() {
+      searchQuery = '';
+    });
+  }
+
+  Widget _buildCourseCard(CourseModel course) {
+    final progress = courseProgress[course.id] ?? 0;
+    final completed = courseCompleted[course.id] ?? false;
+
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(19),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 15,
             offset: const Offset(0, 6),
           ),
         ],
@@ -275,77 +1004,26 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// IMAGE
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
+          Image.network(
+            course.image,
+            height: 170,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) {
+              return Container(
+                height: 170,
+                alignment: Alignment.center,
+                color: const Color(0xffEEEFF3),
+                child: const Icon(
+                  Icons.image_not_supported_outlined,
+                  size: 42,
+                  color: Colors.grey,
                 ),
-
-                child: Animate(
-                  effects: const [
-                    ScaleEffect(
-                      begin: Offset(1.05, 1.05),
-                      end: Offset(1, 1),
-                      duration: Duration(milliseconds: 700),
-                    ),
-                  ],
-
-                  child: Image.network(
-                    course.image,
-                    height: 150,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    cacheWidth: 800,
-
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 150,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.broken_image, size: 40),
-                      );
-                    },
-                  ),
-                ),
-              ),
-
-              /// LEVEL
-              Positioned(
-                left: 14,
-                bottom: 14,
-                child: _pill(course.level, Colors.white, Colors.deepPurple),
-              ),
-
-              /// RATING
-              Positioned(
-                right: 14,
-                bottom: 14,
-                child: _pill("⭐ ${course.rating}", Colors.white, Colors.black),
-              ),
-
-              /// STATUS
-              if ((courseProgress[course.id] ?? 0) > 0)
-                Positioned(
-                  top: 16,
-                  right: 14,
-                  child: _pill(
-                    (courseCompleted[course.id] ?? false)
-                        ? "✓ Completed"
-                        : "Enrolled",
-                    Colors.white,
-                    Colors.deepPurple,
-                    borderColor: Colors.deepPurple,
-                  ),
-                ),
-            ],
+              );
+            },
           ),
-
-          /// CONTENT
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -353,93 +1031,107 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
                   course.title,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-
-                const SizedBox(height: 2),
-
+                const SizedBox(height: 6),
                 Text(
                   course.description,
-                  style: const TextStyle(color: Colors.blueGrey),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xff687083),
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
-
-                const SizedBox(height: 2),
-
+                const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(course.instructor),
-                    Text("🕒 ${course.duration}"),
+                    Expanded(
+                      child: Text(
+                        course.instructor,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Icon(
+                      Icons.schedule_rounded,
+                      size: 17,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(course.duration),
                   ],
                 ),
-
-                /// PROGRESS
-                if ((courseProgress[course.id] ?? 0) > 0) ...[
-                  const SizedBox(height: 8),
-
+                if (hasActiveSubscription) ...[
+                  const SizedBox(height: 15),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(course.lessonsText ?? ""),
                       Text(
-                        "${((courseProgress[course.id] ?? 0) * 100).toInt()}%",
+                        course.lessonsText ?? 'Course progress',
                         style: const TextStyle(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Color(0xff687083),
+                        ),
+                      ),
+                      Text(
+                        '${(progress * 100).round()}%',
+                        style: const TextStyle(
+                          color: Color(0xff7E22CE),
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 8),
-
+                  const SizedBox(height: 7),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(20),
                     child: LinearProgressIndicator(
-                      value: courseProgress[course.id] ?? 0,
-                      minHeight: 10,
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: const Color(0xffECE6F2),
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(
+                            Color(0xff7E22CE),
+                          ),
                     ),
                   ),
                 ],
-
-                const SizedBox(height: 10),
-
-                /// CTA BUTTON
+                const SizedBox(height: 17),
                 SizedBox(
                   width: double.infinity,
-                  child: Animate(
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
-                    ],
-
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (!hasActiveSubscription) {
-                          handleCTA("enroll", course);
-                        } else if (courseCompleted[course.id] ?? false) {
-                          handleCTA("review", course);
-                        } else {
-                          handleCTA("continue", course);
-                        }
-                      },
-                      icon: const Icon(Icons.play_arrow),
-                      label: Text(
-                        !hasActiveSubscription
-                            ? "Enroll Now"
-                            : (courseCompleted[course.id] ?? false)
-                            ? "Review Course"
-                            : "Continue Learning",
+                  child: ElevatedButton.icon(
+                    onPressed: () => _handleCourseTap(course),
+                    icon: Icon(
+                      !hasActiveSubscription
+                          ? Icons.lock_open_rounded
+                          : completed
+                          ? Icons.replay_rounded
+                          : Icons.play_arrow_rounded,
+                    ),
+                    label: Text(
+                      !hasActiveSubscription
+                          ? 'Enrol Now'
+                          : completed
+                          ? 'Review Course'
+                          : 'Continue Learning',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: !hasActiveSubscription
+                          ? const Color(0xffFF641F)
+                          : const Color(0xff7E22CE),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 13,
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: !hasActiveSubscription
-                            ? Colors.deepOrange
-                            : Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
                       ),
                     ),
                   ),
@@ -451,652 +1143,4 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
       ),
     );
   }
-
-  String selectedCategory = "All";
-
-  final categories = [
-    "All",
-    "Foundation",
-    "Asana",
-    "Pranayama",
-    "Meditation",
-    "Fitness",
-    "Wellness",
-  ];
-  Future<void> continueLearning(CourseModel course) async {
-    try {
-      final token = await AuthManager.getToken();
-
-      if (token == null) return;
-
-      final classesResponse = await selfPacedService.getClasses(
-        token,
-        course.id,
-      );
-
-      final List classes = classesResponse["data"] ?? [];
-
-      if (classes.isEmpty) return;
-
-      final progressResponse = await progressService.getMyProgress(token);
-
-      final List progressList = progressResponse["data"] ?? [];
-
-      Map<String, bool> completedMap = {};
-
-      for (final item in progressList) {
-        completedMap[item["classId"].toString()] = item["isCompleted"] == true;
-      }
-
-      final firstUnfinished = classes.firstWhere(
-        (lesson) => completedMap[lesson["id"].toString()] != true,
-        orElse: () => classes.first,
-      );
-      print("OPENING LESSON ID => ${firstUnfinished["id"]}");
-      if (!mounted) return;
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SelfPacedLessonScreen(
-            lesson: ClassModel.fromJson(firstUnfinished),
-          ),
-        ),
-      );
-    } catch (e) {
-      print("CONTINUE LEARNING ERROR => $e");
-    }
-  }
-
-  void handleCTA(String type, [CourseModel? course]) {
-    if (type == "continue" && course != null) {
-      continueLearning(course);
-    } else if (type == "review" && course != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              SelfPacedClassesScreen(moduleId: course.id, title: course.title),
-        ),
-      );
-    } else if (type == "enroll" && course != null) {
-      enrollCourse(course);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("$type action coming soon")));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScaffold(
-      currentIndex: null,
-
-      drawer: const CustomDrawer(currentPage: "Self-Paced"),
-      // backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
-
-        title: Image.asset(
-          'assets/logo/logo_transparent_clean.png',
-          height: 60,
-        ),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-
-              child: Column(
-                children: [
-                  /// TOP GRADIENT SECTION
-                  /// TOP GRADIENT SECTION
-                  Animate(
-                    effects: const [
-                      FadeEffect(duration: Duration(milliseconds: 500)),
-
-                      SlideEffect(
-                        begin: Offset(0, -0.1),
-                        end: Offset(0, 0),
-                        duration: Duration(milliseconds: 500),
-                      ),
-                    ],
-
-                    child: Container(
-                      width: double.infinity,
-
-                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-
-                          colors: [Color(0xffF97316), Color(0xff7E22CE)],
-                        ),
-                      ),
-
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(.15),
-
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-
-                                child: const Icon(
-                                  Icons.school,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ),
-
-                              const SizedBox(width: 16),
-
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-
-                                  children: [
-                                    Text(
-                                      "Self-Paced Learning",
-
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-
-                                        color: Colors.white,
-                                        height: 1.1,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 12),
-
-                                    Text(
-                                      "Learn at your own pace, anytime, anywhere",
-
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 13,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 35),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: buildTopStat(
-                                  Icons.menu_book_outlined,
-                                  "Modules",
-                                  courses.length.toString(),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: buildTopStat(
-                                  Icons.play_circle_outline,
-                                  "Classes",
-                                  totalClasses.toString(),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                child: buildTopStat(
-                                  Icons.trending_up,
-                                  "Progress",
-                                  "${(courseProgress.values.isEmpty ? 0 : (courseProgress.values.reduce((a, b) => a + b) / courseProgress.length * 100)).toInt()}%",
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-
-                              Expanded(
-                                child: buildTopStat(
-                                  Icons.workspace_premium_outlined,
-                                  "Active Plan",
-                                  hasActiveSubscription
-                                      ? "Active"
-                                      : "Not Enrolled",
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (!hasActiveSubscription)
-                            Container(
-                              margin: const EdgeInsets.all(20),
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffF7F1F3),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.orange.shade200,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.shade100,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Icon(
-                                      Icons.lock_outline,
-                                      color: Colors.deepOrange,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 16),
-
-                                  const Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "Subscribe to unlock self-paced classes",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          "Browse the catalogue below and enroll to start watching at your own pace.",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.payments,
-                                      );
-                                    },
-                                    child: const Text("View Plans"),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  /// FLOATING SEARCH FILTER CARD
-                  if (hasActiveSubscription)
-                    Animate(
-                      delay: const Duration(milliseconds: 200),
-                      effects: const [
-                        FadeEffect(duration: Duration(milliseconds: 500)),
-                        SlideEffect(
-                          begin: Offset(0, 0.15),
-                          end: Offset(0, 0),
-                          duration: Duration(milliseconds: 500),
-                        ),
-                      ],
-                      child: Transform.translate(
-                        offset: const Offset(0, 25),
-
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22),
-
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-
-                              borderRadius: BorderRadius.circular(20),
-
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(.08),
-
-                                  blurRadius: 18,
-
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-
-                              children: [
-                                /// SEARCH
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 10,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-
-                                    border: Border.all(
-                                      color: Colors.orange.shade100,
-                                    ),
-                                  ),
-
-                                  child: TextField(
-                                    onChanged: (value) {
-                                      setState(() {
-                                        searchQuery = value;
-                                      });
-                                    },
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                      icon: Icon(
-                                        Icons.search,
-                                        color: Colors.blueGrey,
-                                      ),
-                                      hintText:
-                                          "Search courses, instructors...",
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                /// FILTER
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-
-                                    border: Border.all(
-                                      color: Colors.orange.shade100,
-                                    ),
-                                  ),
-
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-
-                                    children: [
-                                      Icon(Icons.filter_alt_outlined),
-
-                                      SizedBox(width: 10),
-
-                                      Text(
-                                        "All Courses",
-
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                /// CATEGORY CHIPS
-                                // Wrap(
-                                //   spacing: 6,
-                                //   runSpacing: 6,
-
-                                //   children: categories.map((cat) {
-                                //     bool selected = cat == selectedCategory;
-
-                                //     return Animate(
-                                //       delay: Duration(
-                                //         milliseconds:
-                                //             80 * categories.indexOf(cat).toInt(),
-                                //       ),
-
-                                //       effects: const [
-                                //         FadeEffect(
-                                //           duration: Duration(milliseconds: 400),
-                                //         ),
-
-                                //         ScaleEffect(
-                                //           begin: Offset(0.9, 0.9),
-                                //           end: Offset(1, 1),
-                                //           duration: Duration(milliseconds: 400),
-                                //         ),
-                                //       ],
-
-                                //       child: GestureDetector(
-                                //         onTap: () {
-                                //           setState(() {
-                                //             selectedCategory = cat;
-                                //           });
-                                //         },
-
-                                //         child: Container(
-                                //           padding: const EdgeInsets.symmetric(
-                                //             horizontal: 12,
-                                //             vertical: 6,
-                                //           ),
-
-                                //           decoration: BoxDecoration(
-                                //             color: selected
-                                //                 ? Colors.deepOrange
-                                //                 : Colors.white,
-
-                                //             borderRadius: BorderRadius.circular(
-                                //               24,
-                                //             ),
-
-                                //             border: Border.all(
-                                //               color: Colors.orange.shade100,
-                                //             ),
-                                //           ),
-
-                                //           child: Text(
-                                //             cat,
-
-                                //             style: TextStyle(
-                                //               fontSize: 13,
-
-                                //               color: selected
-                                //                   ? Colors.white
-                                //                   : Colors.black87,
-                                //             ),
-                                //           ),
-                                //         ),
-                                //       ),
-                                //     );
-                                //   }).toList(),
-                                // ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  SizedBox(height: hasActiveSubscription ? 50 : 20),
-
-                  if (hasActiveSubscription)
-                    courses.isEmpty
-                        ? const Center(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Text("No courses available"),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: filteredCourses.length,
-                            itemBuilder: (context, index) {
-                              final course = filteredCourses[index];
-
-                              return Animate(
-                                delay: Duration(milliseconds: 150 * index),
-                                effects: const [
-                                  FadeEffect(
-                                    duration: Duration(milliseconds: 500),
-                                  ),
-                                  SlideEffect(
-                                    begin: Offset(0, 0.12),
-                                    end: Offset(0, 0),
-                                    duration: Duration(milliseconds: 500),
-                                  ),
-                                ],
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 20),
-                                  child: _courseCard(course),
-                                ),
-                              );
-                            },
-                          ),
-                  const SizedBox(height: 40),
-                ],
-              ),
-            ),
-    );
-  }
-
-  static Widget _statCard({
-    required IconData icon,
-    required String title,
-    required String count,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(.12),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(.18)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: Colors.white),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  count,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Widget _pill(String text, Color bg, Color fg, {Color? borderColor}) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-
-    decoration: BoxDecoration(
-      color: bg,
-
-      borderRadius: BorderRadius.circular(30),
-
-      border: borderColor != null ? Border.all(color: borderColor) : null,
-    ),
-
-    child: Text(
-      text,
-
-      style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600),
-    ),
-  );
-}
-
-Widget buildTopStat(IconData icon, String title, String value) {
-  return Container(
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.white.withOpacity(.12),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: Colors.white.withOpacity(.2)),
-    ),
-    child: Row(
-      children: [
-        CircleAvatar(
-          backgroundColor: Colors.white24,
-          child: Icon(icon, color: Colors.white),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white70)),
-              Text(
-                value,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
 }

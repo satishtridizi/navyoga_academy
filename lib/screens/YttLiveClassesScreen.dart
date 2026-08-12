@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/LiveClassData.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
-import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
+import 'package:navyoga_academy/widgets/app_scaffold.dart';
 
 class YttLiveClassesScreen extends StatelessWidget {
   const YttLiveClassesScreen({super.key});
@@ -12,60 +12,99 @@ class YttLiveClassesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final data = LiveClassData(
       enrolled: false,
-      title: "My YTT Live Classes",
+      title: 'My YTT Live Classes',
       description:
-          "Live yoga teacher training sessions and recordings from your enrolled cohorts",
+          'Live yoga teacher training sessions and recordings from your enrolled cohorts.',
     );
 
-    return Scaffold(
-      drawer: const CustomDrawer(currentPage: "YTT Live Classes"),
-      //currentIndex: null,
+    return AppScaffold(
+      currentIndex: 0,
+      drawer: const CustomDrawer(
+        currentPage: 'YTT Live Classes',
+      ),
       appBar: AppBar(
-        leadingWidth: 72,
-        backgroundColor: Colors.grey[200],
-        elevation: 0,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 1,
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Color(0xff1E1B39)),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          builder: (context) {
+            return IconButton(
+              tooltip: 'Menu',
+              icon: const Icon(
+                Icons.menu,
+                color: Color(0xFF1E1B39),
+              ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
         ),
-
         title: Image.asset(
           'assets/logo/logo_transparent_clean.png',
-          height: 60,
+          height: 56,
+          fit: BoxFit.contain,
         ),
         centerTitle: true,
       ),
-      backgroundColor: const Color(0xfff5f5f5),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              HeaderSection(
-                data: data,
-                onEnrollTap: () {
-                  Navigator.pushNamed(context, AppRoutes.payments);
-                },
-              ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding =
+                constraints.maxWidth < 600 ? 16.0 : 24.0;
 
-              const SizedBox(height: 15),
-
-              EmptyStateSection(
-                description:
-                    "Enroll in a YTT Live course from the plans page to access its live sessions and recordings.",
-                onViewPlansTap: () {
-                  Navigator.pushNamed(context, AppRoutes.payments);
-                },
+            return RefreshIndicator(
+              onRefresh: () async {
+                // Add API refresh here later.
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  20,
+                  horizontalPadding,
+                  28,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 1000,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        HeaderSection(
+                          data: data,
+                          onEnrollTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.payments,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 18),
+                        if (!data.enrolled)
+                          EmptyStateSection(
+                            description:
+                                'Enroll in a YTT Live course from the plans page to access live sessions and recordings.',
+                            onViewPlansTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.payments,
+                              );
+                            },
+                          )
+                        else
+                          const EnrolledStateSection(),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
-      bottomNavigationBar: const CustomBottomBar(),
     );
   }
 }
@@ -84,116 +123,218 @@ class HeaderSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xfff97316), Color(0xff6a0dad)],
+          colors: [
+            Color(0xFFF97316),
+            Color(0xFF7B2CBF),
+          ],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFF97316).withOpacity(0.20),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          bool mobile = constraints.maxWidth < 700;
+          final isCompact = constraints.maxWidth < 680;
 
-          return mobile
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _titleContent(),
-                    const SizedBox(height: 20),
-                    _statusCard(),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: _titleContent()),
-                    const SizedBox(width: 20),
-                    _statusCard(),
-                  ],
-                );
+          if (isCompact) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTitleContent(),
+                const SizedBox(height: 20),
+                _buildStatusCard(
+                  expandWidth: true,
+                ),
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 3,
+                child: _buildTitleContent(),
+              ),
+              const SizedBox(width: 24),
+              Flexible(
+                flex: 2,
+                child: _buildStatusCard(),
+              ),
+            ],
+          );
         },
       ),
     );
   }
 
-  Widget _titleContent() {
+  Widget _buildTitleContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Icon(Icons.school_outlined, color: Colors.white, size: 34),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                data.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  height: 1.1,
-                ),
-              ),
+        Container(
+          width: 54,
+          height: 54,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.16),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.22),
             ),
-          ],
+          ),
+          child: const Icon(
+            Icons.school_outlined,
+            color: Colors.white,
+            size: 30,
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        Text(
+          data.title,
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 10),
         Text(
           data.description,
           style: GoogleFonts.poppins(
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Colors.white.withOpacity(0.90),
             fontSize: 14,
-            height: 1.4,
             fontWeight: FontWeight.w400,
+            height: 1.55,
           ),
         ),
       ],
     );
   }
 
-  Widget _statusCard() {
+  Widget _buildStatusCard({
+    bool expandWidth = false,
+  }) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      width: expandWidth ? double.infinity : null,
+      constraints: const BoxConstraints(
+        minWidth: 245,
+        maxWidth: 330,
+      ),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.07),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Icon(Icons.lock_outline),
-              const SizedBox(width: 8),
-              Text(
-                data.enrolled ? "Enrolled" : "Not enrolled",
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: data.enrolled
+                      ? Colors.green.shade50
+                      : Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  data.enrolled
+                      ? Icons.verified_outlined
+                      : Icons.lock_outline,
+                  color: data.enrolled
+                      ? Colors.green
+                      : const Color(0xFFF97316),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enrollment Status',
+                      style: TextStyle(
+                        color: Colors.blueGrey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      data.enrolled
+                          ? 'Enrolled'
+                          : 'Not enrolled',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: data.enrolled
+                            ? Colors.green
+                            : const Color(0xFF1E1B39),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: onEnrollTap,
-            icon: const Icon(Icons.workspace_premium_outlined),
-            label: const Text("Enroll"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xfffb7a34),
-              foregroundColor: Colors.white,
-              elevation: 5,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+          const SizedBox(height: 18),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed:
+                  data.enrolled ? null : onEnrollTap,
+              icon: Icon(
+                data.enrolled
+                    ? Icons.check_circle_outline
+                    : Icons.workspace_premium_outlined,
+                size: 20,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              label: Text(
+                data.enrolled
+                    ? 'Already Enrolled'
+                    : 'Enroll Now',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFB7A34),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor:
+                    Colors.green.shade100,
+                disabledForegroundColor:
+                    Colors.green.shade800,
+                elevation: data.enrolled ? 0 : 3,
+                minimumSize: const Size(
+                  double.infinity,
+                  48,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
             ),
           ),
         ],
@@ -214,83 +355,141 @@ class EmptyStateSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        debugPrint("Container Clicked");
-      },
-      borderRadius: BorderRadius.circular(25),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-        decoration: BoxDecoration(
-          color: const Color(0xfff7eef0),
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: const Color(0xffffb48e)),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(
+        horizontal: 22,
+        vertical: 30,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8F4),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFFFFC4A6),
         ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xffffe4d6),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(
-                Icons.lock_outline,
-                size: 32,
-                color: Color(0xfff97316),
-              ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 68,
+            height: 68,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFE4D6),
+              borderRadius: BorderRadius.circular(20),
             ),
-
-            const SizedBox(height: 12),
-
-            Text(
-              "You're not enrolled in any YTT Live cohort yet",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 25,
-                fontWeight: FontWeight.w600,
-              ),
+            child: const Icon(
+              Icons.lock_outline,
+              size: 34,
+              color: Color(0xFFF97316),
             ),
-
-            const SizedBox(height: 12),
-
-            Text(
+          ),
+          const SizedBox(height: 18),
+          Text(
+            'You’re not enrolled in a YTT Live cohort yet',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1E1B39),
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 560,
+            ),
+            child: Text(
               description,
               textAlign: TextAlign.center,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
-                textStyle: TextStyle(
-                  color: Color.fromARGB(255, 130, 130, 130),
-                  fontSize: 14,
-                  height: 1.4,
-                  fontWeight: FontWeight.w500,
-                ),
+                color: Colors.blueGrey,
+                fontSize: 14,
+                height: 1.55,
+                fontWeight: FontWeight.w400,
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            ElevatedButton.icon(
+          ),
+          const SizedBox(height: 22),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
               onPressed: onViewPlansTap,
-              icon: const Icon(Icons.workspace_premium_outlined),
-              label: const Text("View YTT Live Plans"),
+              icon: const Icon(
+                Icons.workspace_premium_outlined,
+                size: 20,
+              ),
+              label: const Text(
+                'View YTT Live Plans',
+              ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xfffb7a34),
+                backgroundColor: const Color(0xFFFB7A34),
                 foregroundColor: Colors.white,
-                elevation: 5,
+                elevation: 3,
+                minimumSize: const Size(
+                  double.infinity,
+                  50,
+                ),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
+                  horizontal: 22,
+                  vertical: 15,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EnrolledStateSection extends StatelessWidget {
+  const EnrolledStateSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.green.shade200,
         ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.check_circle,
+            size: 54,
+            color: Colors.green.shade600,
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Your YTT Live classes are ready',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1E1B39),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your upcoming sessions and available recordings will appear here.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              height: 1.5,
+              color: Colors.blueGrey,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -51,7 +51,7 @@ class _WorkshopsScreenState extends State<WorkshopsScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      currentIndex: null,
+      currentIndex: 2,
       drawer: const CustomDrawer(currentPage: "Workshops"),
       appBar: AppBar(
         title: Image.asset(

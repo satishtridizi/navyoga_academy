@@ -1,61 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:navyoga_academy/widgets/app_background.dart';
 import 'package:navyoga_academy/widgets/bottom_navbar.dart';
-import 'package:navyoga_academy/routes/app_routes.dart';
 
 class AppScaffold extends StatelessWidget {
-  final PreferredSizeWidget? appBar;
-  final Widget body;
-  final Widget? drawer;
-  final int? currentIndex;
-  final FloatingActionButton? floatingActionButton;
-
   const AppScaffold({
     super.key,
-    this.appBar,
     required this.body,
+    required this.currentIndex,
+    this.appBar,
     this.drawer,
-    this.currentIndex,
+    this.backgroundColor,
     this.floatingActionButton,
+    this.onBottomNavTap,
   });
+
+  final Widget body;
+  final int currentIndex;
+  final PreferredSizeWidget? appBar;
+  final Widget? drawer;
+  final Color? backgroundColor;
+  final Widget? floatingActionButton;
+
+  /// Optional custom handler for bottom-navigation taps.
+  ///
+  /// When this is null, BottomNavbar handles navigation internally.
+  final void Function(BuildContext context, int index)? onBottomNavTap;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: drawer,
-      backgroundColor: Colors.transparent,
+      backgroundColor: backgroundColor ?? const Color(0xFFF7F7F7),
       appBar: appBar,
-
-      body: AppBackground(child: body),
-
+      drawer: drawer,
+      body: body,
+      floatingActionButton: floatingActionButton,
       bottomNavigationBar: BottomNavbar(
         currentIndex: currentIndex,
-        onTap: (context, index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, AppRoutes.myClasses);
-              break;
-
-            case 1:
-              Navigator.pushReplacementNamed(context, AppRoutes.recordings);
-              break;
-
-            case 2:
-              Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
-              break;
-
-            case 3:
-              Navigator.pushReplacementNamed(context, AppRoutes.attendance);
-              break;
-
-            case 4:
-              Navigator.pushReplacementNamed(context, AppRoutes.profile);
-              break;
-          }
-        },
+        onTap: onBottomNavTap,
       ),
-      floatingActionButton: floatingActionButton,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

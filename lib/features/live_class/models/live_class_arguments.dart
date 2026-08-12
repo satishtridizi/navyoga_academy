@@ -1,0 +1,1 @@
+export 'package:navyoga_academy/models/live_class_arguments.dart';

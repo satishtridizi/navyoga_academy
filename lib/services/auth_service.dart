@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 
 import '../api/api_constants.dart';
@@ -6,25 +9,46 @@ import '../api/api_service.dart';
 class AuthService {
   final ApiService _api = ApiService();
 
-  Future<dynamic> studentLogin({
-    required String email,
 
-    required String password,
-  }) async {
-    final response = await _api.postRequest(
-      url: "${ApiConstants.baseUrl}/api/auth/student/login",
+Future<dynamic> studentLogin({
+  required String email,
+  required String password,
+}) async {
+  final url = "${ApiConstants.baseUrl}/api/auth/student/login";
 
-      body: {"email": email, "password": password},
+  final payload = {
+    "email": email,
+    "password": password,
+  };
+
+  debugPrint("════════════ API REQUEST ════════════");
+  debugPrint("URL     : $url");
+  debugPrint("METHOD  : POST");
+  debugPrint("PAYLOAD : ${jsonEncode(payload)}");
+  debugPrint("═════════════════════════════════════");
+
+  final response = await _api.postRequest(
+    url: url,
+    body: payload,
+  );
+
+  debugPrint("════════════ API RESPONSE ═══════════");
+  debugPrint("URL      : $url");
+  debugPrint("RESPONSE : ${jsonEncode(response)}");
+  debugPrint("═════════════════════════════════════");
+
+  if (response["success"] == true &&
+      response["data"] != null &&
+      response["data"]["token"] != null) {
+    await AuthManager.saveToken(
+      response["data"]["token"],
     );
 
-    if (response["success"] == true &&
-        response["data"] != null &&
-        response["data"]["token"] != null) {
-      await AuthManager.saveToken(response["data"]["token"]);
-    }
-
-    return response;
+    debugPrint("TOKEN SAVED SUCCESSFULLY");
   }
+
+  return response;
+}
 
   Future<dynamic> getProfile(String token) async {
     final response = await _api.getRequest(

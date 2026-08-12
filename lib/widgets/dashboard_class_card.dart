@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 
 class ClassCard extends StatelessWidget {
-  final String title, subtitle, duration;
-  final VoidCallback? onJoin;
-  const ClassCard(
+   const ClassCard(
     this.title,
-    this.subtitle,
+    this.instructor,
     this.duration, {
     super.key,
-    this.onJoin,
+    required this.onJoin,
+    this.joinButtonText = 'View Class',
+    this.isLive = false,
   });
+
+  final String title;
+  final String instructor;
+  final String duration;
+  final VoidCallback onJoin;
+  final String joinButtonText;
+  final bool isLive;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +85,7 @@ class ClassCard extends StatelessWidget {
 
                   /// SUBTITLE
                   Text(
-                    subtitle,
+                    instructor,
                     style: const TextStyle(
                       color: Colors.blueGrey,
                       fontSize: 13,
