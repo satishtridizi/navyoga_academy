@@ -12,6 +12,7 @@ import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/onboarding_overlay.dart';
 import 'package:navyoga_academy/screens/payments.dart';
 import 'package:navyoga_academy/services/dashboard_service.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/services/notification_service.dart';
 import 'package:navyoga_academy/services/reminder_service.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
@@ -35,6 +36,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final DashboardService _dashboardService = DashboardService();
+  final AuthService _authService = AuthService();
   final MyClassesService _myClassesService = MyClassesService();
   final NotificationService _notificationService =
       NotificationService();
@@ -62,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? studentName;
 
-  String? _studentName = "Sandeep";
+  String? _studentName;
 
   @override
   void initState() {
@@ -92,7 +94,24 @@ class _HomeScreenState extends State<HomeScreen> {
     await Future.wait([
       loadStudentDashboard(),
       loadUnreadCount(),
+      _loadStudentName(),
     ]);
+  }
+
+  Future<void> _loadStudentName() async {
+    try {
+      final token = await AuthManager.getToken();
+      if (token == null || token.trim().isEmpty) return;
+
+      final response = await _authService.getProfile(token);
+      final data = response is Map ? response['data'] : null;
+      final name = data is Map ? data['name']?.toString().trim() : null;
+
+      if (!mounted || name == null || name.isEmpty) return;
+      setState(() => _studentName = name);
+    } catch (error) {
+      debugPrint('Failed to load student name: $error');
+    }
   }
 
   void _startBannerAutoScroll() {

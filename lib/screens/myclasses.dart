@@ -4,6 +4,7 @@ import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/mylive_class_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/myclass_service.dart';
+import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/utils/live_class_navigator.dart';
@@ -19,6 +20,7 @@ class MyClassesScreen extends StatefulWidget {
 
 class _MyClassesScreenState extends State<MyClassesScreen> {
   final MyClassesService _myClassesService = MyClassesService();
+  final AuthService _authService = AuthService();
   final TextEditingController _searchController = TextEditingController();
 
   List<MyLiveClassModel> _classes = [];
@@ -34,7 +36,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   String _selectedStatus = 'All Classes';
   String _selectedDifficulty = 'All Levels';
   
-  String? _studentName = 'Sandeep';
+  String? _studentName;
 
   @override
   void initState() {
@@ -77,6 +79,8 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
         );
         return;
       }
+
+      await _loadStudentName(token);
 
 final result =
     await _myClassesService.getMyClasses(
@@ -129,6 +133,19 @@ final result =
         _isLoading = false;
         _isRefreshing = false;
       });
+    }
+  }
+
+  Future<void> _loadStudentName(String token) async {
+    try {
+      final response = await _authService.getProfile(token);
+      final data = response is Map ? response['data'] : null;
+      final name = data is Map ? data['name']?.toString().trim() : null;
+
+      if (!mounted || name == null || name.isEmpty) return;
+      setState(() => _studentName = name);
+    } catch (error) {
+      debugPrint('Failed to load student name: $error');
     }
   }
 
