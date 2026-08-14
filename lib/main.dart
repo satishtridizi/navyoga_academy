@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:media_kit/media_kit.dart';
 
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/services/reminder_service.dart';
@@ -8,6 +9,7 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

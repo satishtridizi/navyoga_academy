@@ -44,6 +44,7 @@ class LiveClassController extends ChangeNotifier {
   final List<LiveClassMessage> messages = [];
   SfuParticipant? self;
   String? errorMessage;
+  bool endedByTrainer = false;
 
   bool isMicOn = true;
   bool isCameraOn = true;
@@ -291,6 +292,7 @@ class LiveClassController extends ChangeNotifier {
     _subscriptions.add(
       socketService.classEndedStream.listen((_) async {
         debugPrint('classEnded event received');
+        endedByTrainer = true;
         _setState(LiveClassViewState.ended);
         await _teardownMediasoup();
       }),

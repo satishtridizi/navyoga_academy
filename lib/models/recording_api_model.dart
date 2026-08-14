@@ -6,6 +6,7 @@ class RecordingApiModel {
   final String yogaType;
   final String level;
   final String videoUrl;
+  final int durationMinutes;
 
   const RecordingApiModel({
     required this.id,
@@ -15,6 +16,7 @@ class RecordingApiModel {
     required this.yogaType,
     required this.level,
     required this.videoUrl,
+    this.durationMinutes = 0,
   });
 
   factory RecordingApiModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class RecordingApiModel {
           json['recordingUrl']?.toString() ??
           json['url']?.toString() ??
           '',
+      durationMinutes: _asInt(json['durationMinutes'] ?? json['duration']),
     );
   }
 
@@ -48,6 +51,7 @@ class RecordingApiModel {
       'yogaType': yogaType,
       'level': level,
       'videoUrl': videoUrl,
+      'durationMinutes': durationMinutes,
     };
   }
 
@@ -59,6 +63,7 @@ class RecordingApiModel {
     String? yogaType,
     String? level,
     String? videoUrl,
+    int? durationMinutes,
   }) {
     return RecordingApiModel(
       id: id ?? this.id,
@@ -68,6 +73,13 @@ class RecordingApiModel {
       yogaType: yogaType ?? this.yogaType,
       level: level ?? this.level,
       videoUrl: videoUrl ?? this.videoUrl,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
     );
   }
+}
+
+int _asInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
 }

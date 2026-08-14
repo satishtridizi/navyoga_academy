@@ -64,7 +64,7 @@ class StatCard extends StatelessWidget {
                     child: Text(
                       data.value,
                       style: const TextStyle(
-                        fontSize: 34,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

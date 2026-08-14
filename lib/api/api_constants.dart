@@ -2,6 +2,12 @@ class ApiConstants {
   static const String baseUrl =
       "https://dist.navyogawellness.com";
 
+  static const String liveApiBaseUrl =
+      'https://d20fx2gucmvzba.cloudfront.net';
+
+  static const String liveRecordingBaseUrl =
+      'https://navyoga.s3.ap-south-1.amazonaws.com/assets';
+
   // ─────────────────────────────────────────────
   // Dashboard
   // ─────────────────────────────────────────────
@@ -48,10 +54,29 @@ class ApiConstants {
       '/api/live/my-enrollment';
 
   static String get myClassesUrl =>
-      '$baseUrl$myClasses';
+      '$liveApiBaseUrl$myClasses';
 
   static String get myEnrollmentUrl =>
-      '$baseUrl$myEnrollment';
+      '$liveApiBaseUrl$myEnrollment';
+
+  static String buildLiveMediaUrl(String path) {
+    final value = path.trim();
+    if (value.isEmpty) return '';
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+
+    // The live API returns paths such as `/live/<class-id>/recording.mp4`,
+    // while the actual recordings are stored below the S3 `/assets` prefix.
+    final normalizedPath = value.startsWith('/') ? value : '/$value';
+    if (normalizedPath.startsWith('/assets/')) {
+      return 'https://navyoga.s3.ap-south-1.amazonaws.com$normalizedPath';
+    }
+    return '$liveRecordingBaseUrl$normalizedPath';
+  }
+
+  static const String studentClassAttendanceUrl =
+      '$baseUrl/api/attendance/students/me/classes';
 
   // ─────────────────────────────────────────────
   // Self-Paced

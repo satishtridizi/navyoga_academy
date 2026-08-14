@@ -36,6 +36,7 @@ class SfuSocketService {
   io.Socket? _socket;
 
   bool _disposed = false;
+  bool _classEndEmitted = false;
 
   final StreamController<SfuConnectionStatus>
       _connectionController =
@@ -380,14 +381,24 @@ class SfuSocketService {
 
     final classEndedHandler = (dynamic data) {
       debugPrint('SFU event ← classEnded: $data');
-      _classEndedController.add(null);
+      if (!_classEndEmitted && !_classEndedController.isClosed) {
+        _classEndEmitted = true;
+        _classEndedController.add(null);
+      }
     };
 
     socket.on('sfu:class-ended', classEndedHandler);
+    socket.on('sfu:class-end', classEndedHandler);
+    socket.on('sfu:end-class', classEndedHandler);
+    socket.on('classEnded', classEndedHandler);
     socket.on('class-ended', classEndedHandler);
     socket.on('sfu:room-ended', classEndedHandler);
+    socket.on('sfu:room-closed', classEndedHandler);
     socket.on('room-ended', classEndedHandler);
+    socket.on('room-closed', classEndedHandler);
     socket.on('sfu:host-left', classEndedHandler);
+    socket.on('host-left', classEndedHandler);
+    socket.on('trainer-left', classEndedHandler);
 
     void chatMessageHandler(dynamic data) {
       final payload = _unwrapEventData(data);
@@ -405,6 +416,18 @@ class SfuSocketService {
       if (eventName.contains('chat') || eventName.contains('message')) {
         debugPrint('SFU chat event name: $event');
         chatMessageHandler(data);
+      }
+
+      final isClassEndEvent =
+          eventName.contains('class-end') ||
+          eventName.contains('end-class') ||
+          eventName.contains('room-end') ||
+          eventName.contains('room-close') ||
+          eventName.contains('host-left') ||
+          eventName.contains('trainer-left');
+      if (isClassEndEvent) {
+        debugPrint('SFU class-end event name: $event');
+        classEndedHandler(data);
       }
     });
   }

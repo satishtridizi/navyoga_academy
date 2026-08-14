@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:navyoga_academy/features/live_class/controller/live_class_controller.dart';
 import 'package:navyoga_academy/features/live_class/models/sfu_participant.dart';
@@ -31,6 +32,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
 
   bool _showParticipantsSheet = false;
   bool _showChatSheet = false;
+  bool _trainerEndHandled = false;
   final TextEditingController _chatController = TextEditingController();
   final ScrollController _chatScrollController = ScrollController();
 
@@ -69,9 +71,26 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   }
 
   void _onControllerStateChanged() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) return;
+
+    final controller = _controller;
+    if (controller?.state == LiveClassViewState.ended &&
+        controller?.endedByTrainer == true &&
+        !_trainerEndHandled) {
+      _trainerEndHandled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('The trainer has ended the live class.'),
+          ),
+        );
+        Navigator.of(context).maybePop();
+      });
+      return;
     }
+
+    setState(() {});
   }
 
   void _startSessionTimer() {
@@ -84,6 +103,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
 
   @override
   void dispose() {
+    unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
     _sessionTimer?.cancel();
     _sessionSecondsNotifier.dispose();
     _controller?.removeListener(_onControllerStateChanged);
@@ -816,9 +836,10 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
           end: Alignment.topCenter,
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
           /// MIC ON/OFF TOGGLE
           _buildControlButton(
             icon: controller.isMicOn ? Icons.mic : Icons.mic_off,
@@ -846,6 +867,15 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
             isActive: true,
             activeColor: Colors.white,
             onTap: () => controller.switchCamera(),
+          ),
+
+          /// SCREEN ORIENTATION TOGGLE
+          _buildControlButton(
+            icon: Icons.screen_rotation,
+            label: 'Rotate',
+            isActive: true,
+            activeColor: Colors.white,
+            onTap: _rotateScreen,
           ),
 
           /// SPEAKER / EARPIECE TOGGLE
@@ -878,8 +908,26 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
             activeColor: Colors.redAccent,
             onTap: () => _confirmLeave(controller),
           ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Future<void> _rotateScreen() async {
+    final isPortrait =
+        MediaQuery.orientationOf(context) == Orientation.portrait;
+
+    await SystemChrome.setPreferredOrientations(
+      isPortrait
+          ? const [
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]
+          : const [
+              DeviceOrientation.portraitUp,
+              DeviceOrientation.portraitDown,
+            ],
     );
   }
 
@@ -898,9 +946,11 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
 
     final iconColor = isEnd ? Colors.white : (isActive ? activeColor : inactiveColor);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
         GestureDetector(
           onTap: onTap,
           child: AnimatedContainer(
@@ -937,7 +987,8 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
             fontSize: 11,
           ),
         ),
-      ],
+        ],
+      ),
     );
   }
 

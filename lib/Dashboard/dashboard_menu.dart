@@ -191,7 +191,7 @@ class CustomDrawer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
-                "Student Portal",
+                "Sadhaka Portal",
                 style: TextStyle(fontSize: 12),
               ),
             ),
