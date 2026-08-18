@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -52,52 +51,71 @@ class ProfileService {
     required String token,
     required File imageFile,
   }) async {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse(
-        '${ApiConstants.baseUrl}/api/auth/student/profile-image',
-      ),
+    final filename = imageFile.uri.pathSegments.last;
+    final extension = filename.split('.').last.toLowerCase();
+    final contentType = switch (extension) {
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      _ => 'image/jpeg',
+    };
+
+    final presignResponse = await _api.postRequest(
+      url: '${ApiConstants.baseUrl}/api/auth/student/me/avatar-presign',
+      token: token,
+      body: {
+        'filename': filename,
+        'contentType': contentType,
+      },
     );
 
-    request.headers.addAll({
-      'Authorization': 'Bearer $token',
-      'Accept': 'application/json',
-    });
-
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'image',
-        imageFile.path,
-      ),
-    );
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    Map<String, dynamic> decoded;
-
-    try {
-      final raw = jsonDecode(response.body);
-      decoded = raw is Map
-          ? Map<String, dynamic>.from(raw)
-          : <String, dynamic>{
-              'success': false,
-              'message': 'Invalid server response.',
-            };
-    } catch (_) {
-      decoded = <String, dynamic>{
+    if (presignResponse is! Map || presignResponse['success'] != true) {
+      return <String, dynamic>{
         'success': false,
-        'message': 'Unable to read the server response.',
+        'message': presignResponse is Map
+            ? presignResponse['message']?.toString() ??
+                'Unable to prepare the profile image upload.'
+            : 'Unable to prepare the profile image upload.',
       };
     }
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      decoded['success'] = false;
-      decoded['message'] ??=
-          'Profile image upload failed (${response.statusCode}).';
+    final rawData = presignResponse['data'];
+    final data = rawData is Map ? rawData : presignResponse;
+    final uploadUrl = data['url']?.toString();
+    final storePath = data['storePath']?.toString();
+
+    if (uploadUrl == null || storePath == null) {
+      return {
+        'success': false,
+        'message': 'The server returned incomplete upload information.',
+      };
     }
 
-    return decoded;
+    final uploadResponse = await http.put(
+      Uri.parse(uploadUrl),
+      headers: {'Content-Type': contentType},
+      body: await imageFile.readAsBytes(),
+    );
+
+    if (uploadResponse.statusCode < 200 || uploadResponse.statusCode >= 300) {
+      return {
+        'success': false,
+        'message': 'Profile image upload failed (${uploadResponse.statusCode}).',
+      };
+    }
+
+    final updateResponse = await _api.patchRequest(
+      url: '${ApiConstants.baseUrl}/api/auth/student/me',
+      token: token,
+      body: {'avatar': storePath},
+    );
+
+    if (updateResponse is Map) {
+      return Map<String, dynamic>.from(updateResponse);
+    }
+    return {
+      'success': false,
+      'message': 'Unable to save the new profile image.',
+    };
   }
 
   String? _clean(String? value) {

@@ -52,9 +52,6 @@ dependencies:
   flutter_facebook_auth: ^7.2.0
   razorpay_flutter: ^1.4.5
   video_player: ^2.12.0
-  media_kit: ^1.2.6
-  media_kit_video: ^2.0.1
-  media_kit_libs_video: ^1.0.7
   pdf: ^3.12.0
   printing: ^5.14.3
   path_provider: ^2.1.5
@@ -106,6 +103,8 @@ flutter:
   - assets/logo/logo_transparent_clean.png
   - assets/images/woman-practicing-cobra-asana-yoga-600nw-1605427378.webp
   - assets/images/bg_pattern.png
+  - assets/images/navyoga_splash.jpeg
+  - assets/audio/om_chant.wav
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

@@ -85,11 +85,48 @@ Future<dynamic> studentLogin({
         "phone": phone,
         "email": email,
         "password": password,
-        "referralCode": referralCode,
+        if (referralCode != null && referralCode.trim().isNotEmpty)
+          "referredByCode": referralCode.trim(),
       },
     );
 
     return response;
+  }
+
+  Future<dynamic> sendPasswordResetOtp({required String phone}) {
+    return _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/otp/send",
+      body: {"phone": phone, "purpose": "PASSWORD_RESET"},
+    );
+  }
+
+  Future<dynamic> verifyPasswordResetOtp({
+    required String phone,
+    required String code,
+  }) {
+    return _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/otp/verify",
+      body: {
+        "phone": phone,
+        "purpose": "PASSWORD_RESET",
+        "code": code,
+      },
+    );
+  }
+
+  Future<dynamic> resetPassword({
+    required String phone,
+    required String accessToken,
+    required String newPassword,
+  }) {
+    return _api.postRequest(
+      url: "${ApiConstants.baseUrl}/api/auth/student/forgot-password",
+      body: {
+        "phone": phone,
+        "accessToken": accessToken,
+        "newPassword": newPassword,
+      },
+    );
   }
 
   Future<dynamic> changePassword({

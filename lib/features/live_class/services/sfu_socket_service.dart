@@ -388,6 +388,8 @@ class SfuSocketService {
     };
 
     socket.on('sfu:class-ended', classEndedHandler);
+    socket.on('sfu:meeting-ended', classEndedHandler);
+    socket.on('sfu:removed-from-meeting', classEndedHandler);
     socket.on('sfu:class-end', classEndedHandler);
     socket.on('sfu:end-class', classEndedHandler);
     socket.on('classEnded', classEndedHandler);
@@ -423,6 +425,8 @@ class SfuSocketService {
           eventName.contains('end-class') ||
           eventName.contains('room-end') ||
           eventName.contains('room-close') ||
+          eventName.contains('meeting-ended') ||
+          eventName.contains('removed-from-meeting') ||
           eventName.contains('host-left') ||
           eventName.contains('trainer-left');
       if (isClassEndEvent) {

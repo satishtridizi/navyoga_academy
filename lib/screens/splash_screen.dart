@@ -1,69 +1,82 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:navyoga_academy/utils/auth_manager.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/utils/auth_manager.dart';
+import 'package:video_player/video_player.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.isLoggedIn});
+
+  final bool? isLoggedIn;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  late final VideoPlayerController _audioController;
+  bool _visible = false;
+
   @override
   void initState() {
     super.initState();
-
-    checkLogin();
+    _audioController = VideoPlayerController.asset(
+      'assets/audio/om_chant.wav',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _visible = true);
+    });
+    unawaited(_runSplash());
   }
 
-  Future<void> checkLogin() async {
-    await Future.delayed(const Duration(seconds: 1));
-
-    final token = await AuthManager.getToken();
+  Future<void> _runSplash() async {
+    unawaited(_playChant());
+    await Future<void>.delayed(const Duration(milliseconds: 2800));
+    final loggedIn = widget.isLoggedIn ?? await _checkLogin();
 
     if (!mounted) return;
+    Navigator.pushReplacementNamed(
+      context,
+      loggedIn ? AppRoutes.dashboard : AppRoutes.login,
+    );
+  }
 
-    /// ✅ TOKEN EXISTS
-    if (token != null && token.isNotEmpty) {
-      Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+  Future<void> _playChant() async {
+    try {
+      await _audioController.initialize();
+      await _audioController.setVolume(0.55);
+      await _audioController.play();
+    } catch (error) {
+      debugPrint('Unable to play splash audio: $error');
     }
-    /// ❌ NOT LOGGED IN
-    else {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
-    }
+  }
+
+  Future<bool> _checkLogin() async {
+    final token = await AuthManager.getToken();
+    return token != null && token.trim().isNotEmpty;
+  }
+
+  @override
+  void dispose() {
+    unawaited(_audioController.dispose());
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-
-          children: [
-            Image.asset("assets/images/logo.png", height: 120, width: 120),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              "NavYoga Academy",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepOrange,
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            const CircularProgressIndicator(),
-          ],
+      body: AnimatedOpacity(
+        opacity: _visible ? 1 : 0,
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeOut,
+        child: SizedBox.expand(
+          child: Image.asset(
+            'assets/images/navyoga_splash.jpeg',
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+          ),
         ),
       ),
     );

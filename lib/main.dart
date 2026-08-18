@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:media_kit/media_kit.dart';
 
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/splash_screen.dart';
 import 'package:navyoga_academy/services/reminder_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -68,15 +67,11 @@ class MyApp extends StatelessWidget {
       // as /login, which constructs the dashboard (`/`) behind the login page.
       onGenerateInitialRoutes: (initialRoute) => [
         MaterialPageRoute<void>(
-          settings: RouteSettings(name: initialRoute),
-          builder: (context) => isLoggedIn
-              ? AppRoutes.routes[AppRoutes.dashboard]!(context)
-              : AppRoutes.routes[AppRoutes.login]!(context),
+          settings: const RouteSettings(name: AppRoutes.splash),
+          builder: (context) => SplashScreen(isLoggedIn: isLoggedIn),
         ),
       ],
-      initialRoute: isLoggedIn
-          ? AppRoutes.dashboard
-          : AppRoutes.login,
+      initialRoute: AppRoutes.splash,
 
       routes: AppRoutes.routes,
     );

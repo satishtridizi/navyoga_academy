@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/Sign_up.dart';
@@ -11,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:navyoga_academy/utils/app_snackbar.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/services/google_auth_service.dart';
+import 'package:navyoga_academy/screens/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -55,20 +55,11 @@ class _LoginScreen extends State<LoginScreen> {
   }
 
   Future<void> _handleForgotPassword() async {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      _showSnack("Enter your email first");
-      return;
-    }
-
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-
-      _showSnack("Password reset email sent");
-    } catch (e) {
-      _showSnack("Error: $e");
-    }
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const ForgotPasswordDialog(),
+    );
   }
 
   Future<void> _handleGoogleLogin() async {

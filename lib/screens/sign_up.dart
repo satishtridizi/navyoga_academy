@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
+import 'package:navyoga_academy/screens/forgot_password_dialog.dart';
 import 'package:navyoga_academy/services/auth_service.dart';
 import 'package:navyoga_academy/utils/api_helper.dart';
 import 'package:navyoga_academy/widgets/animatedItem.dart';
@@ -21,6 +22,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   bool rememberMe = false;
   bool _obscurePassword = true;
+  bool _isSubmitting = false;
 
   final nameController = TextEditingController();
   final phoneController = TextEditingController();
@@ -28,34 +30,11 @@ class _SignupScreenState extends State<SignupScreen> {
   final passwordController = TextEditingController();
   final referralCodeController = TextEditingController();
   Future<void> _handleForgotPassword() async {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      AppSnackbar.showWarning(context, "Enter your email first");
-      return;
-    }
-
-    if (!_isValidEmail(email)) {
-      AppSnackbar.showWarning(context, "Enter a valid email");
-      return;
-    }
-
-    showDialog(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const ForgotPasswordDialog(),
     );
-
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-
-      Navigator.pop(context);
-
-      AppSnackbar.showSuccess(context, "Password reset link sent to $email");
-    } catch (e) {
-      Navigator.pop(context);
-      AppSnackbar.showError(context, "Something went wrong. Try again.");
-    }
   }
 
   @override
@@ -132,8 +111,68 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  bool _isValidEmail(String email) {
-    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+  Future<void> _createAccount() async {
+    if (_isSubmitting || !_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+
+    try {
+      final response = await AuthService().studentRegister(
+        name: nameController.text.trim(),
+        phone: phoneController.text.replaceAll(RegExp(r'\D'), ''),
+        email: emailController.text.trim(),
+        password: passwordController.text,
+        referralCode: referralCodeController.text.trim(),
+      );
+
+      if (!mounted) return;
+      if (!ApiHelper.isSuccess(response)) {
+        AppSnackbar.showError(
+          context,
+          response['message']?.toString() ?? 'Unable to create account.',
+        );
+        return;
+      }
+
+      final rawData = response['data'];
+      String? token;
+      if (rawData is Map) {
+        token = rawData['token']?.toString() ??
+            rawData['accessToken']?.toString();
+      }
+      token ??= response['token']?.toString() ??
+          response['accessToken']?.toString();
+
+      if (token == null || token.trim().isEmpty) {
+        AppSnackbar.showSuccess(
+          context,
+          'Account created. Please log in to continue.',
+        );
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.login,
+          (_) => false,
+        );
+        return;
+      }
+
+      await AuthManager.saveToken(token);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('show_onboarding', true);
+
+      if (!mounted) return;
+      AppSnackbar.showSuccess(context, 'Account created successfully');
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.dashboard,
+        (_) => false,
+      );
+    } catch (error) {
+      if (mounted) {
+        AppSnackbar.showError(context, 'Unable to create account: $error');
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -492,66 +531,8 @@ class _SignupScreenState extends State<SignupScreen> {
                                 AnimatedItem(
                                   index: 3,
                                   child: ElevatedButton(
-                                    onPressed: () async {
-                                      /// ✅ Validate form
-                                      if (!_formKey.currentState!.validate()) {
-                                        return;
-                                      }
-
-                                      /// ✅ Success
-                                      final response = await AuthService()
-                                          .studentRegister(
-                                            name: nameController.text.trim(),
-                                            phone: phoneController.text.trim(),
-                                            email: emailController.text.trim(),
-                                            password: passwordController.text
-                                                .trim(),
-                                            referralCode: referralCodeController
-                                                .text
-                                                .trim(),
-                                          );
-
-                                      if (ApiHelper.isSuccess(response)) {
-                                        AppSnackbar.showSuccess(
-                                          context,
-                                          "Account created successfully",
-                                        );
-
-                                        Future.delayed(
-                                          const Duration(milliseconds: 500),
-                                          () async {
-                                            // Save login token
-                                            await AuthManager.saveToken(
-                                              response["data"]["token"],
-                                            );
-
-                                            // Save onboarding flag
-                                            final prefs =
-                                                await SharedPreferences.getInstance();
-                                            await prefs.setBool(
-                                              "show_onboarding",
-                                              true,
-                                            );
-
-                                            print(
-                                              "show_onboarding = ${prefs.getBool("show_onboarding")}",
-                                            );
-
-                                            Navigator.pushNamedAndRemoveUntil(
-                                              context,
-                                              AppRoutes.dashboard,
-                                              (route) => false,
-                                            );
-                                          },
-                                        );
-                                      } else {
-                                        AppSnackbar.showError(
-                                          context,
-                                          response["message"] ??
-                                              "Signup failed",
-                                        );
-                                      }
-                                    },
+                                    onPressed:
+                                        _isSubmitting ? null : _createAccount,
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
@@ -562,14 +543,23 @@ class _SignupScreenState extends State<SignupScreen> {
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
-                                    child: const Text(
-                                      "Create Account",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                                    child: _isSubmitting
+                                        ? const SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Text(
+                                            "Create Account",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               ],

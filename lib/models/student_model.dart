@@ -45,8 +45,9 @@ class StudentModel {
     this.updatedAt,
   });
 
- static const String _baseUrl =
+ static const String _bucketUrl =
     'https://navyoga.s3.ap-south-1.amazonaws.com';
+ static const String _baseUrl = '$_bucketUrl/assets';
 
 factory StudentModel.fromJson(Map<String, dynamic> json) {
   return StudentModel(
@@ -94,6 +95,10 @@ static String? _buildImageUrl(dynamic value) {
 
   if (path.startsWith('http://') ||
       path.startsWith('https://')) {
+    if (path.startsWith('$_bucketUrl/') &&
+        !path.startsWith('$_baseUrl/')) {
+      return '$_baseUrl/${path.substring(_bucketUrl.length + 1)}';
+    }
     return path;
   }
 
