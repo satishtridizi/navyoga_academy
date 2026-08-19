@@ -58,7 +58,7 @@ class ApiService {
       print("POST ERROR = $e");
       print(stackTrace);
 
-      return {"success": false, "message": e.toString()};
+      return {"success": false, "message": _friendlyRequestError(e)};
     }
   }
 
@@ -111,7 +111,7 @@ class ApiService {
     }
     // NETWORK / TIMEOUT / OTHER ERRORS
     on Exception catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {"success": false, "message": _friendlyRequestError(e)};
     }
   }
 
@@ -154,7 +154,7 @@ class ApiService {
     }
     /// NETWORK ERROR
     on Exception catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {"success": false, "message": _friendlyRequestError(e)};
     }
   }
 
@@ -217,7 +217,7 @@ class ApiService {
         "message": data["message"] ?? "Something went wrong",
       };
     } on Exception catch (e) {
-      return {"success": false, "message": e.toString()};
+      return {"success": false, "message": _friendlyRequestError(e)};
     }
   }
 
@@ -231,5 +231,19 @@ class ApiService {
     );
 
     return jsonDecode(response.body);
+  }
+
+  String _friendlyRequestError(Object error) {
+    final value = error.toString().toLowerCase();
+    if (value.contains('timeout')) {
+      return 'The request took too long. Please try again.';
+    }
+    if (value.contains('socket') ||
+        value.contains('network') ||
+        value.contains('connection') ||
+        value.contains('host lookup')) {
+      return 'Please check your internet connection and try again.';
+    }
+    return 'We could not complete your request. Please try again.';
   }
 }

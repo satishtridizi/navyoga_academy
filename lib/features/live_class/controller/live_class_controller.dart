@@ -92,6 +92,9 @@ class LiveClassController extends ChangeNotifier {
   bool _joining = false;
   bool _mediaSetupInProgress = false;
   bool _reconnectInProgress = false;
+  bool _mediaSuspended = false;
+  bool _restoreMicAfterInterruption = false;
+  bool _restoreCameraAfterInterruption = false;
 
   // Socket subscriptions
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -124,7 +127,7 @@ class LiveClassController extends ChangeNotifier {
     } catch (error, stackTrace) {
       debugPrint('Live class initialization error: $error');
       debugPrintStack(stackTrace: stackTrace);
-      _fail(error.toString());
+      _fail(_friendlyLiveClassError(error));
     }
   }
 
@@ -232,7 +235,7 @@ class LiveClassController extends ChangeNotifier {
 
     _subscriptions.add(
       socketService.errorStream.listen((message) {
-        errorMessage = message;
+        errorMessage = _friendlyLiveClassError(message);
         _notify();
       }),
     );
@@ -312,7 +315,7 @@ class LiveClassController extends ChangeNotifier {
       );
       await _handleJoinResponse(response);
     } catch (error) {
-      _fail(error.toString());
+      _fail(_friendlyLiveClassError(error));
     } finally {
       _joining = false;
     }
@@ -345,7 +348,9 @@ class LiveClassController extends ChangeNotifier {
     } catch (error, stackTrace) {
       debugPrint('Live-class reconnect failed: $error');
       debugPrintStack(stackTrace: stackTrace);
-      if (!_disposed) _fail('Unable to restore the live class: $error');
+      if (!_disposed) {
+        _fail('The connection was interrupted. Rejoin the class to continue.');
+      }
     } finally {
       _reconnectInProgress = false;
     }
@@ -359,8 +364,20 @@ class LiveClassController extends ChangeNotifier {
     }
 
     if (response.isJoined) {
-      self = response.self;
-      participants = _withSelf(response.participants);
+      // The mobile client is always a student. Some rooms previously promoted
+      // the first peer to host when no tutor was connected yet.
+      self = response.self?.copyWith(role: 'student');
+      participants = _withSelf(
+        response.participants.map((participant) {
+          final isCurrentUser = self != null &&
+              (participant.userId == self!.userId ||
+                  (self!.socketId.isNotEmpty &&
+                      participant.socketId == self!.socketId));
+          return isCurrentUser
+              ? participant.copyWith(role: 'student')
+              : participant;
+        }).toList(),
+      );
 
       final caps = response.routerRtpCapabilities;
       if (caps == null || caps.isEmpty) {
@@ -437,16 +454,23 @@ class LiveClassController extends ChangeNotifier {
   List<SfuParticipant> _withSelf(List<SfuParticipant> roomParticipants) {
     final currentSelf = self;
     if (currentSelf == null) return roomParticipants;
-    final containsSelf = roomParticipants.any(
-      (participant) =>
+    var containsSelf = false;
+    final normalizedParticipants = roomParticipants.map((participant) {
+      final isCurrentUser =
           (currentSelf.userId.isNotEmpty &&
               participant.userId == currentSelf.userId) ||
           (currentSelf.socketId.isNotEmpty &&
-              participant.socketId == currentSelf.socketId),
-    );
+              participant.socketId == currentSelf.socketId);
+      if (!isCurrentUser) return participant;
+      containsSelf = true;
+      return participant.copyWith(role: 'student');
+    }).toList();
     return containsSelf
-        ? roomParticipants
-        : <SfuParticipant>[...roomParticipants, currentSelf];
+        ? normalizedParticipants
+        : <SfuParticipant>[
+            ...normalizedParticipants,
+            currentSelf.copyWith(role: 'student'),
+          ];
   }
 
   // ─── Send transport ───────────────────────────────────────────────────────
@@ -987,6 +1011,51 @@ class LiveClassController extends ChangeNotifier {
     _notify();
   }
 
+  Future<void> suspendMediaForInterruption() async {
+    if (_mediaSuspended) return;
+    _mediaSuspended = true;
+    _restoreMicAfterInterruption = isMicOn;
+    _restoreCameraAfterInterruption = isCameraOn;
+
+    if (_localAudioTrack != null) _localAudioTrack!.enabled = false;
+    if (_localVideoTrack != null) _localVideoTrack!.enabled = false;
+    isMicOn = false;
+    isCameraOn = false;
+    _notify();
+
+    if (socketService.isConnected) {
+      try {
+        await Future.wait([
+          socketService.toggleMute(isMuted: true),
+          socketService.toggleVideo(isVideoOff: true),
+        ]);
+      } catch (error) {
+        debugPrint('Unable to publish interrupted media state: $error');
+      }
+    }
+  }
+
+  Future<void> resumeMediaAfterInterruption() async {
+    if (!_mediaSuspended) return;
+    _mediaSuspended = false;
+    isMicOn = _restoreMicAfterInterruption && _localAudioTrack != null;
+    isCameraOn = _restoreCameraAfterInterruption && _localVideoTrack != null;
+    if (_localAudioTrack != null) _localAudioTrack!.enabled = isMicOn;
+    if (_localVideoTrack != null) _localVideoTrack!.enabled = isCameraOn;
+    _notify();
+
+    if (socketService.isConnected) {
+      try {
+        await Future.wait([
+          socketService.toggleMute(isMuted: !isMicOn),
+          socketService.toggleVideo(isVideoOff: !isCameraOn),
+        ]);
+      } catch (error) {
+        debugPrint('Unable to restore media after interruption: $error');
+      }
+    }
+  }
+
   void toggleFitMode() {
     isFitMode = !isFitMode;
     _notify();
@@ -1096,6 +1165,25 @@ class LiveClassController extends ChangeNotifier {
   }
 
   // ─── State helpers ───────────────────────────────────────────────────────
+
+  String _friendlyLiveClassError(Object error) {
+    final value = error.toString().toLowerCase();
+    if (value.contains('permission') || value.contains('notallowed')) {
+      return 'Camera and microphone access is required to join the class.';
+    }
+    if (value.contains('timeout')) {
+      return 'The live class is taking too long to connect. Please try again.';
+    }
+    if (value.contains('token') || value.contains('unauthorized')) {
+      return 'Your session has expired. Please sign in again.';
+    }
+    if (value.contains('socket') ||
+        value.contains('connection') ||
+        value.contains('network')) {
+      return 'The live-class connection was interrupted. Please check your internet and retry.';
+    }
+    return 'Unable to join the live class right now. Please try again.';
+  }
 
   void _fail(String message) {
     errorMessage =

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
@@ -37,15 +39,25 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   String _selectedDifficulty = 'All Levels';
   
   String? _studentName;
+  Timer? _joinWindowTimer;
 
   @override
   void initState() {
     super.initState();
     _loadMyClasses();
+    _joinWindowTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) {
+        if (mounted && _classes.any((item) => item.isUpcoming)) {
+          setState(() {});
+        }
+      },
+    );
   }
 
   @override
   void dispose() {
+    _joinWindowTimer?.cancel();
     _searchController.dispose();
     _myClassesService.dispose();
     super.dispose();
@@ -925,6 +937,7 @@ class _MyLiveClassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final stateColor = _stateColor(classItem.state);
     final schedule = classItem.scheduledAt;
+    final joinLabel = _joinButtonLabel(classItem);
 
     final dateText = schedule == null
         ? 'Schedule unavailable'
@@ -1053,17 +1066,15 @@ class _MyLiveClassCard extends StatelessWidget {
                 ),
               ],
 
-              if (classItem.canJoin || classItem.isLive) ...[
+              if (!classItem.isPast) ...[
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: onTap,
+                    onPressed: classItem.canJoin ? onTap : null,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(
-                      classItem.isLive
-                          ? 'View Live Class'
-                          : 'Join Class (Waiting Room)',
+                      joinLabel,
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: classItem.isLive ? Colors.green : Colors.deepPurple,
@@ -1079,6 +1090,25 @@ class _MyLiveClassCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String _joinButtonLabel(MyLiveClassModel classItem) {
+    if (classItem.isLive) return 'Join Live Class';
+    if (classItem.canJoin) return 'Join Class (Waiting Room)';
+    final scheduledAt = classItem.scheduledAt;
+    if (scheduledAt == null) return 'Schedule unavailable';
+    final remaining = scheduledAt
+        .subtract(const Duration(minutes: 15))
+        .difference(DateTime.now());
+    if (remaining.inMinutes >= 60) {
+      final hours = remaining.inHours;
+      final minutes = remaining.inMinutes.remainder(60);
+      return 'Join opens in ${hours}h ${minutes}m';
+    }
+    if (remaining.inMinutes >= 1) {
+      return 'Join opens in ${remaining.inMinutes + 1} min';
+    }
+    return 'Join opens shortly';
   }
 
   static Color _stateColor(LiveClassState state) {

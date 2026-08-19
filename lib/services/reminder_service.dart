@@ -312,6 +312,11 @@ class ReminderService {
     } catch (_) {}
   }
 
+  Future<void> clearNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_localNotifStorageKey);
+  }
+
   int _generateNotifId(String input) {
     return input.hashCode & 0x7FFFFFFF;
   }

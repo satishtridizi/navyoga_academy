@@ -156,8 +156,8 @@ class SfuSocketService {
           .disableAutoConnect()
           .enableReconnection()
           .setReconnectionAttempts(10)
-          .setReconnectionDelay(1000)
-          .setReconnectionDelayMax(5000)
+          .setReconnectionDelay(300)
+          .setReconnectionDelayMax(2000)
           .setTimeout(20000)
           .build(),
     );

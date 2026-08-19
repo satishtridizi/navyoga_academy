@@ -896,6 +896,29 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               fontSize: 12,
             ),
           ),
+          if (plan.recordingDays > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(
+                  Icons.video_library_outlined,
+                  size: 17,
+                  color: Color(0xff7B0AA5),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    plan.recordingDaysLabel,
+                    style: const TextStyle(
+                      color: Color(0xff4E465B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           if (plan.description.isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(

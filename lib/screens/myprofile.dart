@@ -543,6 +543,12 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
   }
 
   Widget _buildProfileHeader() {
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'Good morning'
+        : hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -566,6 +572,16 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
       ),
       child: Column(
         children: [
+          Text(
+            '$greeting, ${displayName.split(' ').first}!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.92),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
           GestureDetector(
             onTap: isUploadingImage ? null : pickImage,
             child: Stack(

@@ -60,6 +60,16 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontSize: 17, height: 1.45, color: Color(0xFF27222C)),
+          bodyMedium: TextStyle(fontSize: 15, height: 1.4, color: Color(0xFF27222C)),
+          bodySmall: TextStyle(fontSize: 13, height: 1.35, color: Color(0xFF4F4855)),
+          titleLarge: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF211D25)),
+          titleMedium: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: Color(0xFF211D25)),
+        ),
+      ),
 
       scrollBehavior: const NoGlowScrollBehavior(),
       onGenerateRoute: AppRoutes.onGenerateRoute,

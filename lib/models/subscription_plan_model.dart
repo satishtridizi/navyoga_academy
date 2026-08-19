@@ -17,6 +17,7 @@ class SubscriptionPlanModel {
   final String name;
   final String description;
   final int validity;
+  final int recordingDays;
   final double price;
   final double? originalPrice;
   final List<String> features;
@@ -29,6 +30,7 @@ class SubscriptionPlanModel {
     required this.name,
     required this.description,
     required this.validity,
+    required this.recordingDays,
     required this.price,
     required this.features,
     required this.isActive,
@@ -51,6 +53,12 @@ class SubscriptionPlanModel {
       name: json['name']?.toString() ?? 'Plan',
       description: json['description']?.toString() ?? '',
       validity: _toInt(json['validity']),
+      recordingDays: _toInt(
+        json['recordingDays'] ??
+            json['recording_days'] ??
+            json['recordingAccessDays'] ??
+            json['recording_access_days'],
+      ),
       price: _toDouble(json['price']),
       originalPrice: json['originalPrice'] == null
           ? null
@@ -77,6 +85,10 @@ class SubscriptionPlanModel {
 
     return 'for $validity days';
   }
+
+  String get recordingDaysLabel => recordingDays <= 0
+      ? ''
+      : '$recordingDays day${recordingDays == 1 ? '' : 's'} recording access';
 
   String get categoryKey {
     switch (category) {

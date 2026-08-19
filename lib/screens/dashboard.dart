@@ -48,6 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Timer? _bannerTimer;
   Timer? _classRefreshTimer;
+  Timer? _joinWindowTimer;
+  Timer? _notificationCountTimer;
 
   DashboardModel? dashboard;
 
@@ -76,6 +78,18 @@ class _HomeScreenState extends State<HomeScreen> {
       const Duration(minutes: 1),
       (_) => _checkForNewClasses(),
     );
+    _joinWindowTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) {
+        if (mounted && dashboard?.upcomingClasses.isNotEmpty == true) {
+          setState(() {});
+        }
+      },
+    );
+    _notificationCountTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => loadUnreadCount(),
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkOnboarding();
@@ -86,6 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _bannerTimer?.cancel();
     _classRefreshTimer?.cancel();
+    _joinWindowTimer?.cancel();
+    _notificationCountTimer?.cancel();
     _bannerController.dispose();
     super.dispose();
   }
@@ -283,16 +299,9 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
 
-      final response =
-          await _notificationService.getNotifications(
-        token,
-      );
+      final count = await _notificationService.getUnreadCount(token);
 
       if (!mounted) return;
-
-      final count = response.where((notification) {
-        return notification['isRead'] == false;
-      }).length;
 
       setState(() {
         unreadCount = count;

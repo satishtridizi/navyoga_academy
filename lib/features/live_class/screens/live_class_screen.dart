@@ -23,7 +23,10 @@ class LiveClassScreen extends StatefulWidget {
   }
 }
 
-class _LiveClassScreenState extends State<LiveClassScreen> {
+class _LiveClassScreenState extends State<LiveClassScreen>
+    with WidgetsBindingObserver {
+  static const MethodChannel _screenChannel =
+      MethodChannel('navyoga/screen_awake');
   final SfuSocketService _socketService = SfuSocketService();
   LiveClassController? _controller;
 
@@ -39,8 +42,35 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_setKeepScreenAwake(true));
     _startSessionTimer();
     _initController();
+  }
+
+  Future<void> _setKeepScreenAwake(bool enabled) async {
+    try {
+      await _screenChannel.invokeMethod<void>(
+        'setKeepScreenAwake',
+        <String, bool>{'enabled': enabled},
+      );
+    } catch (error) {
+      debugPrint('Unable to change keep-awake state: $error');
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _controller;
+    if (controller == null) return;
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      unawaited(controller.suspendMediaForInterruption());
+    } else if (state == AppLifecycleState.resumed) {
+      unawaited(controller.resumeMediaAfterInterruption());
+    }
   }
 
   Future<void> _initController() async {
@@ -103,6 +133,8 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(_setKeepScreenAwake(false));
     unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
     _sessionTimer?.cancel();
     _sessionSecondsNotifier.dispose();
@@ -163,10 +195,10 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                 ),
                 child: Text(
                   (controller?.state == LiveClassViewState.joined)
-                      ? 'SFU CONNECTED'
+                      ? 'LIVE'
                       : (controller?.state == LiveClassViewState.waiting
-                          ? 'ROOM WAITING'
-                          : 'CONNECTING...'),
+                          ? 'WAITING FOR TRAINER'
+                          : 'CONNECTING'),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -603,7 +635,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'HOST',
+                        'INSTRUCTOR',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -698,10 +730,10 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          controller.isFitMode ? 'Fit Full Body' : 'Fill Screen',
+                          controller.isFitMode ? 'Fill screen' : 'Fit video',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -1255,7 +1287,7 @@ class _LiveClassScreenState extends State<LiveClassScreen> {
                                 ],
                               ),
                               subtitle: Text(
-                                p.isHost ? 'Host' : 'Student',
+                                p.isHost ? 'Instructor' : 'Student',
                                 style: TextStyle(
                                   color: p.isHost ? Colors.purpleAccent : Colors.white38,
                                   fontSize: 12,
