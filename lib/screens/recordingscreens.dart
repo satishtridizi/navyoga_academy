@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -191,6 +192,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
             level: item.difficulty,
             videoUrl: item.videoUrl,
             durationMinutes: item.duration,
+            durationSeconds: item.durationSeconds,
           )),
         )),
         child: Padding(
@@ -211,7 +213,7 @@ class _RecordingsDashboardState extends State<RecordingsDashboard> {
                 Text(item.title, maxLines: 2, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 4),
-                Text('${item.yogaType} • ${item.duration} min',
+                Text('${item.yogaType} • Recording',
                     style: const TextStyle(color: Colors.deepOrange)),
                 const SizedBox(height: 4),
                 Text(item.scheduledAt == null

@@ -28,6 +28,7 @@ class BottomNavbar extends StatelessWidget {
     BuildContext context,
     int selectedIndex,
   ) {
+    
     if (selectedIndex < 0 || selectedIndex >= _routes.length) {
       return;
     }

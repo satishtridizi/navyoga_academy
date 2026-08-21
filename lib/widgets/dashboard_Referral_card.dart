@@ -1,121 +1,63 @@
 import 'package:flutter/material.dart';
 
 class ReferralCard extends StatelessWidget {
-  final String value, title, badge;
-  final Color color;
+  const ReferralCard(this.value, this.title, this.color, this.badge, {super.key});
 
-  const ReferralCard(
-    this.value,
-    this.title,
-    this.color,
-    this.badge, {
-    super.key,
-  });
+  final String value;
+  final String title;
+  final Color color;
+  final String badge;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        /// 🔥 BACKGROUND
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
-        ),
-
-        borderRadius: BorderRadius.circular(24),
-
-        /// 🎯 BORDER
-        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
-
-        /// 🎯 SHADOW
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.25),
-            blurRadius: 20,
-            spreadRadius: 1,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
       ),
-
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        alignment: Alignment.topLeft,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 🔥 TOP ROW (ICON + BADGE)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.22),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(_getIcon(title), color: Colors.white, size: 19),
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// ICON BOX
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [color.withOpacity(0.9), color],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(color: color.withOpacity(0.4), blurRadius: 10),
-                    ],
-                  ),
-                  child: Icon(_getIcon(title), color: Colors.white, size: 18),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800),
                 ),
-
-                /// BADGE
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    badge,
-                    style: TextStyle(
-                      color: color,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: Colors.white70, fontSize: 10),
                 ),
               ],
             ),
-
-            const SizedBox(height: 10),
-
-            /// VALUE
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff2f3542),
-              ),
-            ),
-
-            const SizedBox(height: 2),
-
-            /// TITLE
-            Text(
-              title,
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 12),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  /// 🎯 ICON MAPPING
-  IconData _getIcon(String title) {
-    if (title.contains("Referrals")) return Icons.group;
-    if (title.contains("Earned")) return Icons.currency_rupee;
-    if (title.contains("Badges")) return Icons.emoji_events;
-    return Icons.star;
+  IconData _getIcon(String label) {
+    if (label.contains('Referral')) return Icons.group_outlined;
+    if (label.contains('Badge')) return Icons.emoji_events_outlined;
+    if (label.contains('Balance')) return Icons.account_balance_wallet_outlined;
+    return Icons.currency_rupee_rounded;
   }
 }

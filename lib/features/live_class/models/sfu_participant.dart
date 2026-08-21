@@ -8,6 +8,7 @@ class SfuParticipant {
     required this.isVideoOff,
     required this.isScreenSharing,
     this.joinedAt,
+    this.producerIds = const <String>{},
   });
 
   final String userId;
@@ -20,6 +21,7 @@ class SfuParticipant {
   final bool isScreenSharing;
 
   final DateTime? joinedAt;
+  final Set<String> producerIds;
 
   bool get isHost {
     final r = role.toLowerCase();
@@ -35,6 +37,7 @@ class SfuParticipant {
     bool? isVideoOff,
     bool? isScreenSharing,
     DateTime? joinedAt,
+    Set<String>? producerIds,
   }) {
     return SfuParticipant(
       userId: userId ?? this.userId,
@@ -45,6 +48,7 @@ class SfuParticipant {
       isVideoOff: isVideoOff ?? this.isVideoOff,
       isScreenSharing: isScreenSharing ?? this.isScreenSharing,
       joinedAt: joinedAt ?? this.joinedAt,
+      producerIds: producerIds ?? this.producerIds,
     );
   }
 
@@ -54,18 +58,44 @@ class SfuParticipant {
     final user = json['user'] is Map
         ? Map<String, dynamic>.from(json['user'] as Map)
         : const <String, dynamic>{};
+    final producerIds = <String>{};
+    void addProducer(dynamic value) {
+      if (value is Map) {
+        addProducer(value['id'] ?? value['producerId'] ?? value['_id']);
+      } else if (value is Iterable) {
+        for (final item in value) {
+          addProducer(item);
+        }
+      } else {
+        final id = value?.toString().trim();
+        if (id != null && id.isNotEmpty) producerIds.add(id);
+      }
+    }
+
+    addProducer(json['producerIds']);
+    addProducer(json['producer_ids']);
+    addProducer(json['producers']);
+    addProducer(json['producerId']);
+    addProducer(json['audioProducerId']);
+    addProducer(json['videoProducerId']);
+    addProducer(json['audioProducer']);
+    addProducer(json['videoProducer']);
+
+    final explicitHost = _asBool(json['isHost'] ?? json['is_host']);
     return SfuParticipant(
       userId: (json['userId'] ?? json['user_id'] ?? json['_id'] ??
               user['id'] ?? user['_id'])
           ?.toString() ?? '',
       socketId: (json['socketId'] ?? json['socket_id'] ?? json['peerId'] ??
-              json['peer_id'])
+              json['peer_id'] ?? json['id'])
           ?.toString() ?? '',
       name: (json['name'] ?? json['studentName'] ?? json['displayName'] ??
               user['name'])
           ?.toString() ?? 'Participant',
-      role: (json['role'] ?? json['userRole'] ?? user['role'])?.toString() ??
-          'guest',
+      role: explicitHost
+          ? 'host'
+          : (json['role'] ?? json['userRole'] ?? user['role'])?.toString() ??
+              'guest',
       isMuted: _asBool(
         json['isMuted'] ?? json['is_muted'],
         fallback: true,
@@ -78,6 +108,7 @@ class SfuParticipant {
         json['isScreenSharing'] ?? json['is_screen_sharing'],
       ),
       joinedAt: _parseJoinedAt(json['joinedAt'] ?? json['joined_at']),
+      producerIds: producerIds,
     );
   }
 

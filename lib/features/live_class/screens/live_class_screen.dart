@@ -67,7 +67,13 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
-      unawaited(controller.suspendMediaForInterruption());
+      // Permission dialogs also trigger `inactive`. Do not suspend while the
+      // initial camera/microphone setup is still in progress.
+      if (controller.state == LiveClassViewState.joined ||
+          controller.state == LiveClassViewState.reconnecting) {
+        if (controller.isChangingLocalMedia) return;
+        unawaited(controller.suspendMediaForInterruption());
+      }
     } else if (state == AppLifecycleState.resumed) {
       unawaited(controller.resumeMediaAfterInterruption());
     }
@@ -256,6 +262,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
     switch (controller.state) {
       case LiveClassViewState.initial:
       case LiveClassViewState.connecting:
+      case LiveClassViewState.preparingMedia:
         return _buildConnectingView();
 
       case LiveClassViewState.waiting:
@@ -267,7 +274,6 @@ class _LiveClassScreenState extends State<LiveClassScreen>
       case LiveClassViewState.reconnecting:
         return _buildReconnectingView();
 
-      case LiveClassViewState.preparingMedia:
       case LiveClassViewState.joined:
         return _buildStageView(controller);
 
@@ -322,8 +328,8 @@ class _LiveClassScreenState extends State<LiveClassScreen>
                   const SizedBox(width: 8),
                   Text(
                     stateStr == 'preparingMedia'
-                        ? 'Setting up WebRTC audio & video streams...'
-                        : 'Establishing secure SFU socket connection...',
+                        ? 'Preparing your audio and video...'
+                        : 'Connecting securely to the class...',
                     style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
@@ -524,7 +530,16 @@ class _LiveClassScreenState extends State<LiveClassScreen>
           child: _buildLocalStudentTile(controller),
         ),
 
-        /// 3. BOTTOM CONTROL TOOLBAR
+        /// 3. REMOTE STUDENT VIDEO STRIP
+        if (_remoteStudents(controller).isNotEmpty)
+          Positioned(
+            left: 12,
+            right: 12,
+            bottom: 104,
+            child: _buildRemoteStudentStrip(controller),
+          ),
+
+        /// 4. BOTTOM CONTROL TOOLBAR
         Positioned(
           left: 0,
           right: 0,
@@ -532,7 +547,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
           child: _buildControlToolbar(controller),
         ),
 
-        /// 4. PARTICIPANTS SHEET OVERLAY
+        /// 5. PARTICIPANTS SHEET OVERLAY
         if (_showParticipantsSheet)
           Positioned.fill(
             child: _buildParticipantsSheet(controller),
@@ -548,6 +563,22 @@ class _LiveClassScreenState extends State<LiveClassScreen>
 
   Widget _buildHostStage(LiveClassController controller, SfuParticipant host) {
     final hostRenderer = controller.hostVideoRenderer;
+    final hostSpeaking = controller.isHostSpeaking && !host.isMuted;
+    final hostAudioLabel = host.isMuted
+        ? 'Muted'
+        : hostSpeaking
+            ? 'Speaking'
+            : 'Mic on';
+    final hostAudioColor = host.isMuted
+        ? Colors.redAccent
+        : hostSpeaking
+            ? Colors.greenAccent
+            : Colors.white70;
+    final hostAudioIcon = host.isMuted
+        ? Icons.mic_off
+        : hostSpeaking
+            ? Icons.graphic_eq
+            : Icons.mic;
     final showHostVideo = hostRenderer != null &&
         hostRenderer.srcObject != null &&
         !host.isVideoOff;
@@ -650,19 +681,16 @@ class _LiveClassScreenState extends State<LiveClassScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      host.isMuted ? Icons.mic_off : Icons.mic,
+                      hostAudioIcon,
                       size: 16,
-                      color:
-                          host.isMuted ? Colors.redAccent : Colors.greenAccent,
+                      color: hostAudioColor,
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      host.isMuted ? 'Muted' : 'Speaking',
+                      hostAudioLabel,
                       style: TextStyle(
                         fontSize: 13,
-                        color: host.isMuted
-                            ? Colors.redAccent
-                            : Colors.greenAccent,
+                        color: hostAudioColor,
                       ),
                     ),
                   ],
@@ -687,10 +715,9 @@ class _LiveClassScreenState extends State<LiveClassScreen>
                   child: Row(
                     children: [
                       Icon(
-                        host.isMuted ? Icons.mic_off : Icons.mic,
+                        hostAudioIcon,
                         size: 16,
-                        color:
-                            host.isMuted ? Colors.redAccent : Colors.greenAccent,
+                        color: hostAudioColor,
                       ),
                       const SizedBox(width: 8),
                       Text(
@@ -750,11 +777,10 @@ class _LiveClassScreenState extends State<LiveClassScreen>
   }
 
   Widget _buildLocalStudentTile(LiveClassController controller) {
-    final isCameraOn = controller.isCameraOn;
+    final isCameraOn = controller.hasLocalVideoPreview;
     final isMicOn = controller.isMicOn;
     final studentName = widget.arguments.studentName;
-    final localStreamAvailable = controller.localRenderer.srcObject != null &&
-        controller.localRenderer.textureId != null;
+    final localStreamAvailable = controller.hasLocalVideoPreview;
 
     return Container(
       width: 120,
@@ -850,6 +876,97 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  List<SfuParticipant> _remoteStudents(LiveClassController controller) {
+    final self = controller.self;
+    return controller.participants.where((participant) {
+      if (participant.isHost) return false;
+      if (self == null) return true;
+      return participant.userId != self.userId &&
+          (participant.socketId.isEmpty || participant.socketId != self.socketId);
+    }).toList();
+  }
+
+  Widget _buildRemoteStudentStrip(LiveClassController controller) {
+    final students = _remoteStudents(controller);
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: students.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final student = students[index];
+          final renderer = controller.videoRendererForParticipant(student);
+          final showVideo = renderer != null &&
+              renderer.srcObject != null &&
+              !student.isVideoOff;
+
+          return Container(
+            width: 92,
+            decoration: BoxDecoration(
+              color: const Color(0xFF23232B),
+              borderRadius: BorderRadius.circular(13),
+              border: Border.all(color: Colors.white24),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (showVideo)
+                  RTCVideoView(
+                    renderer,
+                    objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  )
+                else
+                  Center(
+                    child: CircleAvatar(
+                      backgroundColor: Colors.deepPurple,
+                      child: Text(
+                        student.name.isEmpty
+                            ? 'S'
+                            : student.name.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                Positioned(
+                  left: 5,
+                  right: 5,
+                  bottom: 5,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          student.isMuted ? Icons.mic_off : Icons.mic,
+                          color: student.isMuted ? Colors.redAccent : Colors.greenAccent,
+                          size: 11,
+                        ),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            student.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.white, fontSize: 9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

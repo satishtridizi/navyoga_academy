@@ -15,7 +15,10 @@ class MainActivity : FlutterActivity() {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val icon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher)
+        val icon = BitmapFactory.decodeResource(
+            resources,
+            R.mipmap.navyoga_launcher_foreground,
+        )
         setTaskDescription(ActivityManager.TaskDescription("Navyoga", icon, Color.WHITE))
     }
 

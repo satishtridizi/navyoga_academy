@@ -3,104 +3,135 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ReferralCodeCard extends StatelessWidget {
-  final String referralCode;
+  const ReferralCodeCard({
+    super.key,
+    required this.referralCode,
+    this.onViewProgram,
+  });
 
-  const ReferralCodeCard({super.key, required this.referralCode});
+  final String referralCode;
+  final VoidCallback? onViewProgram;
+
+  bool get _hasCode => referralCode.trim().isNotEmpty;
+
+  Future<void> _copyCode(BuildContext context) async {
+    if (!_hasCode) return;
+    await Clipboard.setData(ClipboardData(text: referralCode));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Referral code copied')));
+  }
+
+  Future<void> _shareCode(BuildContext context) async {
+    if (!_hasCode) return;
+    final box = context.findRenderObject() as RenderBox?;
+    await Share.share(
+      'Join NavYoga Academy with my referral code $referralCode and start your wellness journey today.',
+      subject: 'Join me on NavYoga Academy',
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xff7b1fa2), Color(0xff9c27b0)],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.purple.withOpacity(0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.22)),
       ),
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// TOP ROW
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              /// SHARE ICON
-              GestureDetector(
-                onTap: () {
-                  final code = referralCode;
-
-                  Share.share(
-                    "Join NavYoga Academy using my referral code: $referralCode\n\nGet discounts on your subscription 🎉",
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(Icons.share, color: Colors.white),
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: Colors.white,
+                  size: 20,
                 ),
               ),
-
-              /// COPY BUTTON
-              GestureDetector(
-                onTap: () {
-                  final code = referralCode;
-
-                  Clipboard.setData(ClipboardData(text: code));
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Referral code copied 🎉")),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.copy, color: Colors.white, size: 16),
-                      SizedBox(width: 6),
-                      Text("Copy", style: TextStyle(color: Colors.white)),
-                    ],
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'YOUR REFERRAL CODE',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
                   ),
                 ),
               ),
             ],
           ),
-
-          const SizedBox(height: 20),
-
-          /// CODE
-          Text(
-            referralCode,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 14),
+          InkWell(
+            onTap: _hasCode ? () => _copyCode(context) : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _hasCode ? referralCode : 'Code unavailable',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: _hasCode ? Colors.white : Colors.white60,
+                      fontSize: 23,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: _hasCode ? 1.4 : 0,
+                    ),
+                  ),
+                ),
+                if (_hasCode)
+                  const Icon(Icons.copy_rounded, color: Colors.white70, size: 19),
+              ],
             ),
           ),
-
-          const SizedBox(height: 6),
-
-          const Text(
-            "Your Referral Code",
-            style: TextStyle(color: Colors.white70),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: _hasCode ? () => _shareCode(context) : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF6D28D9),
+                    disabledBackgroundColor: Colors.white24,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                  ),
+                  icon: const Icon(Icons.ios_share_rounded, size: 18),
+                  label: const Text('Invite friends', style: TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ),
+              if (onViewProgram != null) ...[
+                const SizedBox(width: 10),
+                IconButton.filledTonal(
+                  onPressed: onViewProgram,
+                  tooltip: 'View referral program',
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.white.withOpacity(0.16),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(48, 48),
+                  ),
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                ),
+              ],
+            ],
           ),
         ],
       ),

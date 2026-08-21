@@ -15,6 +15,10 @@ class ReminderService {
 
   bool _initialized = false;
   static const String _localNotifStorageKey = 'app_local_in_app_notifications';
+  static const String _dismissedNotifStorageKey =
+      'app_dismissed_notification_ids';
+  static const String _notificationsClearedAtKey =
+      'app_notifications_cleared_at';
 
   Future<void> init() async {
     if (_initialized) return;
@@ -76,6 +80,8 @@ class ReminderService {
     required String classId,
     required String classTitle,
   }) async {
+    final inboxId = 'inapp_new_class_$classId';
+    if (await isNotificationDismissed(inboxId)) return;
     await init();
     const androidDetails = AndroidNotificationDetails(
       'navyoga_classes',
@@ -101,7 +107,7 @@ class ReminderService {
       payload: 'class_$classId',
     );
     await _saveInAppNotification(
-      id: 'inapp_new_class_$classId',
+      id: inboxId,
       title: 'New class available',
       message: classTitle,
       scheduledTime: DateTime.now(),
@@ -119,9 +125,12 @@ class ReminderService {
 
     final time30m = scheduledAt.subtract(const Duration(minutes: 30));
     final time15m = scheduledAt.subtract(const Duration(minutes: 15));
+    final dismissedIds = await getDismissedNotificationIds();
+    final inboxId30 = 'inapp_${classId}_30m';
+    final inboxId15 = 'inapp_${classId}_15m';
 
     // 1. 30 Minutes Reminder
-    if (time30m.isAfter(now)) {
+    if (time30m.isAfter(now) && !dismissedIds.contains(inboxId30)) {
       final id30 = _generateNotifId('${classId}_30m');
       await _scheduleLocalNotification(
         id: id30,
@@ -132,7 +141,7 @@ class ReminderService {
       );
 
       await _saveInAppNotification(
-        id: 'inapp_${classId}_30m',
+        id: inboxId30,
         title: 'Upcoming Class in 30m',
         message: '"$classTitle" starts in 30 minutes at ${_formatTime(scheduledAt)}',
         scheduledTime: time30m,
@@ -140,7 +149,7 @@ class ReminderService {
     }
 
     // 2. 15 Minutes Reminder
-    if (time15m.isAfter(now)) {
+    if (time15m.isAfter(now) && !dismissedIds.contains(inboxId15)) {
       final id15 = _generateNotifId('${classId}_15m');
       await _scheduleLocalNotification(
         id: id15,
@@ -151,7 +160,7 @@ class ReminderService {
       );
 
       await _saveInAppNotification(
-        id: 'inapp_${classId}_15m',
+        id: inboxId15,
         title: 'Upcoming Class in 15m',
         message: '"$classTitle" starts in 15 minutes! Be ready to join.',
         scheduledTime: time15m,
@@ -167,8 +176,10 @@ class ReminderService {
     await init();
     final now = DateTime.now();
     final time7d = renewalDate.subtract(const Duration(days: 7));
+    final inboxId =
+        'inapp_renewal_${renewalDate.millisecondsSinceEpoch}';
 
-    if (time7d.isAfter(now)) {
+    if (time7d.isAfter(now) && !await isNotificationDismissed(inboxId)) {
       final planLabel = planName ?? 'membership';
       final notifId = _generateNotifId('renewal_${renewalDate.millisecondsSinceEpoch}');
 
@@ -181,7 +192,7 @@ class ReminderService {
       );
 
       await _saveInAppNotification(
-        id: 'inapp_renewal_${renewalDate.millisecondsSinceEpoch}',
+        id: inboxId,
         title: 'Subscription Renewal in 1 Week',
         message: 'Your $planLabel plan is set to renew on ${_formatDate(renewalDate)}.',
         scheduledTime: time7d,
@@ -243,6 +254,7 @@ class ReminderService {
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (await isNotificationDismissed(id)) return;
       final existingRaw = prefs.getStringList(_localNotifStorageKey) ?? [];
 
       final existingList = existingRaw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
@@ -270,7 +282,11 @@ class ReminderService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final rawList = prefs.getStringList(_localNotifStorageKey) ?? [];
-      return rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+      final dismissedIds = await getDismissedNotificationIds();
+      return rawList
+          .map((e) => jsonDecode(e) as Map<String, dynamic>)
+          .where((item) => !dismissedIds.contains(item['id']?.toString()))
+          .toList();
     } catch (_) {
       return [];
     }
@@ -299,6 +315,7 @@ class ReminderService {
   /// Delete local notification
   Future<void> deleteNotification(String id) async {
     try {
+      await dismissNotifications([id]);
       final prefs = await SharedPreferences.getInstance();
       final rawList = prefs.getStringList(_localNotifStorageKey) ?? [];
       final list = rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
@@ -309,12 +326,62 @@ class ReminderService {
         _localNotifStorageKey,
         list.map((e) => jsonEncode(e)).toList(),
       );
+      await _notificationsPlugin.cancel(_systemNotificationIdForInboxId(id));
     } catch (_) {}
   }
 
-  Future<void> clearNotifications() async {
+  Future<void> clearNotifications({Iterable<String> ids = const []}) async {
     final prefs = await SharedPreferences.getInstance();
+    final stored = await getLocalInAppNotifications();
+    await dismissNotifications([
+      ...ids,
+      ...stored.map((item) => item['id']?.toString() ?? ''),
+    ]);
     await prefs.remove(_localNotifStorageKey);
+    await prefs.setString(
+      _notificationsClearedAtKey,
+      DateTime.now().toUtc().toIso8601String(),
+    );
+    await _notificationsPlugin.cancelAll();
+  }
+
+  Future<DateTime?> getNotificationsClearedAt() async {
+    final prefs = await SharedPreferences.getInstance();
+    return DateTime.tryParse(
+      prefs.getString(_notificationsClearedAtKey) ?? '',
+    )?.toUtc();
+  }
+
+  Future<Set<String>> getDismissedNotificationIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_dismissedNotifStorageKey) ?? const <String>[])
+        .where((id) => id.isNotEmpty)
+        .toSet();
+  }
+
+  Future<bool> isNotificationDismissed(String id) async {
+    if (id.isEmpty) return false;
+    return (await getDismissedNotificationIds()).contains(id);
+  }
+
+  Future<void> dismissNotifications(Iterable<String> ids) async {
+    final cleanIds = ids.where((id) => id.trim().isNotEmpty).toSet();
+    if (cleanIds.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final existing = await getDismissedNotificationIds();
+    existing.addAll(cleanIds);
+    final values = existing.toList();
+    final retained = values.length > 1000
+        ? values.sublist(values.length - 1000)
+        : values;
+    await prefs.setStringList(_dismissedNotifStorageKey, retained);
+  }
+
+  int _systemNotificationIdForInboxId(String id) {
+    if (id.startsWith('inapp_')) {
+      return _generateNotifId(id.substring('inapp_'.length));
+    }
+    return _generateNotifId(id);
   }
 
   int _generateNotifId(String input) {

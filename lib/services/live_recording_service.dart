@@ -37,10 +37,16 @@ class LiveRecordingService {
     final enrolled = enrollmentData['enrolled'] == true &&
         enrollment['status']?.toString().toUpperCase() == 'ACTIVE';
     final recordingDays = _asInt(
-      classesData['recordingDays'] ?? plan['recordingAccess'],
+      classesData['recordingDays'] ??
+          classesData['recordingAccess'] ??
+          plan['recordingDays'] ??
+          plan['recordingAccess'],
     );
-    final cutoff = DateTime.now().subtract(Duration(days: recordingDays));
-    final rawClasses = classesData['classes'] as List? ?? const [];
+    final rawClasses = _asList(
+      classesData['recordings'] ??
+          classesData['classes'] ??
+          classesData['items'],
+    );
 
     final recordings = rawClasses
         .whereType<Map>()
@@ -48,9 +54,6 @@ class LiveRecordingService {
               Map<String, dynamic>.from(item),
             ))
         .where((item) => item.videoUrl.isNotEmpty)
-        .where((item) => recordingDays <= 0 ||
-            item.scheduledAt == null ||
-            !item.scheduledAt!.isBefore(cutoff))
         .toList()
       ..sort((a, b) => (b.scheduledAt ?? DateTime(1970))
           .compareTo(a.scheduledAt ?? DateTime(1970)));
@@ -66,6 +69,9 @@ class LiveRecordingService {
   Map<String, dynamic> _asMap(dynamic value) => value is Map
       ? Map<String, dynamic>.from(value)
       : <String, dynamic>{};
+
+  List<dynamic> _asList(dynamic value) =>
+      value is List ? value : const <dynamic>[];
 
   int _asInt(dynamic value) {
     if (value is int) return value;

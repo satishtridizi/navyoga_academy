@@ -5,12 +5,13 @@ import 'reminder_service.dart';
 
 class NotificationService {
   final ApiService _api = ApiService();
-  int? _serverUnreadCount;
 
   // ✅ GET ALL
   Future<List<Map<String, dynamic>>> getNotifications(String token) async {
-    _serverUnreadCount = null;
-    final localList = await ReminderService().getLocalInAppNotifications();
+    final reminderService = ReminderService();
+    final localList = await reminderService.getLocalInAppNotifications();
+    final dismissedIds = await reminderService.getDismissedNotificationIds();
+    final clearedAt = await reminderService.getNotificationsClearedAt();
     List<dynamic> apiItems = [];
 
     try {
@@ -26,13 +27,6 @@ class NotificationService {
 
       if (res["success"] == true) {
         final data = res["data"];
-        if (data is Map) {
-          _serverUnreadCount = _toInt(
-            data['unreadCount'] ??
-                data['unread_count'] ??
-                (data['meta'] is Map ? data['meta']['unreadCount'] : null),
-          );
-        }
         apiItems = data is List
             ? data
             : data is Map
@@ -49,6 +43,13 @@ class NotificationService {
       final item = Map<String, dynamic>.from(raw);
       final model = NotificationModel.fromJson(item);
       if (model.id.isEmpty) continue;
+      if (dismissedIds.contains(model.id)) continue;
+      final createdAt = DateTime.tryParse(model.createdAt)?.toUtc();
+      if (clearedAt != null &&
+          createdAt != null &&
+          !createdAt.isAfter(clearedAt)) {
+        continue;
+      }
       unique[model.id] = {
         ...item,
         'id': model.id,
@@ -63,24 +64,10 @@ class NotificationService {
 
   Future<int> getUnreadCount(String token) async {
     final notifications = await getNotifications(token);
-    final localUnread = notifications
+    return notifications
         .map(NotificationModel.fromJson)
-        .where((notification) =>
-            notification.id.startsWith('inapp_') && !notification.isRead)
+        .where((notification) => !notification.isRead)
         .length;
-    final remoteUnread = _serverUnreadCount ??
-        notifications
-            .map(NotificationModel.fromJson)
-            .where((notification) =>
-                !notification.id.startsWith('inapp_') && !notification.isRead)
-            .length;
-    return localUnread + remoteUnread;
-  }
-
-  int? _toInt(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    return int.tryParse(value?.toString() ?? '');
   }
 
   // ✅ MARK AS READ
@@ -98,6 +85,7 @@ class NotificationService {
 
   // ✅ DELETE
   Future<dynamic> deleteNotification(String token, String id) async {
+    await ReminderService().dismissNotifications([id]);
     if (id.startsWith('inapp_')) {
       await ReminderService().deleteNotification(id);
       return {'success': true};
@@ -109,7 +97,7 @@ class NotificationService {
   }
 
   Future<void> clearAll(String token, List<String> ids) async {
-    await ReminderService().clearNotifications();
+    await ReminderService().clearNotifications(ids: ids);
     final remoteIds = ids.where(
       (id) => id.isNotEmpty && !id.startsWith('inapp_'),
     );

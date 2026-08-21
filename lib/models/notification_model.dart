@@ -14,11 +14,21 @@ class NotificationModel {
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    final status = json['status']?.toString().trim().toLowerCase();
+    final readValue = json["isRead"] ??
+        json["is_read"] ??
+        json['read'] ??
+        json['readStatus'] ??
+        json['read_status'];
     return NotificationModel(
       id: (json["id"] ?? json["_id"] ?? "").toString(),
       title: (json["title"] ?? "Notification").toString(),
       message: (json["message"] ?? json["body"] ?? "").toString(),
-      isRead: _toBool(json["isRead"] ?? json["is_read"]),
+      isRead: _toBool(readValue) ||
+          json['readAt'] != null ||
+          json['read_at'] != null ||
+          status == 'read' ||
+          status == 'seen',
       createdAt: (json["createdAt"] ?? json["created_at"] ?? "").toString(),
     );
   }

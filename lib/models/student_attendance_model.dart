@@ -8,16 +8,36 @@ class StudentAttendanceResponse {
   final List<AttendanceRecord> records;
 
   factory StudentAttendanceResponse.fromJson(Map<String, dynamic> json) {
+    final records = ((json['records'] ??
+                    json['attendance'] ??
+                    json['classes']) as List? ??
+            const [])
+        .whereType<Map>()
+        .map((item) => AttendanceRecord.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .toList();
+    final summaryJson = Map<String, dynamic>.from(
+      json['summary'] as Map? ?? {},
+    );
+    final parsedSummary = AttendanceSummary.fromJson(summaryJson);
+    final now = DateTime.now();
+    final attendedThisMonth = records.where((record) {
+      final date = record.joinedAt ?? record.liveClass.scheduledAt;
+      return date != null && date.year == now.year && date.month == now.month;
+    }).length;
+
     return StudentAttendanceResponse(
-      summary: AttendanceSummary.fromJson(
-        Map<String, dynamic>.from(json['summary'] as Map? ?? {}),
+      summary: AttendanceSummary(
+        totalAttended: parsedSummary.totalAttended > 0
+            ? parsedSummary.totalAttended
+            : records.length,
+        attendedThisMonth: parsedSummary.attendedThisMonth > 0
+            ? parsedSummary.attendedThisMonth
+            : attendedThisMonth,
+        lastAttendedAt: parsedSummary.lastAttendedAt,
       ),
-      records: (json['records'] as List? ?? const [])
-          .whereType<Map>()
-          .map((item) => AttendanceRecord.fromJson(
-                Map<String, dynamic>.from(item),
-              ))
-          .toList(),
+      records: records,
     );
   }
 }
@@ -35,9 +55,15 @@ class AttendanceSummary {
 
   factory AttendanceSummary.fromJson(Map<String, dynamic> json) {
     return AttendanceSummary(
-      totalAttended: _asInt(json['totalAttended']),
-      attendedThisMonth: _asInt(json['attendedThisMonth']),
-      lastAttendedAt: _asDate(json['lastAttendedAt']),
+      totalAttended: _asInt(
+        json['totalAttended'] ?? json['totalClassesAttended'] ?? json['total'],
+      ),
+      attendedThisMonth: _asInt(
+        json['attendedThisMonth'] ?? json['monthlyAttended'] ?? json['thisMonth'],
+      ),
+      lastAttendedAt: _asDate(
+        json['lastAttendedAt'] ?? json['lastAttendanceAt'],
+      ),
     );
   }
 }
@@ -55,10 +81,15 @@ class AttendanceRecord {
 
   factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
     return AttendanceRecord(
-      id: json['id']?.toString() ?? '',
-      joinedAt: _asDate(json['joinedAt']),
+      id: (json['id'] ?? json['_id'])?.toString() ?? '',
+      joinedAt: _asDate(
+        json['joinedAt'] ?? json['joined_at'] ?? json['attendanceDate'],
+      ),
       liveClass: AttendedLiveClass.fromJson(
-        Map<String, dynamic>.from(json['liveClass'] as Map? ?? {}),
+        Map<String, dynamic>.from(
+          (json['liveClass'] ?? json['class'] ?? json['classDetails']) as Map? ??
+              {},
+        ),
       ),
     );
   }
@@ -87,13 +118,18 @@ class AttendedLiveClass {
     final tutor = Map<String, dynamic>.from(json['tutor'] as Map? ?? {});
     final batch = Map<String, dynamic>.from(json['batch'] as Map? ?? {});
     return AttendedLiveClass(
-      id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? 'Live Yoga Class',
-      yogaType: json['yogaType']?.toString() ?? '',
-      duration: _asInt(json['duration']),
-      tutorName: tutor['name']?.toString() ?? 'Trainer',
-      scheduledAt: _asDate(json['scheduledAt']),
-      batchName: batch['name']?.toString(),
+      id: (json['id'] ?? json['_id'])?.toString() ?? '',
+      title: (json['title'] ?? json['className'])?.toString() ??
+          'Live Yoga Class',
+      yogaType: (json['yogaType'] ?? json['yoga_type'])?.toString() ?? '',
+      duration: _asInt(json['durationMinutes'] ?? json['duration']),
+      tutorName: (tutor['name'] ?? json['tutorName'] ?? json['trainerName'])
+              ?.toString() ??
+          'Trainer',
+      scheduledAt: _asDate(
+        json['scheduledAt'] ?? json['scheduled_at'] ?? json['classDate'],
+      ),
+      batchName: (batch['name'] ?? json['batchName'])?.toString(),
     );
   }
 }

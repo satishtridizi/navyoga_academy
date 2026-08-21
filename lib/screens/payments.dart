@@ -98,6 +98,11 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       final yttRecordedEnrollmentResponse = responses[7];
       final yttLiveEnrollmentResponse = responses[8];
 
+      _debugPlanResponse('LIVE', livePlansResponse);
+      _debugPlanResponse('SELF_PACED', selfPacedResponse);
+      _debugPlanResponse('YTT_RECORDED', yttRecordedResponse);
+      _debugPlanResponse('YTT_LIVE', yttLiveResponse);
+
       final parsedPlatform = _parsePlatform(platformResponse);
 
       final parsedLivePlans = _parsePlans(
@@ -121,6 +126,13 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         category: SubscriptionCategory.teacherTraining,
         trainingType: TeacherTrainingType.live,
       );
+
+      _debugParsedPlans([
+        ...parsedLivePlans,
+        ...parsedSelfPacedPlans,
+        ...parsedYttRecordedPlans,
+        ...parsedYttLivePlans,
+      ]);
 
       final parsedLivePlan =
           _parseSingleEnrollmentResponse(
@@ -215,6 +227,39 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     return PlatformConfigModel.fromJson(data);
   }
 
+  void _debugPlanResponse(
+    String source,
+    Map<String, dynamic> response,
+  ) {
+    debugPrint('========== SUBSCRIPTION PLANS: $source ==========');
+    debugPrint('success: ${response['success']}');
+    debugPrint('message: ${response['message']}');
+    final data = response['data'];
+    debugPrint('raw data: $data');
+    if (data is List) {
+      debugPrint('plan count: ${data.length}');
+      for (var index = 0; index < data.length; index++) {
+        debugPrint('$source plan[$index]: ${data[index]}');
+      }
+    } else {
+      debugPrint('unexpected data type: ${data.runtimeType}');
+    }
+    debugPrint('================================================');
+  }
+
+  void _debugParsedPlans(List<SubscriptionPlanModel> plans) {
+    debugPrint('========== PARSED SUBSCRIPTION PLANS ==========');
+    if (plans.isEmpty) debugPrint('No valid backend plans parsed.');
+    for (final plan in plans) {
+      debugPrint(
+        'id=${plan.id} | name=${plan.name} | price=${plan.price} | '
+        'category=${plan.categoryKey} | active=${plan.isActive} | '
+        'recordingDays=${plan.recordingDays}',
+      );
+    }
+    debugPrint('===============================================');
+  }
+
   List<SubscriptionPlanModel> _parsePlans(
     Map<String, dynamic> response, {
     required SubscriptionCategory category,
@@ -235,7 +280,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             trainingType: trainingType,
           ),
         )
-        .where((plan) => plan.isActive)
+        .where((plan) => plan.isActive && plan.id.trim().isNotEmpty)
         .toList();
   }
 
@@ -407,6 +452,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         'name': plan.name,
         'price': plan.price,
         'originalPrice': plan.originalPrice,
+        'recordingDays': plan.recordingDays,
         'subscriptionType': plan.categoryKey,
         'gstPercentage': platform?.gstPercentage ?? 0,
       },

@@ -46,29 +46,25 @@ class SubscriptionPlanModel {
     TeacherTrainingType? trainingType,
   }) {
     final rawFeatures = json['features'];
+    final features = rawFeatures is List
+        ? rawFeatures
+            .map((item) => item.toString().trim())
+            .where((item) => item.isNotEmpty)
+            .toList()
+        : const <String>[];
 
     return SubscriptionPlanModel(
-      id: json['id']?.toString() ?? '',
-      courseId: json['courseId']?.toString(),
+      id: (json['id'] ?? json['_id'] ?? json['planId'])?.toString() ?? '',
+      courseId: (json['courseId'] ?? json['course_id'])?.toString(),
       name: json['name']?.toString() ?? 'Plan',
       description: json['description']?.toString() ?? '',
       validity: _toInt(json['validity']),
-      recordingDays: _toInt(
-        json['recordingDays'] ??
-            json['recording_days'] ??
-            json['recordingAccessDays'] ??
-            json['recording_access_days'],
-      ),
+      recordingDays: _parseRecordingDays(json, features),
       price: _toDouble(json['price']),
       originalPrice: json['originalPrice'] == null
           ? null
           : _toDouble(json['originalPrice']),
-      features: rawFeatures is List
-          ? rawFeatures
-              .map((item) => item.toString().trim())
-              .where((item) => item.isNotEmpty)
-              .toList()
-          : const [],
+      features: features,
       isActive: json['isActive'] != false,
       category: category,
       trainingType: trainingType,
@@ -88,7 +84,7 @@ class SubscriptionPlanModel {
 
   String get recordingDaysLabel => recordingDays <= 0
       ? ''
-      : '$recordingDays day${recordingDays == 1 ? '' : 's'} recording access';
+      : 'Recording access: $recordingDays day${recordingDays == 1 ? '' : 's'}';
 
   String get categoryKey {
     switch (category) {
@@ -122,7 +118,44 @@ class SubscriptionPlanModel {
     if (value is int) return value;
     if (value is num) return value.toInt();
 
-    return int.tryParse(value?.toString() ?? '') ?? 0;
+    final text = value?.toString().trim() ?? '';
+    final direct = int.tryParse(text);
+    if (direct != null) return direct;
+    return int.tryParse(RegExp(r'\d+').firstMatch(text)?.group(0) ?? '') ?? 0;
+  }
+
+  static int _parseRecordingDays(
+    Map<String, dynamic> json,
+    List<String> features,
+  ) {
+    final access = json['access'] is Map
+        ? Map<String, dynamic>.from(json['access'] as Map)
+        : const <String, dynamic>{};
+    final limits = json['limits'] is Map
+        ? Map<String, dynamic>.from(json['limits'] as Map)
+        : const <String, dynamic>{};
+    final candidates = <dynamic>[
+      json['recordingDays'],
+      json['recording_days'],
+      json['recordingAccess'],
+      json['recording_access'],
+      json['recordingAccessDays'],
+      json['recording_access_days'],
+      json['recordingDuration'],
+      json['recording_duration'],
+      access['recordingDays'],
+      access['recordingAccess'],
+      limits['recordingDays'],
+      limits['recordingAccess'],
+      ...features.where(
+        (feature) => feature.toLowerCase().contains('recording'),
+      ),
+    ];
+    for (final candidate in candidates) {
+      final days = _toInt(candidate);
+      if (days > 0) return days;
+    }
+    return 0;
   }
 
   static double _toDouble(dynamic value) {

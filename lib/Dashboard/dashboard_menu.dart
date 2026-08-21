@@ -141,6 +141,8 @@ class CustomDrawer extends StatelessWidget {
       //{"icon": Icons.check_circle, "title": "Enrollment Success"},
       {"icon": Icons.school, "title": "Self-Paced"},
       {"icon": Icons.videocam, "title": "Recordings"},
+      {"icon": Icons.cast_for_education, "title": "YTT Live Classes"},
+      {"icon": Icons.video_camera_front, "title": "YTT Recorded"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
       {"icon": Icons.event, "title": "Events"},
       // {"icon": Icons.school, "title": "Workshops"},
@@ -149,15 +151,14 @@ class CustomDrawer extends StatelessWidget {
       {"icon": Icons.person_outline, "title": "Profile"},
       {"icon": Icons.subscriptions_outlined, "title": "Subscription"},
       {"icon": Icons.settings, "title": "Settings"},
-      {"icon": Icons.cast_for_education, "title": "YTT Live Classes"},
-      {"icon": Icons.video_camera_front, "title": "YTT Recorded"},
     ];
 
     return Drawer(
       backgroundColor: const Color(0xfff7f7f7),
-      child: Column(
-        children: [
-          const SizedBox(height: 40),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
 
           /// 🔝 HEADER
           ListTile(
@@ -171,7 +172,7 @@ class CustomDrawer extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Image.asset(
                   'assets/logo/logo_transparent_clean.png',
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -363,7 +364,8 @@ class CustomDrawer extends StatelessWidget {
           ),
 
           const SizedBox(height: 10),
-        ],
+          ],
+        ),
       ),
     );
   }

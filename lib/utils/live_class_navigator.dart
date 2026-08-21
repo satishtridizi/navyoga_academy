@@ -19,6 +19,16 @@ class LiveClassNavigator {
     Map<String, dynamic> rawData =
         const <String, dynamic>{},
   }) async {
+    final joinWindowStart =
+        scheduledAt?.subtract(const Duration(minutes: 15));
+    if (joinWindowStart != null && DateTime.now().isBefore(joinWindowStart)) {
+      AppSnackbar.showError(
+        context,
+        'The waiting room opens 15 minutes before the class starts.',
+      );
+      return;
+    }
+
     if (classId.trim().isEmpty) {
       AppSnackbar.showError(
         context,

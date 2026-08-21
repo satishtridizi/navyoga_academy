@@ -22,7 +22,6 @@ import 'package:navyoga_academy/widgets/app_scaffold.dart';
 import 'package:navyoga_academy/widgets/dashboard_Action_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_ReferralCode_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_Referral_card.dart';
-import 'package:navyoga_academy/widgets/dashboard_ShareEarn_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_class_card.dart';
 import 'package:navyoga_academy/widgets/dashboard_section_header.dart';
 import 'package:navyoga_academy/widgets/dashboard_stat_card.dart';
@@ -32,6 +31,26 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _WelcomeGlow extends StatelessWidget {
+  const _WelcomeGlow({required this.size, required this.opacity});
+
+  final double size;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(opacity),
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white.withOpacity(opacity)),
+      ),
+    );
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -61,8 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int currentBanner = 0;
   int unreadCount = 0;
+  bool _isOpeningNotifications = false;
+  int _unreadRequestSequence = 0;
 
-  static const int _bannerCount = 2;
+  static const int _bannerCount = 3;
 
   String? studentName;
 
@@ -88,7 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     _notificationCountTimer = Timer.periodic(
       const Duration(seconds: 30),
-      (_) => loadUnreadCount(),
+      (_) {
+        if (!_isOpeningNotifications) loadUnreadCount();
+      },
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -292,6 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadUnreadCount() async {
+    final requestSequence = ++_unreadRequestSequence;
     try {
       final token = await AuthManager.getToken();
 
@@ -301,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final count = await _notificationService.getUnreadCount(token);
 
-      if (!mounted) return;
+      if (!mounted || requestSequence != _unreadRequestSequence) return;
 
       setState(() {
         unreadCount = count;
@@ -531,29 +555,45 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNotificationButton() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          tooltip: 'Notifications',
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: Color(0xFF1E1B39),
+    return SizedBox(
+      width: 56,
+      height: 56,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: IconButton(
+              tooltip: 'Notifications',
+              iconSize: 27,
+              splashRadius: 25,
+              icon: const Icon(
+                Icons.notifications_outlined,
+                color: Color(0xFF1E1B39),
+              ),
+              onPressed: _isOpeningNotifications
+                  ? null
+                  : () async {
+                      setState(() => _isOpeningNotifications = true);
+                      try {
+                        await Navigator.pushNamed(
+                          context,
+                          AppRoutes.notifications,
+                        );
+                        if (mounted) await loadUnreadCount();
+                      } finally {
+                        if (mounted) {
+                          setState(() => _isOpeningNotifications = false);
+                        }
+                      }
+                    },
+            ),
           ),
-          onPressed: () async {
-            await Navigator.pushNamed(
-              context,
-              AppRoutes.notifications,
-            );
-
-            await loadUnreadCount();
-          },
-        ),
-        if (unreadCount > 0)
-          Positioned(
-            right: 7,
-            top: 7,
-            child: Container(
+          if (unreadCount > 0)
+            Positioned(
+              right: 5,
+              top: 5,
+              child: IgnorePointer(
+                child: Container(
               constraints: const BoxConstraints(
                 minWidth: 17,
                 minHeight: 17,
@@ -583,9 +623,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+                ),
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -700,6 +742,144 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildWelcomeCard() {
+    final now = DateTime.now();
+    final greeting = now.hour < 12
+        ? 'Good morning'
+        : now.hour < 17
+            ? 'Good afternoon'
+            : 'Good evening';
+    final fullName = _studentName?.trim() ?? '';
+    final firstName = fullName.isEmpty ? 'Yogi' : fullName.split(RegExp(r'\s+')).first;
+    final initial = firstName.substring(0, 1).toUpperCase();
+
+    return AnimatedItem(
+      index: 0,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 210),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFFF6A32),
+              Color(0xFFD93D68),
+              Color(0xFF7B0AA5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x407B0AA5),
+              blurRadius: 24,
+              offset: Offset(0, 11),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            const Positioned(
+              right: -42,
+              top: -52,
+              child: _WelcomeGlow(size: 150, opacity: 0.11),
+            ),
+            const Positioned(
+              right: 45,
+              bottom: -64,
+              child: _WelcomeGlow(size: 130, opacity: 0.08),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(21),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.5),
+                            width: 3,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 10),
+                          ],
+                        ),
+                        child: Text(
+                          initial,
+                          style: const TextStyle(
+                            color: Color(0xFF7B0AA5),
+                            fontSize: 21,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 13),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$greeting,',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.82),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '$firstName!',
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                height: 1.1,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(
+                          Icons.self_improvement_rounded,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Welcome back to your wellness journey. Take a mindful moment for yourself today.',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      height: 1.35,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBannerSection() {
     return AnimatedItem(
       index: 0,
@@ -718,6 +898,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 },
                 children: [
+                  _buildWelcomeCard(),
                   _buildOfferBanner(
                     image:
                         'assets/images/woman-practicing-cobra-asana-yoga-600nw-1605427378.webp',
@@ -1298,6 +1479,27 @@ DateTime? _getDashboardClassDate(
   ) {
     final unlockedBadges =
         _getUnlockedBadges(referral);
+    const badgeTargets = [1, 5, 10, 20, 50, 100];
+    int? nextTarget;
+    for (final target in badgeTargets) {
+      if (referral.totalReferrals < target) {
+        nextTarget = target;
+        break;
+      }
+    }
+    final previousTarget = nextTarget == null
+        ? badgeTargets.last
+        : badgeTargets.where((target) => target < nextTarget!).fold<int>(
+              0,
+              (highest, target) => target > highest ? target : highest,
+            );
+    final badgeProgress = nextTarget == null
+        ? 1.0
+        : ((referral.totalReferrals - previousTarget) /
+                (nextTarget - previousTarget))
+            .clamp(0.0, 1.0);
+    final referralsToNext =
+        nextTarget == null ? 0 : nextTarget - referral.totalReferrals;
 
     return Column(
       crossAxisAlignment:
@@ -1315,14 +1517,52 @@ DateTime? _getDashboardClassDate(
           viewAllText: 'View All →',
         ),
         const SizedBox(height: 12),
-        GridView.count(
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF5B21B6), Color(0xFF7C3AED), Color(0xFF9333EA)],
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6D28D9).withOpacity(0.24),
+                blurRadius: 22,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Share wellness. Earn rewards.', style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800)),
+                        SizedBox(height: 4),
+                        Text('Invite friends and grow together.', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                  CircleAvatar(
+                    backgroundColor: Colors.white12,
+                    child: Icon(Icons.redeem_rounded, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              GridView.count(
           crossAxisCount: 2,
           shrinkWrap: true,
           physics:
               const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 2.15,
           children: [
             ReferralCard(
               referral.totalReferrals
@@ -1350,14 +1590,52 @@ DateTime? _getDashboardClassDate(
               'Balance',
             ),
           ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFD166), size: 19),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            nextTarget == null
+                                ? 'All referral badges unlocked!'
+                                : '$referralsToNext more ${referralsToNext == 1 ? 'referral' : 'referrals'} to your next badge',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Text(
+                          nextTarget == null ? '6/6' : '${referral.totalReferrals}/$nextTarget',
+                          style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: badgeProgress,
+                        minHeight: 7,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation(Color(0xFFFFD166)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              ReferralCodeCard(
+                referralCode: referral.referralCode,
+                onViewProgram: () => Navigator.pushNamed(context, AppRoutes.referral),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 20),
-        ReferralCodeCard(
-          referralCode:
-              referral.referralCode,
-        ),
-        const SizedBox(height: 14),
-        const ShareEarnCard(),
       ],
     );
   }

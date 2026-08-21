@@ -67,6 +67,10 @@ class SfuSocketService {
       StreamController<Map<String, dynamic>>.broadcast();
 
   final StreamController<Map<String, dynamic>>
+      _speakingStatusController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  final StreamController<Map<String, dynamic>>
       _newProducerController =
       StreamController<Map<String, dynamic>>.broadcast();
 
@@ -108,6 +112,9 @@ class SfuSocketService {
 
   Stream<Map<String, dynamic>> get videoStatusStream =>
       _videoStatusController.stream;
+
+  Stream<Map<String, dynamic>> get speakingStatusStream =>
+      _speakingStatusController.stream;
 
   Stream<Map<String, dynamic>> get newProducerStream =>
       _newProducerController.stream;
@@ -301,24 +308,17 @@ class SfuSocketService {
             nested['participants'] ??
             nested['peers'];
 
-        final participants =
-            participantsValue is List
-                ? participantsValue
-                    .whereType<Map>()
-                    .map(
-                      (item) =>
-                          SfuParticipant.fromJson(
-                        Map<String, dynamic>.from(
-                          item,
-                        ),
-                      ),
-                    )
-                    .toList()
-                : <SfuParticipant>[];
-
-        _participantsController.add(
-          participants,
-        );
+        if (participantsValue is List) {
+          final participants = participantsValue
+              .whereType<Map>()
+              .map(
+                (item) => SfuParticipant.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .toList();
+          _participantsController.add(participants);
+        }
       },
     );
 
@@ -398,9 +398,6 @@ class SfuSocketService {
     socket.on('sfu:room-closed', classEndedHandler);
     socket.on('room-ended', classEndedHandler);
     socket.on('room-closed', classEndedHandler);
-    socket.on('sfu:host-left', classEndedHandler);
-    socket.on('host-left', classEndedHandler);
-    socket.on('trainer-left', classEndedHandler);
 
     void chatMessageHandler(dynamic data) {
       final payload = _unwrapEventData(data);
@@ -426,12 +423,31 @@ class SfuSocketService {
           eventName.contains('room-end') ||
           eventName.contains('room-close') ||
           eventName.contains('meeting-ended') ||
-          eventName.contains('removed-from-meeting') ||
-          eventName.contains('host-left') ||
-          eventName.contains('trainer-left');
+          eventName.contains('removed-from-meeting');
       if (isClassEndEvent) {
         debugPrint('SFU class-end event name: $event');
         classEndedHandler(data);
+      }
+
+      final isSpeakerEvent = eventName.contains('active-speaker') ||
+          eventName.contains('active_speaker') ||
+          eventName.contains('dominant-speaker') ||
+          eventName.contains('dominant_speaker') ||
+          eventName.contains('speaking') ||
+          eventName.contains('speech');
+      if (isSpeakerEvent && !_speakingStatusController.isClosed) {
+        final payload = _unwrapEventData(data);
+        if (payload.isEmpty && data is String) {
+          payload['peerId'] = data;
+        }
+        final stopped = eventName.contains('stop') ||
+            eventName.contains('inactive') ||
+            eventName.contains('silence');
+        payload['isSpeaking'] = payload['isSpeaking'] ??
+            payload['speaking'] ??
+            payload['active'] ??
+            !stopped;
+        _speakingStatusController.add(payload);
       }
     });
   }
@@ -447,7 +463,12 @@ class SfuSocketService {
       event: SfuEvents.joinRoom,
       payload: {
         'classId': classId,
+        'liveClassId': classId,
         'name': studentName,
+        'studentName': studentName,
+        'role': 'student',
+        'userRole': 'student',
+        'isHost': false,
       },
     );
 
@@ -872,6 +893,7 @@ class SfuSocketService {
     await _errorController.close();
     await _mutedStatusController.close();
     await _videoStatusController.close();
+    await _speakingStatusController.close();
     await _newProducerController.close();
     await _producerClosedController.close();
     await _classEndedController.close();

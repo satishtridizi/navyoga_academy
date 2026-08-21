@@ -7,6 +7,7 @@ class RecordingApiModel {
   final String level;
   final String videoUrl;
   final int durationMinutes;
+  final int durationSeconds;
 
   const RecordingApiModel({
     required this.id,
@@ -17,6 +18,7 @@ class RecordingApiModel {
     required this.level,
     required this.videoUrl,
     this.durationMinutes = 0,
+    this.durationSeconds = 0,
   });
 
   factory RecordingApiModel.fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class RecordingApiModel {
           json['url']?.toString() ??
           '',
       durationMinutes: _asInt(json['durationMinutes'] ?? json['duration']),
+      durationSeconds: _asInt(json['durationSeconds']),
     );
   }
 
@@ -52,6 +55,7 @@ class RecordingApiModel {
       'level': level,
       'videoUrl': videoUrl,
       'durationMinutes': durationMinutes,
+      'durationSeconds': durationSeconds,
     };
   }
 
@@ -64,6 +68,7 @@ class RecordingApiModel {
     String? level,
     String? videoUrl,
     int? durationMinutes,
+    int? durationSeconds,
   }) {
     return RecordingApiModel(
       id: id ?? this.id,
@@ -74,6 +79,7 @@ class RecordingApiModel {
       level: level ?? this.level,
       videoUrl: videoUrl ?? this.videoUrl,
       durationMinutes: durationMinutes ?? this.durationMinutes,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
     );
   }
 }
