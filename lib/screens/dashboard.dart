@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:navyoga_academy/Dashboard/dashboard_menu.dart';
 import 'package:navyoga_academy/models/dashboard_model.dart';
+import 'package:navyoga_academy/models/student_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
 import 'package:navyoga_academy/screens/onboarding_overlay.dart';
 import 'package:navyoga_academy/screens/payments.dart';
@@ -88,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? studentName;
 
   String? _studentName;
+  StudentModel? studentProfile;
 
   @override
   void initState() {
@@ -144,12 +146,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final response = await _authService.getProfile(token);
       final data = response is Map ? response['data'] : null;
-      final name = data is Map ? data['name']?.toString().trim() : null;
 
-      if (!mounted || name == null || name.isEmpty) return;
-      setState(() => _studentName = name);
+      if (!mounted || data == null || data is! Map) return;
+
+      final rawData = Map<String, dynamic>.from(data);
+      final profile = StudentModel.fromJson(rawData);
+
+      setState(() {
+        studentProfile = profile;
+        _studentName = profile.name;
+        studentName = profile.name;
+      });
     } catch (error) {
-      debugPrint('Failed to load student name: $error');
+      debugPrint('Failed to load student profile: $error');
     }
   }
 
@@ -224,11 +233,19 @@ class _HomeScreenState extends State<HomeScreen> {
           }).toList();
 
           final existingIds = result.upcomingClasses.map((e) => e.id).toSet();
+
+
+          final existingBatchIds = result.upcomingClasses
+              .map(_dashboardClassBatchId)
+              .whereType<String>()
+              .toSet();
           final mergedClasses = [...result.upcomingClasses];
           for (final fc in fetchedClasses) {
-            if (!existingIds.contains(fc.id)) {
-              mergedClasses.add(fc);
-            }
+            if (existingIds.contains(fc.id)) continue;
+            final batchId = _dashboardClassBatchId(fc);
+            if (batchId != null && existingBatchIds.contains(batchId)) continue;
+            mergedClasses.add(fc);
+            if (batchId != null) existingBatchIds.add(batchId);
           }
           result = result.copyWith(upcomingClasses: mergedClasses);
         }
@@ -290,10 +307,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _notifyAboutNewClasses(List<MyLiveClassModel> classes) async {
-    // Do not erase the snapshot on a temporary empty/error response; doing so
-    // would announce every existing class when the API recovers.
+
+
     if (classes.isEmpty) return;
-    const key = 'known_live_class_ids';
+
+
+    final userId = await AuthManager.getUserId() ?? 'anonymous';
+    final key = 'known_live_class_ids::$userId';
     final prefs = await SharedPreferences.getInstance();
     final previous = prefs.getStringList(key);
     final currentIds = classes
@@ -555,79 +575,107 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNotificationButton() {
-    return SizedBox(
-      width: 56,
-      height: 56,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(
-            child: IconButton(
-              tooltip: 'Notifications',
-              iconSize: 27,
-              splashRadius: 25,
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: Color(0xFF1E1B39),
+    final avatarUrl = studentProfile?.avatar;
+    final name = studentProfile?.name ?? 'User';
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned.fill(
+                child: IconButton(
+                  tooltip: 'Notifications',
+                  iconSize: 26,
+                  splashRadius: 24,
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: Color(0xFF1E1B39),
+                  ),
+                  onPressed: _isOpeningNotifications
+                      ? null
+                      : () async {
+                          setState(() => _isOpeningNotifications = true);
+                          try {
+                            await Navigator.pushNamed(
+                              context,
+                              AppRoutes.notifications,
+                            );
+                            if (mounted) await loadUnreadCount();
+                          } finally {
+                            if (mounted) {
+                              setState(() => _isOpeningNotifications = false);
+                            }
+                          }
+                        },
+                ),
               ),
-              onPressed: _isOpeningNotifications
-                  ? null
-                  : () async {
-                      setState(() => _isOpeningNotifications = true);
-                      try {
-                        await Navigator.pushNamed(
-                          context,
-                          AppRoutes.notifications,
-                        );
-                        if (mounted) await loadUnreadCount();
-                      } finally {
-                        if (mounted) {
-                          setState(() => _isOpeningNotifications = false);
-                        }
-                      }
-                    },
-            ),
+              if (unreadCount > 0)
+                Positioned(
+                  right: 3,
+                  top: 3,
+                  child: IgnorePointer(
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        unreadCount > 99 ? '99+' : '$unreadCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-          if (unreadCount > 0)
-            Positioned(
-              right: 5,
-              top: 5,
-              child: IgnorePointer(
-                child: Container(
-              constraints: const BoxConstraints(
-                minWidth: 17,
-                minHeight: 17,
-              ),
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 4,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius:
-                    BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white,
-                  width: 1.5,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                unreadCount > 99
-                    ? '99+'
-                    : '$unreadCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-                ),
-              ),
-            ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 4),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushNamed(context, AppRoutes.profile);
+          },
+          child: CircleAvatar(
+            radius: 17,
+            backgroundColor: const Color(0xFFFF642D),
+            backgroundImage: (avatarUrl != null && avatarUrl.startsWith('http'))
+                ? NetworkImage(avatarUrl)
+                : null,
+            child: (avatarUrl == null || !avatarUrl.startsWith('http'))
+                ? Text(
+                    initial,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  )
+                : null,
+          ),
+        ),
+      ],
     );
   }
 
@@ -1074,10 +1122,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return true;
   }
 
-  /*
-   * Fallback:
-   * Determine live state from start time and duration.
-   */
+
   final startTime = _getDashboardClassDate(classData);
 
   if (startTime == null) {
@@ -1093,6 +1138,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   return !now.isBefore(startTime) &&
       now.isBefore(endTime);
+}
+
+String? _dashboardClassBatchId(
+  UpcomingClassModel classData,
+) {
+  final rawData = classData.rawData;
+  final value = rawData['batchId'] ?? rawData['batch_id'] ?? rawData['batch']?['id'];
+  final text = value?.toString().trim();
+  return (text == null || text.isEmpty) ? null : text;
 }
 
 DateTime? _getDashboardClassDate(
@@ -1139,12 +1193,20 @@ DateTime? _getDashboardClassDate(
  Widget _buildUpcomingClassesSection(
   List<UpcomingClassModel> classes,
 ) {
-  final sortedClasses = [...classes]
+
+  final uniqueClassesMap = <String, UpcomingClassModel>{};
+  for (final c in classes) {
+    final key = c.id.isNotEmpty ? c.id : "${c.name}_${c.startTime}";
+    uniqueClassesMap[key] = c;
+  }
+  final uniqueList = uniqueClassesMap.values.toList();
+
+  final sortedClasses = [...uniqueList]
     ..sort((first, second) {
       final firstIsLive = _isDashboardClassLive(first);
       final secondIsLive = _isDashboardClassLive(second);
 
-      // Live classes must always appear first.
+
       if (firstIsLive && !secondIsLive) {
         return -1;
       }
@@ -1171,11 +1233,7 @@ DateTime? _getDashboardClassDate(
       return firstDate.compareTo(secondDate);
     });
 
-  /*
-   * Show every live class first.
-   * After that, show upcoming classes until the section has
-   * at least two cards.
-   */
+
   final liveClasses = sortedClasses
       .where(_isDashboardClassLive)
       .toList();
@@ -1261,7 +1319,8 @@ DateTime? _getDashboardClassDate(
     if (startTime == null) return false;
 
     final now = DateTime.now();
-    final windowStart = startTime.subtract(const Duration(minutes: 15));
+
+    final windowStart = startTime.subtract(const Duration(minutes: 17));
     final durationMinutes = classData.duration > 0 ? classData.duration : 60;
     final endTime = startTime.add(Duration(minutes: durationMinutes));
 

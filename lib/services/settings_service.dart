@@ -1,4 +1,4 @@
-// lib/services/settings_service.dart
+
 
 import 'package:navyoga_academy/models/settings_privacy_option_model.dart';
 
@@ -17,7 +17,7 @@ class SettingsService {
     ];
   }
 
-  /// CHANGE PASSWORD
+
   Future<dynamic> changePassword({
     required String token,
     required String currentPassword,
@@ -30,7 +30,7 @@ class SettingsService {
     );
   }
 
-  /// DELETE ACCOUNT
+
   Future<dynamic> deleteAccount(String token) async {
     return await _api.deleteRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.deleteAccount}",
@@ -38,7 +38,7 @@ class SettingsService {
     );
   }
 
-  /// EXPORT / DOWNLOAD MY DATA
+
   Future<dynamic> downloadMyData(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.downloadData}",

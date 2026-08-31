@@ -568,7 +568,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           const SizedBox(height: 12),
 
-                          /// DIVIDER
+
                           Container(
                             height: 1,
                             width: double.infinity,
@@ -577,7 +577,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           const SizedBox(height: 12),
 
-                          /// FOOTER TEXT
+
                           const SizedBox(height: 20),
 
                           AnimatedItem(
@@ -598,7 +598,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   onTap: () {
                                     Navigator.pop(
                                       context,
-                                    ); // Back to Login Screen
+                                    );
                                   },
                                   child: const Text(
                                     "Sign in",
@@ -618,7 +618,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     const SizedBox(height: 12),
 
-                    /// © COPYRIGHT
+
                     const Text(
                       "© 2026 NavYoga Academy. All rights reserved.",
                       style: TextStyle(
@@ -655,34 +655,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // static Widget buildField({
-  //   required TextEditingController controller,
-  //   required String hint,
-  //   bool obscure = false,
-  // }) {
-  //   return TextField(
-  //     controller: controller,
-  //     obscureText: obscure,
-  //     decoration: InputDecoration(
-  //       hintText: hint,
-  //       hintStyle: const TextStyle(color: Color.fromARGB(255, 85, 84, 84)),
-  //       filled: true,
-  //       fillColor: const Color.fromARGB(255, 255, 255, 255),
-  //       contentPadding: const EdgeInsets.symmetric(
-  //         horizontal: 16,
-  //         vertical: 08,
-  //       ),
-  //       enabledBorder: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(16),
-  //         borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-  //       ),
-  //       focusedBorder: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(16),
-  //         borderSide: const BorderSide(color: Color(0xFF6A11CB), width: 1.2),
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget _circle(double size, Color color) {
     return Container(

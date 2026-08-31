@@ -28,14 +28,14 @@ class StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
 
-          /// 🌈 SOFT GRADIENT BACKGROUND
+
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
           ),
 
-          /// 🌫 SOFT SHADOW (NEUMORPHIC FEEL)
+
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -53,10 +53,10 @@ class StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔝 TOP ROW
+
             Row(
               children: [
-                /// 🔥 ICON BOX (FLOATING STYLE)
+
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -76,7 +76,7 @@ class StatCard extends StatelessWidget {
 
                 const SizedBox(width: 10),
 
-                /// TITLE
+
                 Expanded(
                   child: Text(
                     title,
@@ -92,7 +92,7 @@ class StatCard extends StatelessWidget {
 
             const Spacer(),
 
-            /// 🔻 VALUE + SUBTITLE
+
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -129,7 +129,7 @@ class StatCard extends StatelessWidget {
     );
   }
 
-  /// 🎯 ICON MAPPING (UPDATED LIKE IMAGE)
+
   IconData _getIcon(String title) {
     if (title.contains("Enrolled")) return Icons.menu_book;
     if (title.contains("Hours")) return Icons.access_time;

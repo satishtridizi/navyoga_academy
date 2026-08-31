@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _fadeController;
   late final Animation<double> _fadeAnimation;
 
-  static const _splashDuration = Duration(seconds: 6);
+  static const _splashDuration = Duration(seconds: 3);
 
   @override
   void initState() {

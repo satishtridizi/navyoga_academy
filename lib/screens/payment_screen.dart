@@ -111,10 +111,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final Plan plan = ModalRoute.of(context)!.settings.arguments as Plan;
 
     return Scaffold(
-      // currentIndex: null,
+
       drawer: const CustomDrawer(currentPage: "Payments"),
 
-      /// 🔥 APP BAR
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,

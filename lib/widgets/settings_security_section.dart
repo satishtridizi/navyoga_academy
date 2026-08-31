@@ -3,11 +3,9 @@ import 'package:navyoga_academy/models/settings_security_field_model.dart';
 
 class SettingsSecuritySection extends StatelessWidget {
   final List<SecurityField> securityFields;
-  //final bool twoFactorEnabled;
   final ValueChanged<bool> onTwoFactorChanged;
   final VoidCallback onUpdatePassword;
 
-  // ✅ ADD THESE THREE
   final TextEditingController currentPasswordController;
   final TextEditingController newPasswordController;
   final TextEditingController confirmPasswordController;
@@ -15,16 +13,13 @@ class SettingsSecuritySection extends StatelessWidget {
   const SettingsSecuritySection({
     super.key,
     required this.securityFields,
-    //required this.twoFactorEnabled,
     required this.onTwoFactorChanged,
     required this.onUpdatePassword,
-    // ✅ ADD THESE THREE
     required this.currentPasswordController,
     required this.newPasswordController,
     required this.confirmPasswordController,
   });
 
-  // ✅ Map each field index to its controller
   TextEditingController _controllerFor(int index) {
     switch (index) {
       case 0:
@@ -73,7 +68,6 @@ class SettingsSecuritySection extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // ✅ Use indexed map to attach the right controller to each field
           ...securityFields.asMap().entries.map((entry) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +78,7 @@ class SettingsSecuritySection extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 TextField(
-                  controller: _controllerFor(entry.key), // ✅ connected
+                  controller: _controllerFor(entry.key),
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: entry.value.hint,
@@ -131,41 +125,6 @@ class SettingsSecuritySection extends StatelessWidget {
               ),
             ),
           ),
-
-          // const SizedBox(height: 20),
-
-          // Container(height: 1, color: Colors.deepOrange.withOpacity(.2)),
-
-          // const SizedBox(height: 16),
-
-          // Container(
-          //   padding: const EdgeInsets.all(16),
-          //   decoration: BoxDecoration(
-          //     border: Border.all(color: Colors.deepOrange.withOpacity(.2)),
-          //     borderRadius: BorderRadius.circular(18),
-          //   ),
-          //   child: Row(
-          //     children: [
-          //       const Expanded(
-          //         child: Column(
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           children: [
-          //             Text(
-          //               "Two-Factor Authentication",
-          //               style: TextStyle(fontWeight: FontWeight.bold),
-          //             ),
-          //             SizedBox(height: 4),
-          //             Text(
-          //               "Add an extra layer of security",
-          //               style: TextStyle(color: Colors.blueGrey),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //       Switch(value: twoFactorEnabled, onChanged: onTwoFactorChanged),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );

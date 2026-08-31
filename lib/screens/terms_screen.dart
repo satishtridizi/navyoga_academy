@@ -12,7 +12,7 @@ class TermsScreen extends StatelessWidget {
     return AppScaffold(
       currentIndex: 4,
 
-      // backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -35,7 +35,7 @@ class TermsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
 
           children: [
-            /// HEADER CARD
+
             Container(
               padding: const EdgeInsets.all(22),
 
@@ -103,7 +103,7 @@ class TermsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// CONTENT CARD
+
             Container(
               padding: const EdgeInsets.all(22),
 
@@ -200,7 +200,7 @@ class TermsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// FOOTER
+
             Center(
               child: Text(
                 "Last updated: May 2026",
@@ -213,7 +213,7 @@ class TermsScreen extends StatelessWidget {
     );
   }
 
-  /// SECTION TITLE
+
   Widget _sectionTitle(String text) {
     return Text(
       text,
@@ -225,7 +225,7 @@ class TermsScreen extends StatelessWidget {
     );
   }
 
-  /// PARAGRAPH
+
   Widget _paragraph(String text) {
     return Padding(
       padding: const EdgeInsets.only(top: 8),

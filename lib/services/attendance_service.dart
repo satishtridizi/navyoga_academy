@@ -27,23 +27,7 @@ class AttendanceService {
     );
   }
 
-  // ✅ ADD THIS
-  // Future<List> getAttendance(String token) async {
-  //   final results = await Future.wait([
-  //     getFrontlineAttendance(token),
-  //     getOperationsAttendance(token),
-  //   ]);
 
-  //   final frontline = results[0];
-  //   final operations = results[1];
-
-  //   if (frontline["unauthorized"] == true ||
-  //       operations["unauthorized"] == true) {
-  //     throw Exception("UNAUTHORIZED");
-  //   }
-
-  //   return [...(frontline["data"] ?? []), ...(operations["data"] ?? [])];
-  // }
   Future<StudentAttendanceResponse> getAttendance(String token) async {
     final response = await _api.getRequest(
       url: ApiConstants.studentClassAttendanceUrl,

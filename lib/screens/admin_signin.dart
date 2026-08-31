@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: AppBackground(
         child: Stack(
           children: [
-            /// 🌈 BACKGROUND GRADIENT (PURPLE)
+
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            /// 🎨 FLOATING DOTS
+
             Positioned(top: 80, left: 40, child: circle(10, Colors.orange)),
 
             Positioned(
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: circle(12, Colors.white.withValues(alpha: 0.6)),
             ),
 
-            /// 📦 CARD CONTENT
+
             Center(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// 🔶 LOGO ICON
+
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -107,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 16),
 
-                    /// TITLE
+
                     const Text(
                       "NavYoga Academy",
                       style: TextStyle(
@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 6),
 
-                    /// SUBTITLE
+
                     const Text(
                       "Login Portal",
                       style: TextStyle(color: Colors.orangeAccent),
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 24),
 
-                    /// EMAIL
+
                     buildLabel("Email Address", Icons.email_outlined),
                     const SizedBox(height: 6),
                     buildField(
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 16),
 
-                    /// PASSWORD
+
                     buildLabel("Password", Icons.lock_outline),
                     const SizedBox(height: 6),
                     buildField(
@@ -148,21 +148,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 12),
 
-                    /// REMEMBER + FORGOT
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Row(
                           children: [
-                            // Checkbox(
-                            //   value: rememberMe,
-                            //   activeColor: const Color(0xFF6A11CB),
-                            //   onChanged: (val) {
-                            //     setState(() {
-                            //       rememberMe = val!;
-                            //     });
-                            //   },
-                            // ),
+
+
                             const Text("Remember me"),
                           ],
                         ),
@@ -175,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 16),
 
-                    /// 🔘 BUTTON
+
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -224,7 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// 🔘 LABEL
+
   static Widget buildLabel(String text, IconData icon) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -244,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// 🔤 FIELD
+
   static Widget buildField({
     required TextEditingController controller,
     required String hint,
@@ -273,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// 🎨 Circle
+
   Widget circle(double size, Color color) {
     return Container(
       height: size,

@@ -1,4 +1,4 @@
-// lib/services/workshop_service.dart
+
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -6,7 +6,7 @@ import '../api/api_service.dart';
 class WorkshopService {
   final ApiService _api = ApiService();
 
-  /// GET ALL WORKSHOPS
+
   Future<dynamic> getWorkshops(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/my-enrollments",
@@ -14,7 +14,7 @@ class WorkshopService {
     );
   }
 
-  /// GET SINGLE WORKSHOP
+
   Future<dynamic> getWorkshopById(String id, String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/$id",
@@ -22,7 +22,7 @@ class WorkshopService {
     );
   }
 
-  /// CREATE WORKSHOP
+
   Future<dynamic> createWorkshop(
     Map<String, dynamic> data,
     String token,
@@ -34,7 +34,7 @@ class WorkshopService {
     );
   }
 
-  /// UPDATE WORKSHOP
+
   Future<dynamic> updateWorkshop(
     String id,
     Map<String, dynamic> data,
@@ -47,7 +47,7 @@ class WorkshopService {
     );
   }
 
-  /// DELETE WORKSHOP
+
   Future<dynamic> deleteWorkshop(String id, String token) async {
     return await _api.deleteRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/$id",
@@ -55,7 +55,7 @@ class WorkshopService {
     );
   }
 
-  /// ENROLL IN WORKSHOP
+
   Future<dynamic> enrollWorkshop(String id, String token) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.workshops}/$id/enrollment",

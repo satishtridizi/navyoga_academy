@@ -33,6 +33,11 @@ class _LiveClassScreenState extends State<LiveClassScreen>
   Timer? _sessionTimer;
   final ValueNotifier<int> _sessionSecondsNotifier = ValueNotifier<int>(0);
 
+
+  static const Duration _reconnectFallbackDelay = Duration(seconds: 15);
+  Timer? _reconnectFallbackTimer;
+  bool _showReconnectRetry = false;
+
   bool _showParticipantsSheet = false;
   bool _showChatSheet = false;
   bool _trainerEndHandled = false;
@@ -67,8 +72,8 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
-      // Permission dialogs also trigger `inactive`. Do not suspend while the
-      // initial camera/microphone setup is still in progress.
+
+
       if (controller.state == LiveClassViewState.joined ||
           controller.state == LiveClassViewState.reconnecting) {
         if (controller.isChangingLocalMedia) return;
@@ -126,6 +131,17 @@ class _LiveClassScreenState extends State<LiveClassScreen>
       return;
     }
 
+    if (controller?.state == LiveClassViewState.reconnecting) {
+      _reconnectFallbackTimer ??= Timer(_reconnectFallbackDelay, () {
+        if (!mounted) return;
+        setState(() => _showReconnectRetry = true);
+      });
+    } else {
+      _reconnectFallbackTimer?.cancel();
+      _reconnectFallbackTimer = null;
+      if (_showReconnectRetry) _showReconnectRetry = false;
+    }
+
     setState(() {});
   }
 
@@ -143,6 +159,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
     unawaited(_setKeepScreenAwake(false));
     unawaited(SystemChrome.setPreferredOrientations(DeviceOrientation.values));
     _sessionTimer?.cancel();
+    _reconnectFallbackTimer?.cancel();
     _sessionSecondsNotifier.dispose();
     _controller?.removeListener(_onControllerStateChanged);
     _controller?.dispose();
@@ -272,7 +289,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         return _buildErrorView(controller);
 
       case LiveClassViewState.reconnecting:
-        return _buildReconnectingView();
+        return _buildReconnectingView(controller);
 
       case LiveClassViewState.joined:
         return _buildStageView(controller);
@@ -407,17 +424,36 @@ class _LiveClassScreenState extends State<LiveClassScreen>
     );
   }
 
-  Widget _buildReconnectingView() {
-    return const Center(
+  Widget _buildReconnectingView(LiveClassController controller) {
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: Colors.amberAccent),
-          SizedBox(height: 18),
-          Text(
+          const CircularProgressIndicator(color: Colors.amberAccent),
+          const SizedBox(height: 18),
+          const Text(
             'Reconnecting to live session...',
             style: TextStyle(color: Colors.white70),
           ),
+          if (_showReconnectRetry) ...[
+            const SizedBox(height: 20),
+            const Text(
+              'This is taking longer than usual.',
+              style: TextStyle(color: Colors.white54, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => controller.retry(),
+              icon: const Icon(Icons.refresh, color: Colors.amberAccent),
+              label: const Text(
+                'Retry now',
+                style: TextStyle(color: Colors.amberAccent),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.amberAccent),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -518,36 +554,37 @@ class _LiveClassScreenState extends State<LiveClassScreen>
 
     return Stack(
       children: [
-        /// 1. MAIN TUTOR / HOST STAGE
+
         Positioned.fill(
           child: _buildHostStage(controller, host),
         ),
 
-        /// 2. PIP LOCAL STUDENT TILE
+
         Positioned(
           top: 16,
           right: 16,
           child: _buildLocalStudentTile(controller),
         ),
 
-        /// 3. REMOTE STUDENT VIDEO STRIP
-        if (_remoteStudents(controller).isNotEmpty)
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 104,
-            child: _buildRemoteStudentStrip(controller),
-          ),
 
-        /// 4. BOTTOM CONTROL TOOLBAR
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: _buildControlToolbar(controller),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_remoteStudents(controller).isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: _buildRemoteStudentStrip(controller),
+                ),
+              _buildControlToolbar(controller),
+            ],
+          ),
         ),
 
-        /// 5. PARTICIPANTS SHEET OVERLAY
+
         if (_showParticipantsSheet)
           Positioned.fill(
             child: _buildParticipantsSheet(controller),
@@ -579,9 +616,11 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         : hostSpeaking
             ? Icons.graphic_eq
             : Icons.mic;
-    final showHostVideo = hostRenderer != null &&
-        hostRenderer.srcObject != null &&
-        !host.isVideoOff;
+
+
+    final rendererActive =
+        hostRenderer != null && hostRenderer.srcObject != null;
+    final showHostVideo = rendererActive;
 
     return Container(
       decoration: const BoxDecoration(
@@ -598,7 +637,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Host Live WebRTC Video Stream (if active)
+
           if (showHostVideo)
             Positioned.fill(
               child: RTCVideoView(
@@ -609,7 +648,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
               ),
             ),
 
-          // Host Avatar / Placeholder View (if video off or renderer null)
+
           if (!showHostVideo)
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -698,7 +737,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
               ],
             ),
 
-          // Host Label & Aspect Ratio Control at Bottom-Left of Stage
+
           Positioned(
             bottom: 110,
             left: 20,
@@ -833,7 +872,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
                     ),
             ),
 
-            // Top Status Bar (Mic Indicator)
+
             Positioned(
               top: 8,
               right: 8,
@@ -851,7 +890,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
               ),
             ),
 
-            // Bottom Name Tag
+
             Positioned(
               bottom: 8,
               left: 8,
@@ -989,7 +1028,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-          /// MIC ON/OFF TOGGLE
+
           _buildControlButton(
             icon: controller.isMicOn ? Icons.mic : Icons.mic_off,
             label: controller.isMicOn ? 'Mute' : 'Unmute',
@@ -999,7 +1038,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: () => controller.toggleMic(),
           ),
 
-          /// VIDEO ON/OFF TOGGLE
+
           _buildControlButton(
             icon: controller.isCameraOn ? Icons.videocam : Icons.videocam_off,
             label: controller.isCameraOn ? 'Stop Video' : 'Start Video',
@@ -1009,7 +1048,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: () => controller.toggleCamera(),
           ),
 
-          /// SWITCH CAMERA
+
           _buildControlButton(
             icon: Icons.cameraswitch,
             label: 'Flip',
@@ -1018,7 +1057,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: () => controller.switchCamera(),
           ),
 
-          /// SCREEN ORIENTATION TOGGLE
+
           _buildControlButton(
             icon: Icons.screen_rotation,
             label: 'Rotate',
@@ -1027,7 +1066,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: _rotateScreen,
           ),
 
-          /// SPEAKER / EARPIECE TOGGLE
+
           _buildControlButton(
             icon: controller.isSpeakerphoneOn
                 ? Icons.volume_up
@@ -1039,8 +1078,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: () => controller.toggleSpeakerphone(),
           ),
 
-          /// PARTICIPANTS
-          /// PARTICIPANTS
+
           _buildControlButton(
             icon: Icons.people,
             label: 'Participants',
@@ -1049,7 +1087,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
             onTap: () => _toggleParticipantsSheet(),
           ),
 
-          /// LEAVE CLASS
+
           _buildControlButton(
             icon: Icons.call_end,
             label: 'Leave',
@@ -1191,8 +1229,8 @@ class _LiveClassScreenState extends State<LiveClassScreen>
               left: 16,
               right: 16,
               top: 12,
-              // Scaffold already resizes the body for the keyboard. Applying
-              // viewInsets again here caused the bottom sheet to overflow.
+
+
               bottom: 12,
             ),
             decoration: const BoxDecoration(
@@ -1319,7 +1357,7 @@ class _LiveClassScreenState extends State<LiveClassScreen>
         color: Colors.black54,
         alignment: Alignment.bottomCenter,
         child: GestureDetector(
-          onTap: () {}, // Prevent taps inside sheet from closing it
+          onTap: () {},
           child: Container(
             height: MediaQuery.of(context).size.height * 0.55,
             decoration: const BoxDecoration(

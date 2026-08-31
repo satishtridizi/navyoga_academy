@@ -35,7 +35,7 @@ class RecordingCard extends StatelessWidget {
 
         child: Column(
           children: [
-            /// THUMBNAIL
+
             Stack(
               children: [
                 Container(
@@ -97,7 +97,7 @@ class RecordingCard extends StatelessWidget {
               ],
             ),
 
-            /// DETAILS
+
             Padding(
               padding: const EdgeInsets.all(14),
 

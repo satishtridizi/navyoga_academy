@@ -13,7 +13,7 @@ class ShareEarnCard extends StatelessWidget {
         color: const Color(0xffffefe6),
         borderRadius: BorderRadius.circular(24),
 
-        /// BORDER
+
         border: Border.all(color: Colors.deepOrange, width: 1.5),
 
         boxShadow: [
@@ -28,7 +28,7 @@ class ShareEarnCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ICON
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -46,7 +46,7 @@ class ShareEarnCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// TITLE
+
           const Text(
             "Share & Earn Rewards!",
             style: TextStyle(
@@ -58,7 +58,7 @@ class ShareEarnCard extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          /// DESCRIPTION
+
           const Text(
             "Invite friends and earn ₹300 per referral + unlock achievement badges",
             style: TextStyle(color: Colors.blueGrey),
@@ -66,7 +66,7 @@ class ShareEarnCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          /// BUTTON
+
           Center(
             child: ElevatedButton.icon(
               onPressed: () {

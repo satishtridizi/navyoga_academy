@@ -26,7 +26,6 @@ class StatCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(26),
 
-          /// 🌈 SOFT GRADIENT
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -35,7 +34,6 @@ class StatCard extends StatelessWidget {
 
           border: Border.all(color: data.color.withOpacity(0.15)),
 
-          /// 🌫 PREMIUM SHADOW
           boxShadow: [
             BoxShadow(
               color: data.color.withOpacity(0.12),
@@ -54,7 +52,6 @@ class StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔹 TITLE
             Text(
               data.title,
               style: const TextStyle(
@@ -66,13 +63,11 @@ class StatCard extends StatelessWidget {
 
             const Spacer(),
 
-            /// 🔹 ICON + VALUE
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
 
               children: [
-                /// ICON BOX
                 Animate(
                   effects: const [
                     ScaleEffect(
@@ -102,7 +97,6 @@ class StatCard extends StatelessWidget {
                   ),
                 ),
 
-                /// VALUE
                 Text(
                   data.value,
                   style: const TextStyle(

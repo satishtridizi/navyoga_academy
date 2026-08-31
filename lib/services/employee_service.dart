@@ -1,4 +1,4 @@
-// lib/services/employee_service.dart
+
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -6,7 +6,7 @@ import '../api/api_service.dart';
 class EmployeeService {
   final ApiService _api = ApiService();
 
-  /// GET ALL EMPLOYEES
+
   Future<dynamic> getEmployees(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.employees}",
@@ -14,7 +14,7 @@ class EmployeeService {
     );
   }
 
-  /// GET SINGLE EMPLOYEE
+
   Future<dynamic> getEmployeeById(String id, String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.employees}/$id",
@@ -22,7 +22,7 @@ class EmployeeService {
     );
   }
 
-  /// CREATE EMPLOYEE
+
   Future<dynamic> createEmployee(
     Map<String, dynamic> data,
     String token,
@@ -34,7 +34,7 @@ class EmployeeService {
     );
   }
 
-  /// UPDATE EMPLOYEE
+
   Future<dynamic> updateEmployee(
     String id,
     Map<String, dynamic> data,
@@ -47,7 +47,7 @@ class EmployeeService {
     );
   }
 
-  /// DELETE EMPLOYEE
+
   Future<dynamic> deleteEmployee(String id, String token) async {
     return await _api.deleteRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.employees}/$id",

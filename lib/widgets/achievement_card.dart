@@ -30,7 +30,7 @@ class AchievementCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(26),
 
-            /// 🌈 SOFT GRADIENT
+
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -45,7 +45,7 @@ class AchievementCard extends StatelessWidget {
               width: 1.5,
             ),
 
-            /// 🌫 PREMIUM SHADOW
+
             boxShadow: [
               BoxShadow(
                 color: Colors.green.withOpacity(0.12),
@@ -57,7 +57,7 @@ class AchievementCard extends StatelessWidget {
 
           child: Column(
             children: [
-              /// 🎉 EMOJI
+
               Animate(
                 effects: const [
                   ScaleEffect(
@@ -72,7 +72,7 @@ class AchievementCard extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              /// 🔥 TITLE
+
               Text(
                 data.title,
                 textAlign: TextAlign.center,
@@ -86,7 +86,7 @@ class AchievementCard extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              /// 🔹 SUBTITLE
+
               Text(
                 data.subtitle,
                 textAlign: TextAlign.center,
@@ -96,7 +96,7 @@ class AchievementCard extends StatelessWidget {
 
               const SizedBox(height: 18),
 
-              /// 📅 DATE CHIP
+
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18,

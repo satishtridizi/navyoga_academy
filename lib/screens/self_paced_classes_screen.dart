@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:navyoga_academy/models/class_model.dart';
 import 'package:navyoga_academy/routes/app_routes.dart';
-//import 'package:navyoga_academy/services/certificate_service.dart';
+
 import 'package:navyoga_academy/services/self_paced_service.dart';
 import 'package:navyoga_academy/utils/auth_manager.dart';
 import 'package:navyoga_academy/screens/self_paced_lesson_screen.dart';
@@ -29,7 +29,7 @@ class _SelfPacedClassesScreenState extends State<SelfPacedClassesScreen> {
   bool isLoading = true;
   List<ClassModel> classes = [];
   final progressService = SelfPacedProgressService();
-  // final certificateService = CertificateService();
+
 
   Set<String> completedLessonIds = {};
   @override
@@ -75,25 +75,6 @@ class _SelfPacedClassesScreenState extends State<SelfPacedClassesScreen> {
     }
   }
 
-  // Future<void> downloadCertificate() async {
-  //   try {
-  //     final file = await certificateService.generateCertificate(
-  //       studentName: "Student",
-  //       moduleName: widget.title,
-  //     );
-
-  //     await OpenFilex.open(file.path);
-  //     await Share.shareXFiles([XFile(file.path)]);
-
-  //     if (!mounted) return;
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Certificate generated successfully")),
-  //     );
-  //   } catch (e) {
-  //     print("CERTIFICATE ERROR => $e");
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +125,8 @@ class _SelfPacedClassesScreenState extends State<SelfPacedClassesScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          // ElevatedButton.icon(
-                          //   onPressed: downloadCertificate,
-                          //   icon: const Icon(Icons.download),
-                          //   label: const Text("Download Certificate"),
-                          // ),
+
+
                         ],
                       ),
                     ),

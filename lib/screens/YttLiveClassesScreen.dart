@@ -55,7 +55,7 @@ class YttLiveClassesScreen extends StatelessWidget {
 
             return RefreshIndicator(
               onRefresh: () async {
-                // Add API refresh here later.
+
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),

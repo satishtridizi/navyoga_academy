@@ -1,4 +1,4 @@
-// lib/services/tutor_service.dart
+
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -6,7 +6,7 @@ import '../api/api_service.dart';
 class TutorService {
   final ApiService _api = ApiService();
 
-  /// GET ALL TUTORS
+
   Future<dynamic> getTutors(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.tutors}",
@@ -14,7 +14,7 @@ class TutorService {
     );
   }
 
-  /// GET SINGLE TUTOR
+
   Future<dynamic> getTutorById(String id, String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.tutors}/$id",
@@ -22,7 +22,7 @@ class TutorService {
     );
   }
 
-  /// GET MY TUTOR PROFILE (for logged-in tutor)
+
   Future<dynamic> getMyTutorProfile(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}/api/auth/tutor/me",
@@ -30,7 +30,7 @@ class TutorService {
     );
   }
 
-  /// CREATE TUTOR
+
   Future<dynamic> createTutor(Map<String, dynamic> data, String token) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.tutors}",
@@ -39,7 +39,7 @@ class TutorService {
     );
   }
 
-  /// UPDATE TUTOR
+
   Future<dynamic> updateTutor(
     String id,
     Map<String, dynamic> data,
@@ -52,7 +52,7 @@ class TutorService {
     );
   }
 
-  /// DELETE TUTOR
+
   Future<dynamic> deleteTutor(String id, String token) async {
     return await _api.deleteRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.tutors}/$id",

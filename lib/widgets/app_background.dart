@@ -9,7 +9,7 @@ class AppBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        /// BACKGROUND
+
         Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -20,20 +20,20 @@ class AppBackground extends StatelessWidget {
           ),
         ),
 
-        /// FLOATING CIRCLES
+
         _circle(40, 80, 60, Colors.orange.withOpacity(0.12)),
         _circle(280, 140, 50, Colors.purple.withOpacity(0.08)),
         _circle(90, 650, 40, Colors.orange.withOpacity(0.08)),
         _circle(260, 700, 80, Colors.red.withOpacity(0.08)),
 
-        /// YOGA ICONS
+
         _icon(Icons.self_improvement, 70, 180, 90),
         _icon(Icons.accessibility_new, 230, 260, 80),
         _icon(Icons.spa, 140, 330, 50),
         _icon(Icons.fitness_center, 260, 420, 70),
         _icon(Icons.airline_seat_legroom_normal, 110, 520, 80),
 
-        /// SCREEN CONTENT
+
         child,
       ],
     );

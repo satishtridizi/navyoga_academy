@@ -138,15 +138,15 @@ class CustomDrawer extends StatelessWidget {
     final List<Map<String, dynamic>> menuItems = [
       {"icon": Icons.dashboard, "title": "Dashboard"},
       {"icon": Icons.menu_book, "title": "My Classes"},
-      //{"icon": Icons.check_circle, "title": "Enrollment Success"},
+
       {"icon": Icons.school, "title": "Self-Paced"},
       {"icon": Icons.videocam, "title": "Recordings"},
       {"icon": Icons.cast_for_education, "title": "YTT Live Classes"},
       {"icon": Icons.video_camera_front, "title": "YTT Recorded"},
       {"icon": Icons.calendar_today, "title": "Attendance"},
       {"icon": Icons.event, "title": "Events"},
-      // {"icon": Icons.school, "title": "Workshops"},
-      // {"icon": Icons.live_tv, "title": "Live Classes"},
+
+
       {"icon": Icons.card_giftcard, "title": "Referrals"},
       {"icon": Icons.person_outline, "title": "Profile"},
       {"icon": Icons.subscriptions_outlined, "title": "Subscription"},
@@ -160,7 +160,6 @@ class CustomDrawer extends StatelessWidget {
         child: Column(
           children: [
 
-          /// 🔝 HEADER
           ListTile(
             leading: Container(
               width: 50,
@@ -204,7 +203,6 @@ class CustomDrawer extends StatelessWidget {
 
           const Divider(),
 
-          /// 🔥 MENU LIST (DYNAMIC)
           Expanded(
             child: ListView.builder(
               itemCount: menuItems.length,
@@ -277,16 +275,8 @@ class CustomDrawer extends StatelessWidget {
                       } else if (item["title"] == "Events") {
                         Navigator.pushNamed(context, AppRoutes.events);
                       }
-                      // else if (item["title"] == "Workshops") {
-                      //   Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //       builder: (_) => const WorkshopsScreen(),
-                      //     ),
-                      //   );
-                      // } else if (item["title"] == "Live Classes") {
-                      //   Navigator.pushNamed(context, AppRoutes.liveClassesList);
-                      // }
+
+
                       else if (item["title"] == "Profile") {
                         Navigator.push(
                           context,
@@ -325,12 +315,8 @@ class CustomDrawer extends StatelessWidget {
                           ),
                         );
                       }
-                      // else if (item["title"] == "Enrollment Success") {
-                      //   Navigator.pushNamed(
-                      //     context,
-                      //     AppRoutes.enrollmentsuccess,
-                      //   );
-                      // }
+
+
                     },
                   ),
                 );
@@ -340,7 +326,6 @@ class CustomDrawer extends StatelessWidget {
 
           const Divider(),
 
-          /// 🚪 LOGOUT
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.blueGrey),
             title: const Text("Logout"),

@@ -20,10 +20,10 @@ class ProfileStatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xfff7f7f7), // 🔥 soft bg (not white)
+          color: const Color(0xfff7f7f7),
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: stat.color.withOpacity(.25), // 🔥 subtle colored border
+            color: stat.color.withOpacity(.25),
           ),
         ),
 
@@ -31,7 +31,7 @@ class ProfileStatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            /// 🔥 ICON CAPSULE (this is key difference)
+
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -43,7 +43,7 @@ class ProfileStatCard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// 🔥 TITLE (TOP)
+
             Text(
               stat.title,
               style: const TextStyle(color: Color(0xff64748B), fontSize: 14),
@@ -51,7 +51,7 @@ class ProfileStatCard extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            /// 🔥 VALUE (BOTTOM, BIG)
+
             Expanded(
               child: Align(
                 alignment: Alignment.bottomLeft,

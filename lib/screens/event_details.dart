@@ -175,7 +175,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
           physics: const ClampingScrollPhysics(),
 
           slivers: [
-            /// 🔥 APP BAR IMAGE
+
             SliverAppBar(
               expandedHeight: 280,
               pinned: true,
@@ -202,7 +202,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       ),
                     ),
 
-                    /// DARK OVERLAY
+
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -217,7 +217,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                       ),
                     ),
 
-                    /// TITLE
+
                     Positioned(
                       left: 20,
                       bottom: 30,
@@ -242,7 +242,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
               ),
             ),
 
-            /// 🔥 CONTENT
+
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -251,7 +251,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
-                    /// TAGS
+
                     AnimatedItem(
                       index: 1,
 
@@ -267,7 +267,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                     const SizedBox(height: 24),
 
-                    /// DESCRIPTION CARD
+
                     AnimatedItem(
                       index: 2,
 
@@ -317,7 +317,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                     const SizedBox(height: 24),
 
-                    /// EVENT DETAILS
+
                     AnimatedItem(
                       index: 3,
 
@@ -377,7 +377,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
 
                     const SizedBox(height: 40),
 
-                    /// JOIN BUTTON
+
                     AnimatedItem(
                       index: 4,
 
@@ -433,7 +433,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
   }
 
-  /// 🔥 TAG CHIP
+
   Widget _tag(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -453,7 +453,7 @@ class _EventDetailsScreenState extends State<EventDetailsScreen> {
     );
   }
 
-  /// 🔥 DETAIL ROW
+
   Widget _detailRow(IconData icon, String title, String value) {
     return Row(
       children: [

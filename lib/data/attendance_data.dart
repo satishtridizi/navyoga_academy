@@ -5,7 +5,7 @@ import '../models/progress_model.dart';
 import '../models/insight_model.dart';
 
 class AttendanceData {
-  // ---------- Stats ----------
+
   static const List<AttendanceStatModel> stats = [
     AttendanceStatModel(
       title: "Total Classes",
@@ -36,7 +36,7 @@ class AttendanceData {
     ),
   ];
 
-  // ---------- Detail Card ----------
+
   static const List<DetailModel> details = [
     DetailModel(
       title: "Total Time This Month",
@@ -47,7 +47,7 @@ class AttendanceData {
     ),
   ];
 
-  // ---------- Insight Cards ----------
+
   static const List<InsightModel> insights = [
     InsightModel(
       title: "Average Per Day",
@@ -83,7 +83,7 @@ class AttendanceData {
     ),
   ];
 
-  // ---------- Monthly ----------
+
   static const List<ProgressModel> monthly = [
     ProgressModel(
       title: "January",
@@ -107,7 +107,7 @@ class AttendanceData {
     ),
   ];
 
-  // ---------- Class Wise ----------
+
   static const List<ProgressModel> classWise = [
     ProgressModel(
       title: "Advanced Hatha Yoga",

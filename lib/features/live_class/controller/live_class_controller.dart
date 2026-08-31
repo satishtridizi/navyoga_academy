@@ -6,6 +6,8 @@ import 'package:mediasfu_mediasoup_client/mediasfu_mediasoup_client.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'package:navyoga_academy/features/live_class/models/sfu_join_response_model.dart';
+import 'package:navyoga_academy/api/api_constants.dart';
+import 'package:navyoga_academy/api/api_service.dart';
 
 import '../models/live_class_arguments.dart';
 import '../models/live_class_message.dart';
@@ -36,7 +38,7 @@ class LiveClassController extends ChangeNotifier {
   final SfuSocketService socketService;
   final String token;
 
-  // ─── State ───────────────────────────────────────────────────────────────
+
   LiveClassViewState state = LiveClassViewState.initial;
 
   int waitingCount = 0;
@@ -52,46 +54,36 @@ class LiveClassController extends ChangeNotifier {
   bool isSpeakerphoneOn = true;
   bool isHostSpeaking = false;
 
-  /// Controls video object fit for tutor stage (true: Contain/Fit full body, false: Cover/Fill).
   bool isFitMode = true;
 
-  // ─── WebRTC / mediasoup objects ──────────────────────────────────────────
 
-  /// Local camera/mic stream from getUserMedia.
   MediaStream? localStream;
 
-  /// RTCVideoRenderer for the local camera preview (PIP tile).
   final RTCVideoRenderer localRenderer = RTCVideoRenderer();
 
-  /// All active remote consumers: producerId → Consumer.
   final Map<String, Consumer> _consumers = {};
   final Set<String> _pendingConsumers = {};
   final Map<String, String> _producerPeerIds = {};
   final Set<String> _hostProducerIds = {};
-
-  /// RTCVideoRenderer per remote producer (for video): producerId → renderer.
   final Map<String, RTCVideoRenderer> remoteVideoRenderers = {};
 
-  // Keep every remote audio stream alive. Audio tracks play without a widget,
-  // but dropping the stream reference can stop playback on some platforms.
   final Map<String, MediaStream> _remoteAudioStreams = {};
 
-  // mediasoup device – loaded with router RTP capabilities after joining.
   Device? _device;
 
-  // Transports
+
   Transport? _sendTransport;
   Transport? _recvTransport;
 
-  // Local producers
+
   Producer? _audioProducer;
   Producer? _videoProducer;
 
-  // Tracks produced locally
+
   MediaStreamTrack? _localAudioTrack;
   MediaStreamTrack? _localVideoTrack;
 
-  // Guards
+
   bool _disposed = false;
   bool _joining = false;
   bool _mediaSetupInProgress = false;
@@ -102,32 +94,31 @@ class LiveClassController extends ChangeNotifier {
   bool _micToggleInProgress = false;
   bool _cameraToggleInProgress = false;
 
-  // Socket subscriptions
+  bool _hostVideoWasClosedByProducerClose = false;
+  Timer? _hostVideoRetryTimer;
+
   final List<StreamSubscription<dynamic>> _subscriptions = [];
 
-  // ─── Convenience getters ─────────────────────────────────────────────────
-
-  /// A verified instructor renderer. Never fall back to an attendee stream.
   RTCVideoRenderer? get hostVideoRenderer {
     if (remoteVideoRenderers.isEmpty) return null;
     for (final entry in remoteVideoRenderers.entries) {
       if (_hostProducerIds.contains(entry.key)) return entry.value;
       final peerId = _producerPeerIds[entry.key];
-      if (peerId == null || peerId.isEmpty) continue;
-      final isInstructor = participants.any(
-        (participant) =>
-            participant.isHost &&
-            (participant.userId == peerId || participant.socketId == peerId),
-      );
-      if (isInstructor) return entry.value;
+      if (peerId != null && peerId.isNotEmpty) {
+        final isInstructor = participants.any(
+          (participant) =>
+              participant.isHost &&
+              (participant.userId == peerId || participant.socketId == peerId),
+        );
+        if (isInstructor) return entry.value;
+      }
     }
-    return null;
+    return remoteVideoRenderers.values.first;
   }
 
   bool get hasRemoteVideo => hostVideoRenderer != null;
 
-  /// Returns only media that is owned by [participant]. Host-stage selection
-  /// remains separate, so an attendee can never replace the trainer on stage.
+
   RTCVideoRenderer? videoRendererForParticipant(SfuParticipant participant) {
     for (final entry in remoteVideoRenderers.entries) {
       if (participant.producerIds.contains(entry.key)) return entry.value;
@@ -145,12 +136,11 @@ class LiveClassController extends ChangeNotifier {
   bool get isChangingLocalMedia =>
       _micToggleInProgress || _cameraToggleInProgress;
 
-  // ─── Initialise ──────────────────────────────────────────────────────────
 
   Future<void> initialize() async {
     if (state != LiveClassViewState.initial) return;
 
-    // Initialise local renderer so it's always safe to pass to RTCVideoView.
+
     await localRenderer.initialize();
 
     _listenToSocketEvents();
@@ -167,7 +157,6 @@ class LiveClassController extends ChangeNotifier {
     }
   }
 
-  // ─── Socket event listeners ───────────────────────────────────────────────
 
   void _listenToSocketEvents() {
     _subscriptions.add(
@@ -177,9 +166,8 @@ class LiveClassController extends ChangeNotifier {
             _setState(LiveClassViewState.reconnecting);
 
           case SfuConnectionStatus.connected:
-            // After reconnect the socket auto-rejoins via the reconnect handler
-            // inside SfuSocketService. We watch for the join response via the
-            // normal participantsStream / hostJoinedStream.
+
+
             break;
 
           case SfuConnectionStatus.disconnected:
@@ -224,7 +212,7 @@ class LiveClassController extends ChangeNotifier {
           }
           await _joinRoomWithRetry();
         } else if (state == LiveClassViewState.joined) {
-          // Host may have started a new stream — try consuming new producers.
+
           await _consumeAllRemoteProducers();
         }
       }),
@@ -303,6 +291,19 @@ class LiveClassController extends ChangeNotifier {
             data['isVideoOff'] == true || data['is_video_off'] == true;
         if (userId == null || userId.isEmpty) return;
         _updateParticipantState(userId: userId, isVideoOff: isVideoOff);
+
+
+        if (!isVideoOff && _isHostParticipantId(userId) && !_disposed) {
+          _hostVideoWasClosedByProducerClose = false;
+
+          _hostVideoRetryTimer?.cancel();
+          _hostVideoRetryTimer = null;
+
+
+          if (hostVideoRenderer == null) {
+            _scheduleHostVideoRetries();
+          }
+        }
       }),
     );
 
@@ -339,11 +340,54 @@ class LiveClassController extends ChangeNotifier {
         final producerId = (data['producerId'] ?? data['producer_id'] ??
                 data['id'])
             ?.toString() ?? '';
+        final kind = data['kind']?.toString() ?? 'video';
+
         if (producerId.isNotEmpty) {
+
+          final peerId = _extractProducerPeerId(data);
+          if (peerId != null && peerId.isNotEmpty) {
+            _producerPeerIds[producerId] = peerId;
+          }
+
+
+          if (kind == 'video') {
+            final isHostProducer = _isVerifiedHostProducer(data, peerId: peerId);
+            final hostHasVideoOff = participants.any(
+              (p) => p.isHost && p.isVideoOff,
+            );
+            final hostRendererGone = hostVideoRenderer == null;
+
+
+            final shouldClearHostVideoOff = isHostProducer ||
+                (_hostVideoWasClosedByProducerClose &&
+                    hostHasVideoOff &&
+                    hostRendererGone);
+
+            if (shouldClearHostVideoOff) {
+              _hostVideoWasClosedByProducerClose = false;
+              for (final participant in participants) {
+                if (!participant.isHost) continue;
+                if (!participant.isVideoOff) break;
+                final matchesPeer = peerId != null &&
+                    (participant.userId == peerId ||
+                        participant.socketId == peerId);
+                if (matchesPeer || participants.where((p) => p.isHost).length == 1) {
+                  _updateParticipantState(
+                    userId: participant.userId.isNotEmpty
+                        ? participant.userId
+                        : participant.socketId,
+                    isVideoOff: false,
+                  );
+                  break;
+                }
+              }
+            }
+          }
+
           await _consumeSingleProducer({
             ...data,
             'id': producerId,
-            'kind': data['kind']?.toString() ?? 'video',
+            'kind': kind,
           });
         } else {
           await _consumeAllRemoteProducers();
@@ -354,10 +398,24 @@ class LiveClassController extends ChangeNotifier {
     _subscriptions.add(
       socketService.producerClosedStream.listen((producerId) async {
         debugPrint('producerClosed event received for $producerId');
+        final wasHostVideoProducer = _hostProducerIds.contains(producerId) ||
+            (() {
+              final peerId = _producerPeerIds[producerId];
+              if (peerId == null) return false;
+              return participants.any(
+                (p) => p.isHost &&
+                    (p.userId == peerId || p.socketId == peerId),
+              );
+            })();
         if (remoteVideoRenderers.containsKey(producerId)) {
           final renderer = remoteVideoRenderers.remove(producerId);
           renderer?.srcObject = null;
           await renderer?.dispose();
+
+
+          if (wasHostVideoProducer) {
+            _hostVideoWasClosedByProducerClose = true;
+          }
         }
         _consumers.remove(producerId);
         _remoteAudioStreams.remove(producerId);
@@ -377,7 +435,6 @@ class LiveClassController extends ChangeNotifier {
     );
   }
 
-  // ─── Room join flow ───────────────────────────────────────────────────────
 
   Future<void> _joinRoom() async {
     if (_joining) return;
@@ -439,8 +496,8 @@ class LiveClassController extends ChangeNotifier {
     }
 
     if (response.isJoined) {
-      // The mobile client is always a student. Some rooms previously promoted
-      // the first peer to host when no tutor was connected yet.
+
+
       self = response.self?.copyWith(role: 'student');
       participants = _withSelf(
         response.participants.map((participant) {
@@ -466,14 +523,13 @@ class LiveClassController extends ChangeNotifier {
     }
   }
 
-  // ─── mediasoup full setup ─────────────────────────────────────────────────
 
   Future<void> _setupMediasoup(Map<String, dynamic> routerCaps) async {
     if (_mediaSetupInProgress || _disposed) return;
     _mediaSetupInProgress = true;
 
     try {
-      // 1. Request permissions (soft check - doesn't block room join if denied)
+
       await _requestPermissions();
 
       try {
@@ -482,13 +538,13 @@ class LiveClassController extends ChangeNotifier {
         debugPrint('Failed to set speakerphone on: $e');
       }
 
-      // 2. Load mediasoup Device
+
       _device = Device();
       final rtpCaps = RtpCapabilities.fromMap(routerCaps);
       await _device!.load(routerRtpCapabilities: rtpCaps);
       debugPrint('mediasoup Device loaded');
 
-      // 3. Create send transport and produce local tracks (if permitted)
+
       try {
         await _createSendTransport();
         await _startLocalMediaAndProduce();
@@ -499,14 +555,17 @@ class LiveClassController extends ChangeNotifier {
         await _publishLocalMediaStatus();
       }
 
-      // 4. Create the recv transport (for the host's streams)
+
       await _createRecvTransport();
 
-      // 5. Consume all existing remote producers (host audio + video)
+
       await _consumeAllRemoteProducers();
 
       if (!_disposed) {
         _setState(LiveClassViewState.joined);
+
+
+        unawaited(_markAttendance());
       }
     } catch (error, stack) {
       debugPrint('mediasoup setup error: $error\n$stack');
@@ -518,7 +577,18 @@ class LiveClassController extends ChangeNotifier {
     }
   }
 
-  // ─── Permissions ─────────────────────────────────────────────────────────
+  Future<void> _markAttendance() async {
+    try {
+      await ApiService().postRequest(
+        url: ApiConstants.attendClassUrl(arguments.classId),
+        body: const {},
+        token: token,
+      );
+    } catch (e) {
+      debugPrint('Unable to mark class attendance: $e');
+    }
+  }
+
 
   Future<void> _requestPermissions() async {
     try {
@@ -552,7 +622,6 @@ class LiveClassController extends ChangeNotifier {
           ];
   }
 
-  // ─── Send transport ───────────────────────────────────────────────────────
 
   Future<void> _createSendTransport() async {
     final transportData = await socketService.createTransport(
@@ -619,7 +688,6 @@ class LiveClassController extends ChangeNotifier {
     }
   }
 
-  // ─── Local media ─────────────────────────────────────────────────────────
 
   Future<void> _startLocalMediaAndProduce() async {
     bool micGranted = false;
@@ -641,7 +709,7 @@ class LiveClassController extends ChangeNotifier {
     MediaStream? stream;
 
     try {
-      // Request media with high-quality WebRTC audio processing & optimal video resolution
+
       stream = await navigator.mediaDevices.getUserMedia({
         'audio': micGranted
             ? {
@@ -715,7 +783,7 @@ class LiveClassController extends ChangeNotifier {
               audioOnlyStream != null &&
               !identical(stream, audioOnlyStream)) {
             for (final track in audioOnlyStream.getAudioTracks()) {
-              stream!.addTrack(track);
+              stream.addTrack(track);
             }
           }
         }
@@ -732,10 +800,10 @@ class LiveClassController extends ChangeNotifier {
 
     localStream = stream;
 
-    // Bind to local renderer for the PIP tile.
+
     localRenderer.srcObject = stream;
 
-    // Audio track → produce.
+
     final audioTracks = stream.getAudioTracks();
     if (audioTracks.isNotEmpty && _sendTransport != null) {
       _localAudioTrack = audioTracks.first;
@@ -751,7 +819,7 @@ class LiveClassController extends ChangeNotifier {
       );
     }
 
-    // Video track → produce.
+
     final videoTracks = stream.getVideoTracks();
     if (videoTracks.isNotEmpty && _sendTransport != null) {
       _localVideoTrack = videoTracks.first;
@@ -809,7 +877,6 @@ class LiveClassController extends ChangeNotifier {
     };
   }
 
-  // ─── Recv transport ───────────────────────────────────────────────────────
 
   Future<void> _createRecvTransport() async {
     final transportData = await socketService.createTransport(
@@ -843,7 +910,6 @@ class LiveClassController extends ChangeNotifier {
     debugPrint('Recv transport created: ${_recvTransport!.id}');
   }
 
-  // ─── Consume remote producers ─────────────────────────────────────────────
 
   Future<void> _consumeAllRemoteProducers() async {
     if (_recvTransport == null || _device == null) {
@@ -862,9 +928,8 @@ class LiveClassController extends ChangeNotifier {
       }
 
       _syncProducerOwnershipFromParticipants();
-      // Preserve the order returned by the room. Parallel consumption makes
-      // whichever renderer finishes first appear as the trainer, even when a
-      // later producer belongs to another student.
+
+
       for (final producer in producers) {
         await _consumeSingleProducer(producer);
       }
@@ -959,6 +1024,12 @@ class LiveClassController extends ChangeNotifier {
         : const <String, dynamic>{};
     final value = data['peerId'] ??
         data['peer_id'] ??
+
+
+        data['producerSocketId'] ??
+        data['producer_socket_id'] ??
+        data['producerUserId'] ??
+        data['producer_user_id'] ??
         data['socketId'] ??
         data['socket_id'] ??
         data['userId'] ??
@@ -1085,7 +1156,7 @@ class LiveClassController extends ChangeNotifier {
       _hostProducerIds.add(producerId);
     }
 
-    // Skip already consumed producers.
+
     if (_consumers.containsKey(producerId) ||
         !_pendingConsumers.add(producerId)) {
       debugPrint('Already consuming producer $producerId');
@@ -1115,12 +1186,7 @@ class LiveClassController extends ChangeNotifier {
       final rtpParamsRaw =
           consumeData['rtpParameters'] ?? consumeData['rtp_parameters'];
 
-      // Never promote an unidentified stream to the host stage. The server
-      // must identify the trainer by role, peer ownership, or producer ID.
-      // All other streams are still consumed as attendee media.
 
-      // Keep this at the application boundary: setRemoteDescription failures
-      // originate from the SDP generated from these server RTP parameters.
       debugPrint(
         'Consume response for $producerId: '
         '${jsonEncode(consumeData)}',
@@ -1133,6 +1199,7 @@ class LiveClassController extends ChangeNotifier {
           'id=${consumeData['id']}, kind=${consumeData['kind']}, '
           'rtpParametersType=${rtpParamsRaw.runtimeType}',
         );
+        _pendingConsumers.remove(producerId);
         return;
       }
 
@@ -1141,6 +1208,7 @@ class LiveClassController extends ChangeNotifier {
           : RTCRtpMediaType.RTCRtpMediaTypeAudio;
 
       final rtpParameters = RtpParameters.fromMap(rtpParamsRaw);
+
 
       _recvTransport!.consume(
         id: consumerId,
@@ -1152,15 +1220,15 @@ class LiveClassController extends ChangeNotifier {
       );
     } catch (e) {
       debugPrint('Failed to consume producer $producerId: $e');
-    } finally {
       _pendingConsumers.remove(producerId);
     }
   }
 
-  /// Called by the Transport via consumerCallback when a Consumer is ready.
+
   void _onConsumerCreated(Consumer consumer, Function? accept) async {
     final producerId = consumer.producerId;
     _consumers[producerId] = consumer;
+    _pendingConsumers.remove(producerId);
 
     debugPrint(
         'Consumer created: id=${consumer.id} kind=${consumer.kind} producer=$producerId');
@@ -1175,8 +1243,8 @@ class LiveClassController extends ChangeNotifier {
       debugPrint('Unable to prepare remote ${consumer.kind}: $error');
       debugPrintStack(stackTrace: stackTrace);
     } finally {
-      // Call accept even if renderer/audio-route setup fails so the transport
-      // callback is never left hanging.
+
+
       accept?.call();
     }
 
@@ -1210,6 +1278,32 @@ class LiveClassController extends ChangeNotifier {
 
     remoteVideoRenderers[consumer.producerId] = renderer;
     debugPrint('Video renderer set for producer ${consumer.producerId}');
+
+
+    final peerId = _producerPeerIds[consumer.producerId];
+    final isPositivelyHostProducer = _hostProducerIds.contains(consumer.producerId) ||
+        (peerId != null &&
+            participants.any(
+              (p) => p.isHost && (p.userId == peerId || p.socketId == peerId),
+            ));
+
+
+    final onlyOneRenderer = remoteVideoRenderers.length == 1;
+    final hostWithVideoOff = participants.where((p) => p.isHost && p.isVideoOff);
+
+    if ((isPositivelyHostProducer || onlyOneRenderer) &&
+        hostWithVideoOff.isNotEmpty) {
+      _hostVideoWasClosedByProducerClose = false;
+      for (final participant in hostWithVideoOff) {
+        _updateParticipantState(
+          userId: participant.userId.isNotEmpty
+              ? participant.userId
+              : participant.socketId,
+          isVideoOff: false,
+        );
+      }
+    }
+
     _notify();
   }
 
@@ -1228,7 +1322,6 @@ class LiveClassController extends ChangeNotifier {
     debugPrint('Audio consumer ready for producer ${consumer.producerId}');
   }
 
-  // ─── Mic / Camera toggles ─────────────────────────────────────────────────
 
   Future<void> toggleMic() async {
     if (_micToggleInProgress || _mediaSuspended) return;
@@ -1464,6 +1557,15 @@ class LiveClassController extends ChangeNotifier {
   Future<void> resumeMediaAfterInterruption() async {
     if (!_mediaSuspended) return;
     _mediaSuspended = false;
+
+    if (!socketService.isConnected) {
+
+
+      debugPrint('Socket disconnected on resume - forcing full reconnect.');
+      await retry();
+      return;
+    }
+
     isMicOn = _restoreMicAfterInterruption && _localAudioTrack != null;
     isCameraOn = _restoreCameraAfterInterruption && _localVideoTrack != null;
     if (_localAudioTrack != null) _localAudioTrack!.enabled = isMicOn;
@@ -1487,7 +1589,37 @@ class LiveClassController extends ChangeNotifier {
     _notify();
   }
 
-  // ─── Retry / Leave ───────────────────────────────────────────────────────
+
+  void _scheduleHostVideoRetries() {
+    const delays = [
+      Duration(milliseconds: 500),
+      Duration(milliseconds: 1500),
+      Duration(milliseconds: 3000),
+      Duration(milliseconds: 5500),
+    ];
+    var attempt = 0;
+
+    void schedule() {
+      if (_disposed || attempt >= delays.length) return;
+      _hostVideoRetryTimer = Timer(delays[attempt], () async {
+        _hostVideoRetryTimer = null;
+        if (_disposed) return;
+        if (hostVideoRenderer != null) {
+          debugPrint('Host video renderer ready after retry $attempt — stopping.');
+          return;
+        }
+        debugPrint(
+          'Host cam re-enable retry ${attempt + 1}/${delays.length}: list-producers...',
+        );
+        attempt++;
+        await _consumeAllRemoteProducers();
+        if (hostVideoRenderer == null) schedule();
+      });
+    }
+
+    schedule();
+  }
+
 
   Future<void> retry() async {
     errorMessage = null;
@@ -1510,18 +1642,22 @@ class LiveClassController extends ChangeNotifier {
     await socketService.disconnect();
   }
 
-  // ─── Mediasoup teardown ──────────────────────────────────────────────────
 
   Future<void> _teardownMediasoup() async {
     debugPrint('Tearing down mediasoup resources...');
 
-    // Stop producers
+
+    _hostVideoRetryTimer?.cancel();
+    _hostVideoRetryTimer = null;
+    _hostVideoWasClosedByProducerClose = false;
+
+
     try {
       _audioProducer = null;
       _videoProducer = null;
     } catch (_) {}
 
-    // Close transports (automatically closes producers/consumers)
+
     try {
       await _sendTransport?.close();
     } catch (_) {}
@@ -1532,7 +1668,7 @@ class LiveClassController extends ChangeNotifier {
     } catch (_) {}
     _recvTransport = null;
 
-    // Dispose remote video renderers
+
     for (final renderer in remoteVideoRenderers.values) {
       renderer.srcObject = null;
       await renderer.dispose();
@@ -1544,7 +1680,7 @@ class LiveClassController extends ChangeNotifier {
     _producerPeerIds.clear();
     _hostProducerIds.clear();
 
-    // Stop local tracks
+
     if (localStream != null) {
       for (final track in localStream!.getTracks()) {
         await track.stop();
@@ -1561,7 +1697,6 @@ class LiveClassController extends ChangeNotifier {
     isHostSpeaking = false;
   }
 
-  // ─── Participant state helpers ────────────────────────────────────────────
 
   String? _eventParticipantId(Map<String, dynamic> data) {
     final speakerValue = data['speaker'] ?? data['activeSpeaker'];
@@ -1654,7 +1789,6 @@ class LiveClassController extends ChangeNotifier {
     if (updated) _notify();
   }
 
-  // ─── State helpers ───────────────────────────────────────────────────────
 
   String _friendlyLiveClassError(Object error) {
     final value = error.toString().toLowerCase();
@@ -1693,7 +1827,6 @@ class LiveClassController extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
-  // ─── Dispose ─────────────────────────────────────────────────────────────
 
   @override
   Future<void> dispose() async {

@@ -149,7 +149,7 @@ Future<dynamic> studentLogin({
     );
   }
 
-  /// ================= VERIFY PHONE =================
+
   Future<dynamic> verifyPhone({
     required String token,
     required String accessToken,

@@ -1,37 +1,9 @@
- import '../api/api_constants.dart';
- import '../api/api_service.dart';
-
-// class SubscriptionService {
-//   
-
-//   Future<dynamic> getPlans(String token) async {
-//     return await _api.getRequest(
-//       url: "${ApiConstants.baseUrl}/api/self-paced/plans",
-//       token: token,
-//     );
-//   }
-
-  
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../api/api_constants.dart';
+import '../api/api_service.dart';
 
 class SubscriptionService {
-  static const String _baseUrl =
-      'https://d20fx2gucmvzba.cloudfront.net';
-      final ApiService _api = ApiService();
-
-  final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      sendTimeout: const Duration(seconds: 30),
-      headers: const {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-    ),
-  );
+  final ApiService _api = ApiService();
 
   Future<Map<String, dynamic>> getPlatform(
     String token,
@@ -42,13 +14,13 @@ class SubscriptionService {
       fallbackData: <String, dynamic>{},
     );
   }
+
   Future<dynamic> getMySubscription(String token) async {
     return await _api.getRequest(
       url: ApiConstants.myEnrollmentUrl,
       token: token,
     );
   }
-
 
   Future<Map<String, dynamic>> getLivePlans(
     String token,
@@ -136,27 +108,23 @@ class SubscriptionService {
     required dynamic fallbackData,
   }) async {
     try {
-      final response = await _dio.get(
-        endpoint,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $token',
-          },
-        ),
+      final url = endpoint.startsWith('http')
+          ? endpoint
+          : '${ApiConstants.liveApiBaseUrl}$endpoint';
+
+      final response = await _api.getRequest(
+        url: url,
+        token: token,
       );
 
-      debugPrint(
-        'SUBSCRIPTION API [$endpoint] => ${response.data}',
-      );
+      debugPrint('SUBSCRIPTION API [$endpoint] => $response');
 
-      final data = response.data;
-
-      if (data is Map<String, dynamic>) {
-        return data;
+      if (response is Map<String, dynamic>) {
+        return response;
       }
 
-      if (data is Map) {
-        return Map<String, dynamic>.from(data);
+      if (response is Map) {
+        return Map<String, dynamic>.from(response);
       }
 
       return {
@@ -164,21 +132,8 @@ class SubscriptionService {
         'message': 'Invalid server response',
         'data': fallbackData,
       };
-    } on DioException catch (error) {
-      debugPrint(
-        'SUBSCRIPTION API ERROR [$endpoint] => '
-        '${error.response?.data ?? error.message}',
-      );
-
-      return {
-        'success': false,
-        'message': _extractMessage(error),
-        'data': fallbackData,
-      };
     } catch (error, stackTrace) {
-      debugPrint(
-        'SUBSCRIPTION API ERROR [$endpoint] => $error',
-      );
+      debugPrint('SUBSCRIPTION API ERROR [$endpoint] => $error');
       debugPrintStack(stackTrace: stackTrace);
 
       return {
@@ -186,30 +141,6 @@ class SubscriptionService {
         'message': 'Unable to load subscription information',
         'data': fallbackData,
       };
-    }
-  }
-
-  String _extractMessage(DioException error) {
-    final data = error.response?.data;
-
-    if (data is Map && data['message'] != null) {
-      return data['message'].toString();
-    }
-
-    switch (error.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.sendTimeout:
-        return 'The request timed out';
-
-      case DioExceptionType.connectionError:
-        return 'Please check your internet connection';
-
-      case DioExceptionType.badResponse:
-        return 'The server returned an error';
-
-      default:
-        return error.message ?? 'Something went wrong';
     }
   }
 }

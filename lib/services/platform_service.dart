@@ -1,4 +1,4 @@
-// lib/services/platform_service.dart
+
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -6,7 +6,7 @@ import '../api/api_service.dart';
 class PlatformService {
   final ApiService _api = ApiService();
 
-  /// GET PLATFORM CONFIG / SETTINGS
+
   Future<dynamic> getPlatformConfig(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.platform}/config",
@@ -14,7 +14,7 @@ class PlatformService {
     );
   }
 
-  /// UPDATE PLATFORM CONFIG
+
   Future<dynamic> updatePlatformConfig(
     Map<String, dynamic> data,
     String token,
@@ -26,7 +26,7 @@ class PlatformService {
     );
   }
 
-  /// GET PLATFORM STATS (active users, revenue, sessions)
+
   Future<dynamic> getPlatformStats(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.platform}/stats",

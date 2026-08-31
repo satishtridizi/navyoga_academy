@@ -5,7 +5,7 @@ class OTPDialog extends StatefulWidget {
   final String phone;
   final bool isLoading;
 
-  /// Returns the complete OTP entered by the user.
+
   final ValueChanged<String> onVerify;
 
   final VoidCallback onResend;

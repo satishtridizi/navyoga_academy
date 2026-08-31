@@ -46,7 +46,7 @@ class PlanCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔹 TOP ROW
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -55,16 +55,16 @@ class PlanCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: plan.color.withValues(alpha: 0.15), // 🔥 FIXED
+                        color: plan.color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: Icon(plan.icon, color: plan.color), // 🔥 FIXED
+                      child: Icon(plan.icon, color: plan.color),
                     ),
                     const SizedBox(width: 10),
                     Text(
                       plan.name,
                       style: TextStyle(
-                        color: plan.color, // 🔥 dynamic
+                        color: plan.color,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -72,7 +72,7 @@ class PlanCard extends StatelessWidget {
                   ],
                 ),
 
-                /// 🔥 MOST POPULAR
+
                 if (plan.isPopular)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -80,7 +80,7 @@ class PlanCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: plan.color, // 🔥 solid color
+                      color: plan.color,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -93,7 +93,7 @@ class PlanCard extends StatelessWidget {
 
             const SizedBox(height: 18),
 
-            /// 🔹 PRICE
+
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -119,13 +119,13 @@ class PlanCard extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            /// 🔹 FEATURES
+
             ...plan.features.map(
               (f) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Row(
                   children: [
-                    Icon(Icons.check, color: plan.color, size: 18), // 🔥 FIXED
+                    Icon(Icons.check, color: plan.color, size: 18),
                     const SizedBox(width: 8),
                     Text(f),
                   ],
@@ -135,7 +135,7 @@ class PlanCard extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// 🔹 BUTTON
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -143,8 +143,8 @@ class PlanCard extends StatelessWidget {
 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: plan.isCurrent
-                      ? const Color.fromARGB(255, 107, 107, 107) // 🔥 disabled
-                      : plan.color, // 🔥 dynamic
+                      ? const Color.fromARGB(255, 107, 107, 107)
+                      : plan.color,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

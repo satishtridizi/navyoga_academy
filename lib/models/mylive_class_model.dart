@@ -80,7 +80,8 @@ class MyLiveClassModel {
     if (scheduledAt == null) return false;
 
     final now = DateTime.now();
-    final windowStart = scheduledAt!.subtract(const Duration(minutes: 15));
+
+    final windowStart = scheduledAt!.subtract(const Duration(minutes: 17));
     final effectiveDuration = duration > 0 ? duration : 60;
     final endTime = scheduledAt!.add(Duration(minutes: effectiveDuration));
 

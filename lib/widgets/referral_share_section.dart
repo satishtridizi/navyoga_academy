@@ -68,7 +68,7 @@ class ShareSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// CODE
+
           const Text("Your Referral Code"),
           const SizedBox(height: 6),
           Row(
@@ -119,7 +119,7 @@ class ShareSection extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          /// LINK
+
           const Text("Your Referral Link"),
           const SizedBox(height: 6),
           Row(

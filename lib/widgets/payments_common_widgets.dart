@@ -19,7 +19,7 @@ Widget feature(String text, {Color color = Colors.green}) => Padding(
 );
 
 Widget infoBox(String t, String v, Color c) => Container(
-  width: double.infinity, // 🔥 makes it full width (IMPORTANT)
+  width: double.infinity,
   margin: const EdgeInsets.only(bottom: 16),
   padding: const EdgeInsets.all(18),
   decoration: BoxDecoration(color: c, borderRadius: BorderRadius.circular(20)),
@@ -67,7 +67,7 @@ Widget sectionHeader(String t, String action) => Row(
       ),
     ),
 
-    /// 🔥 PAYMENT METHODS BUTTON (FIX)
+
     if (t == "Payment Methods")
       ElevatedButton.icon(
         onPressed: () {},
@@ -82,7 +82,7 @@ Widget sectionHeader(String t, String action) => Row(
         icon: const Icon(Icons.add, size: 18, color: Colors.white),
         label: const Text("Add Card", style: TextStyle(color: Colors.white)),
       )
-    /// 🔽 RECENT PAYMENTS BUTTON (already correct)
+
     else if (t == "Recent Payments")
       OutlinedButton.icon(
         onPressed: () {},
@@ -98,7 +98,7 @@ Widget sectionHeader(String t, String action) => Row(
           style: TextStyle(color: Colors.black54),
         ),
       )
-    /// 🔽 DEFAULT (for other sections)
+
     else
       chip(action),
   ],

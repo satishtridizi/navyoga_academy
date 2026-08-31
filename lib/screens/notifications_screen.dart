@@ -135,8 +135,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final token = await AuthManager.getToken();
     if (token == null) return;
     try {
-      await Future.wait(
-        unread.map((item) => service.markAsRead(token, item.id)),
+      await service.markAllAsRead(
+        token,
+        unread.map((item) => item.id).toList(),
       );
       if (!mounted) return;
       setState(() {

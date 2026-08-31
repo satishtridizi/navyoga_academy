@@ -21,7 +21,7 @@ Widget sectionHeader(
 
       const SizedBox(width: 10),
 
-      /// 👇 TEXTS TOGETHER
+
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

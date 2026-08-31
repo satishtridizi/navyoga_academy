@@ -18,6 +18,6 @@ class BadgeModel {
     required this.icon,
     required this.color,
     required this.isCompleted,
-    required this.percent, // 👈 REQUIRED
+    required this.percent,
   });
 }

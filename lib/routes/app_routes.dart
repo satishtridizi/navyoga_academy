@@ -86,10 +86,6 @@ class AppRoutes {
 
     enrollClass: (_) => const EnrollScreen(),
 
-    /*
-     * Do not register liveClass here.
-     * It requires route arguments.
-     */
 
     liveClassesList: (_) =>
         const LiveClassesListScreen(),

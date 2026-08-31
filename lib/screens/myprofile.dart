@@ -430,10 +430,11 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
                               ),
                             ],
                           ),
-                          _buildTextField(
+                          _buildDropdownField(
                             controller: genderController,
                             label: 'Gender',
                             icon: Icons.wc_outlined,
+                            options: const ['Male', 'Female', 'Other', 'Prefer not to say'],
                           ),
                         ],
                       ),
@@ -456,10 +457,11 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: _buildTextField(
+                                child: _buildDropdownField(
                                   controller: bloodGroupController,
                                   label: 'Blood Group',
                                   icon: Icons.bloodtype_outlined,
+                                  options: const ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
                                 ),
                               ),
                             ],
@@ -485,15 +487,17 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
                       icon: Icons.self_improvement,
                       child: Column(
                         children: [
-                          _buildTextField(
+                          _buildDropdownField(
                             controller: yogaExperienceController,
                             label: 'Yoga Experience',
                             icon: Icons.history_toggle_off,
+                            options: const ['Beginner', '< 1 Year', '1-3 Years', '3-5 Years', '5+ Years'],
                           ),
-                          _buildTextField(
+                          _buildDropdownField(
                             controller: currentLevelController,
                             label: 'Current Level',
                             icon: Icons.trending_up,
+                            options: const ['Basic', 'Intermediate', 'Advanced'],
                           ),
                           _buildTextField(
                             controller: areasOfInterestController,
@@ -821,6 +825,64 @@ debugPrint('FINAL AVATAR URL => ${studentData.avatar}');
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required List<String> options,
+  }) {
+    final currentVal = controller.text.trim();
+    final validVal = options.contains(currentVal) ? currentVal : null;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DropdownButtonFormField<String>(
+        isExpanded: true,
+        value: validVal,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon),
+          filled: true,
+          fillColor: const Color(0xFFFAFAFA),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Colors.deepOrange),
+          ),
+        ),
+        items: [
+          const DropdownMenuItem<String>(
+            value: '',
+            child: Text(
+              '-- None / Not Specified --',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          ...options.map((opt) => DropdownMenuItem<String>(
+                value: opt,
+                child: Text(
+                  opt,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )),
+        ],
+        onChanged: (val) {
+          setState(() {
+            controller.text = val ?? '';
+          });
+        },
       ),
     );
   }

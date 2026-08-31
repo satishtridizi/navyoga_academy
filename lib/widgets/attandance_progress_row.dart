@@ -13,7 +13,7 @@ class ProgressRow extends StatelessWidget {
 
       child: Column(
         children: [
-          /// Top row
+
           Row(
             children: [
               Expanded(
@@ -47,7 +47,7 @@ class ProgressRow extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          /// Progress bar + %
+
           Row(
             children: [
               Expanded(

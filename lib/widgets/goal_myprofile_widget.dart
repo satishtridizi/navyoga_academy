@@ -29,7 +29,7 @@ class GoalWidget extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
 
-          /// 🌈 SOFT GRADIENT
+
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -41,7 +41,7 @@ class GoalWidget extends StatelessWidget {
 
           border: Border.all(color: Colors.deepPurple.withOpacity(0.12)),
 
-          /// 🌫 SHADOW
+
           boxShadow: [
             BoxShadow(
               color: Colors.deepPurple.withOpacity(0.08),
@@ -54,7 +54,7 @@ class GoalWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔥 TITLE + %
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
@@ -96,7 +96,7 @@ class GoalWidget extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            /// 🔥 ANIMATED PROGRESS BAR
+
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: data.progress),
 
@@ -122,7 +122,7 @@ class GoalWidget extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// 🔥 SUBTITLE
+
             Text(
               data.subtitle,
 

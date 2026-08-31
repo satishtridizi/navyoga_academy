@@ -32,7 +32,7 @@ class DownloadDataScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// 🔥 HEADER
+
               AnimatedItem(
                 index: 0,
                 child: const Text(
@@ -61,7 +61,7 @@ class DownloadDataScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              /// 📦 DATA CARD
+
               AnimatedItem(
                 index: 2,
                 child: Container(
@@ -92,7 +92,7 @@ class DownloadDataScreen extends StatelessWidget {
 
                   child: Column(
                     children: [
-                      /// ICON
+
                       Container(
                         padding: const EdgeInsets.all(18),
 
@@ -141,7 +141,7 @@ class DownloadDataScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              /// 🚀 DOWNLOAD BUTTON
+
               AnimatedItem(
                 index: 3,
                 child: SizedBox(
@@ -155,7 +155,7 @@ class DownloadDataScreen extends StatelessWidget {
                         ),
                       );
 
-                      // 👉 Future API integration
+
                     },
 
                     icon: const Icon(Icons.download, color: Colors.white),
@@ -185,7 +185,7 @@ class DownloadDataScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// 🔒 FOOTER NOTE
+
               AnimatedItem(
                 index: 4,
                 child: Center(
@@ -202,7 +202,7 @@ class DownloadDataScreen extends StatelessWidget {
     );
   }
 
-  /// ✅ FEATURE ROW
+
   static Widget _featureRow(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),

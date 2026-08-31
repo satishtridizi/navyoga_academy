@@ -15,7 +15,7 @@ class AnimatedItem extends StatelessWidget {
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 40 * (1 - value)), // slide up
+            offset: Offset(0, 40 * (1 - value)),
             child: child,
           ),
         );
