@@ -23,9 +23,6 @@ class InsightCard extends StatelessWidget {
     }
   }
 
-  /// ----------------------------
-  /// IMAGE 6 style
-  /// ----------------------------
 
   Widget _simpleInsightCard() {
     return Container(
@@ -48,7 +45,7 @@ class InsightCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// 🔝 TITLE + ICON
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -81,12 +78,12 @@ class InsightCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          /// 🔻 SUBTITLE + VALUE
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              /// LEFT (subtitle + icon)
+
               Row(
                 children: [
                   Icon(
@@ -105,7 +102,7 @@ class InsightCard extends StatelessWidget {
                 ],
               ),
 
-              /// RIGHT (value)
+
               Text(
                 data.value + (data.unit.isNotEmpty ? " ${data.unit}" : ""),
                 style: const TextStyle(
@@ -121,9 +118,6 @@ class InsightCard extends StatelessWidget {
     );
   }
 
-  /// ----------------------------
-  /// IMAGE 7 Practice Streak
-  /// ----------------------------
 
   Widget _streakCard() {
     return Container(
@@ -239,9 +233,6 @@ class InsightCard extends StatelessWidget {
     );
   }
 
-  /// ----------------------------
-  /// IMAGE 8 Monthly Goal Progress
-  /// ----------------------------
 
   Widget _goalProgressCard() {
     return Container(
@@ -323,9 +314,6 @@ class InsightCard extends StatelessWidget {
     );
   }
 
-  /// ----------------------------
-  /// IMAGE 9 Excellent Attendance
-  /// ----------------------------
 
   Widget _achievementCard() {
     return Container(

@@ -50,12 +50,12 @@ class ClassCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// LEFT CONTENT
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// TITLE + DOT
+
                   Row(
                     children: [
                       Container(
@@ -83,7 +83,7 @@ class ClassCard extends StatelessWidget {
 
                   const SizedBox(height: 6),
 
-                  /// SUBTITLE
+
                   Text(
                     instructor,
                     style: const TextStyle(
@@ -94,7 +94,7 @@ class ClassCard extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  /// DURATION CHIP
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 14,
@@ -118,7 +118,7 @@ class ClassCard extends StatelessWidget {
 
             const SizedBox(width: 10),
 
-            /// JOIN BUTTON
+
             ElevatedButton(
               onPressed: onJoin,
               style: ElevatedButton.styleFrom(
@@ -143,7 +143,7 @@ class ClassCard extends StatelessWidget {
     );
   }
 
-  /// 🎨 COLOR MAPPING
+
   Color _getColor(String title) {
     if (title.contains("Hatha")) return Colors.deepOrange;
     if (title.contains("Pranayama")) return Colors.purple;

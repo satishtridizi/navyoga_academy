@@ -20,12 +20,12 @@ Widget paymentCard(PaymentMethod m, {VoidCallback? onDelete}) {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.deepOrange.withValues(alpha: 0.25), // ✅ ORANGE BORDER
+          color: Colors.deepOrange.withValues(alpha: 0.25),
         ),
       ),
       child: Row(
         children: [
-          /// ICON BOX
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -37,7 +37,7 @@ Widget paymentCard(PaymentMethod m, {VoidCallback? onDelete}) {
 
           const SizedBox(width: 12),
 
-          /// TEXT
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,7 +57,7 @@ Widget paymentCard(PaymentMethod m, {VoidCallback? onDelete}) {
             ),
           ),
 
-          /// DEFAULT TAG
+
           if (m.isDefault)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -75,7 +75,7 @@ Widget paymentCard(PaymentMethod m, {VoidCallback? onDelete}) {
 
           const SizedBox(width: 10),
 
-          /// DELETE
+
           IconButton(
             onPressed: onDelete,
             icon: const Icon(Icons.close, color: Colors.red),

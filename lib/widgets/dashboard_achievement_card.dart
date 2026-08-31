@@ -28,7 +28,7 @@ class AchievementCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 18),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          /// 🎯 BACKGROUND (KEY FIX)
+
           gradient: earned
               ? LinearGradient(
                   colors: [color.withOpacity(0.12), color.withOpacity(0.05)],
@@ -39,13 +39,13 @@ class AchievementCard extends StatelessWidget {
 
           borderRadius: BorderRadius.circular(24),
 
-          /// 🎯 BORDER
+
           border: Border.all(
             color: earned ? color : Colors.grey.shade300,
             width: earned ? 1.5 : 1.2,
           ),
 
-          /// 🎯 SHADOW
+
           boxShadow: [
             if (earned)
               BoxShadow(
@@ -59,10 +59,10 @@ class AchievementCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 🔥 TOP ROW (ICON + BADGE)
+
             Row(
               children: [
-                /// ICON
+
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -83,7 +83,7 @@ class AchievementCard extends StatelessWidget {
 
                 const SizedBox(width: 12),
 
-                /// BADGE (RIGHT OF ICON)
+
                 if (earned)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -108,7 +108,7 @@ class AchievementCard extends StatelessWidget {
 
             const SizedBox(height: 14),
 
-            /// TITLE
+
             Text(
               title,
               style: const TextStyle(
@@ -120,7 +120,7 @@ class AchievementCard extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            /// SUBTITLE
+
             Text(
               subtitle,
               style: const TextStyle(color: Colors.blueGrey, fontSize: 13),

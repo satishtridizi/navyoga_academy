@@ -6,11 +6,12 @@ import 'reminder_service.dart';
 class NotificationService {
   final ApiService _api = ApiService();
 
-  // ✅ GET ALL
+
   Future<List<Map<String, dynamic>>> getNotifications(String token) async {
     final reminderService = ReminderService();
     final localList = await reminderService.getLocalInAppNotifications();
     final dismissedIds = await reminderService.getDismissedNotificationIds();
+    final readIds = await reminderService.getReadNotificationIds();
     final clearedAt = await reminderService.getNotificationsClearedAt();
     List<dynamic> apiItems = [];
 
@@ -50,12 +51,13 @@ class NotificationService {
           !createdAt.isAfter(clearedAt)) {
         continue;
       }
+      final isRead = model.isRead || readIds.contains(model.id);
       unique[model.id] = {
         ...item,
         'id': model.id,
         'title': model.title,
         'message': model.message,
-        'isRead': model.isRead,
+        'isRead': isRead,
         'createdAt': model.createdAt,
       };
     }
@@ -70,10 +72,10 @@ class NotificationService {
         .length;
   }
 
-  // ✅ MARK AS READ
+
   Future<dynamic> markAsRead(String token, String id) async {
+    await ReminderService().markAsRead(id);
     if (id.startsWith('inapp_')) {
-      await ReminderService().markAsRead(id);
       return {'success': true};
     }
     return await _api.patchRequest(
@@ -83,7 +85,26 @@ class NotificationService {
     );
   }
 
-  // ✅ DELETE
+
+  Future<void> markAllAsRead(String token, List<String> ids) async {
+    if (ids.isEmpty) return;
+    await ReminderService().markAllAsRead(ids);
+
+    final remoteIds = ids.where((id) => !id.startsWith('inapp_')).toList();
+    if (remoteIds.isNotEmpty) {
+      await Future.wait(
+        remoteIds.map(
+          (id) => _api.patchRequest(
+            url: "${ApiConstants.baseUrl}/api/notifications/$id",
+            token: token,
+            body: {"isRead": true},
+          ).catchError((_) => null),
+        ),
+      );
+    }
+  }
+
+
   Future<dynamic> deleteNotification(String token, String id) async {
     await ReminderService().dismissNotifications([id]);
     if (id.startsWith('inapp_')) {

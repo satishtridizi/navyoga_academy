@@ -4,7 +4,7 @@ import '../api/api_service.dart';
 class SelfPacedService {
   final ApiService _api = ApiService();
 
-  /// 🔥 GET COURSES
+
   Future<dynamic> getCourses(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}/api/self-paced/modules",

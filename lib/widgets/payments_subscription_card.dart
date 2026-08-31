@@ -19,7 +19,7 @@ class SubscriptionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// TOP ROW
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -82,7 +82,7 @@ class SubscriptionCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          /// INFO BOXES
+
           infoBox("Monthly Price", sub.price, const Color(0xfff3e6df)),
           infoBox(
             "Next Billing Date",

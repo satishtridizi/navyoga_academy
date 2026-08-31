@@ -42,7 +42,7 @@ class EventCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// TITLE + PRICE
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -67,7 +67,7 @@ class EventCard extends StatelessWidget {
 
                   const SizedBox(height: 6),
 
-                  /// SEATS
+
                   Align(
                     alignment: Alignment.centerRight,
                     child: _chip("${event.seats} seats"),
@@ -75,7 +75,7 @@ class EventCard extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  /// DESCRIPTION (hide in compact)
+
                   if (!isCompact)
                     Text(
                       event.description,
@@ -86,7 +86,7 @@ class EventCard extends StatelessWidget {
 
                   const SizedBox(height: 10),
 
-                  /// INFO
+
                   Wrap(
                     spacing: 16,
                     runSpacing: 6,
@@ -109,7 +109,7 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// 🔹 IMAGE
+
   Widget _image() {
     return Stack(
       children: [
@@ -121,14 +121,14 @@ class EventCard extends StatelessWidget {
             width: double.infinity,
             fit: BoxFit.cover,
 
-            /// 🔄 Loading placeholder
+
             placeholder: (context, url) => Container(
               height: isCompact ? 140 : 200,
               color: Colors.grey[300],
               child: const Center(child: CircularProgressIndicator()),
             ),
 
-            /// ❌ Error fallback
+
             errorWidget: (context, url, error) => Container(
               height: isCompact ? 140 : 200,
               color: Colors.grey[300],
@@ -152,7 +152,7 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// 🔹 CHIP
+
   Widget _chip(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -209,7 +209,7 @@ class EventCard extends StatelessWidget {
     }
   }
 
-  /// 🔹 INFO
+
   Widget _info(IconData icon, String text) {
     return Row(
       mainAxisSize: MainAxisSize.min,

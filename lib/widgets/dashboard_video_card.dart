@@ -43,7 +43,7 @@ class VideoCard extends StatelessWidget {
 
           child: Row(
             children: [
-              /// 🎥 VIDEO THUMBNAIL
+
               Stack(
                 children: [
                   Container(
@@ -62,7 +62,7 @@ class VideoCard extends StatelessWidget {
                     ),
                   ),
 
-                  /// ▶ PLAY BUTTON
+
                   Positioned(
                     bottom: -6,
                     right: -3,
@@ -85,7 +85,7 @@ class VideoCard extends StatelessWidget {
 
               const SizedBox(width: 14),
 
-              /// 📄 TEXT CONTENT
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +111,7 @@ class VideoCard extends StatelessWidget {
 
                     const SizedBox(height: 8),
 
-                    /// 👇 VIEWS + DATE
+
                     Row(
                       children: [
                         Container(

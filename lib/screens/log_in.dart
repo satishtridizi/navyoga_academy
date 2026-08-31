@@ -92,7 +92,7 @@ class _LoginScreen extends State<LoginScreen> {
 
   void _handleFacebookLogin() {
     _showSnack("Facebook login coming soon");
-    // Future: FacebookAuth.instance.login()
+
   }
 
   void _showSnack(String msg) {
@@ -130,7 +130,7 @@ class _LoginScreen extends State<LoginScreen> {
               ),
               child: Column(
                 children: [
-                  /// 🔶 LOGO
+
                   Image.asset(
                     "assets/logo/logo_transparent_clean.png",
                     height: 120,
@@ -146,7 +146,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
-                  /// EMAIL
+
                   buildLabel("Email"),
                   const SizedBox(height: 6),
                   buildInput(
@@ -158,7 +158,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  /// PASSWORD
+
                   buildLabel("Password"),
                   const SizedBox(height: 6),
                   buildInput(
@@ -184,7 +184,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 12),
 
-                  /// REMEMBER + FORGOT
+
                   AnimatedItem(
                     index: 2,
                     child: Row(
@@ -223,7 +223,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 16),
 
-                  /// 🔘 log IN BUTTON
+
                   SizedBox(
                     width: double.infinity,
                     child: AnimatedItem(
@@ -259,7 +259,7 @@ class _LoginScreen extends State<LoginScreen> {
                                 );
 
 
-                                Navigator.pop(context); // dismiss loader
+                                Navigator.pop(context);
 
                                if (ApiHelper.isSuccess(response)) {
   final dynamic responseData = response["data"];
@@ -295,7 +295,7 @@ class _LoginScreen extends State<LoginScreen> {
   if (rememberMe) {
     await prefs.setString('saved_email', email);
 
-    // Avoid saving passwords in SharedPreferences.
+
     await prefs.remove('saved_password');
   } else {
     await prefs.remove('saved_email');
@@ -361,7 +361,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 30),
 
-                  /// SIGN UP
+
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -390,7 +390,7 @@ class _LoginScreen extends State<LoginScreen> {
 
                   const SizedBox(height: 40),
 
-                  /// COPYRIGHT
+
                   const Text(
                     "© 2026 NavYoga Academy. All rights reserved.",
                     style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -404,7 +404,7 @@ class _LoginScreen extends State<LoginScreen> {
     );
   }
 
-  /// LABEL
+
   Widget buildLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -418,17 +418,17 @@ class _LoginScreen extends State<LoginScreen> {
     );
   }
 
-  /// INPUT
+
   Widget buildInput({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
-    required int index, // 🔥 ADD THIS
+    required int index,
     bool obscure = false,
     Widget? suffix,
   }) {
     return AnimatedItem(
-      index: index, // ✅ dynamic index
+      index: index,
       child: TextField(
         controller: controller,
         obscureText: obscure,
@@ -445,7 +445,7 @@ class _LoginScreen extends State<LoginScreen> {
             borderSide: BorderSide.none,
           ),
 
-          // 🔥 ADD FOCUS ANIMATION HERE
+
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: Color(0xFFFF6A1A), width: 2),
@@ -455,7 +455,7 @@ class _LoginScreen extends State<LoginScreen> {
     );
   }
 
-  /// SOCIAL BUTTON
+
   Widget socialButton({
     required IconData icon,
     required String text,

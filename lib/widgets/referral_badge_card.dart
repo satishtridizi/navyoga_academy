@@ -34,7 +34,7 @@ class BadgeCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ICON BOX (LEFT)
+
           Stack(
             children: [
               Container(
@@ -54,7 +54,7 @@ class BadgeCard extends StatelessWidget {
                 child: Icon(badge.icon, color: Colors.white, size: 28),
               ),
 
-              /// CHECK ICON
+
               if (badge.isCompleted)
                 Positioned(
                   top: -2,
@@ -78,12 +78,12 @@ class BadgeCard extends StatelessWidget {
 
           const SizedBox(width: 14),
 
-          /// CONTENT (RIGHT)
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// TITLE
+
                 Text(
                   badge.title,
                   style: const TextStyle(
@@ -94,7 +94,7 @@ class BadgeCard extends StatelessWidget {
 
                 const SizedBox(height: 4),
 
-                /// SUBTITLE
+
                 Text(
                   badge.subtitle,
                   style: const TextStyle(color: Colors.blueGrey),
@@ -102,7 +102,7 @@ class BadgeCard extends StatelessWidget {
 
                 const SizedBox(height: 10),
 
-                /// PROGRESS TEXT ROW
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -122,7 +122,7 @@ class BadgeCard extends StatelessWidget {
 
                 const SizedBox(height: 6),
 
-                /// PROGRESS BAR
+
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
@@ -135,7 +135,7 @@ class BadgeCard extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                /// EARNED CHIP
+
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,

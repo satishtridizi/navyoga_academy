@@ -41,7 +41,7 @@ class EnrollmentSuccessScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.pushNamed(
                     context,
-                    AppRoutes.liveClass, // change later if needed
+                    AppRoutes.liveClass,
                     arguments: classData,
                   );
                 },

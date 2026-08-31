@@ -4,7 +4,7 @@ import '../api/api_constants.dart';
 class LeadsService {
   final ApiService _apiService = ApiService();
 
-  /// GET ALL LEADS
+
   Future<dynamic> getLeads(String token) async {
     return await _apiService.getRequest(
       url: ApiConstants.baseUrl + ApiConstants.leads,
@@ -12,7 +12,7 @@ class LeadsService {
     );
   }
 
-  /// GET SINGLE LEAD
+
   Future<dynamic> getLeadById(String id, String token) async {
     return await _apiService.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.leads}/$id",
@@ -20,7 +20,7 @@ class LeadsService {
     );
   }
 
-  /// CREATE LEAD
+
   Future<dynamic> createLead(Map<String, dynamic> data, String token) async {
     return await _apiService.postRequest(
       url: ApiConstants.baseUrl + ApiConstants.leads,
@@ -29,7 +29,7 @@ class LeadsService {
     );
   }
 
-  /// UPDATE LEAD (using PUT)
+
   Future<dynamic> updateLead(
     String id,
     Map<String, dynamic> data,

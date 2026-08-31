@@ -1,16 +1,23 @@
 class ApiConstants {
-  static const String baseUrl =
-      "https://dist.navyogawellness.com";
+  static const String prodBaseUrl = 'https://dist.navyogawellness.com';
+  static const String prodLiveApiBaseUrl = 'https://d20fx2gucmvzba.cloudfront.net';
+  static const String prodLiveRecordingBaseUrl = 'https://navyoga.s3.ap-south-1.amazonaws.com/assets';
 
-  static const String liveApiBaseUrl =
-      'https://d20fx2gucmvzba.cloudfront.net';
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: prodBaseUrl,
+  );
 
-  static const String liveRecordingBaseUrl =
-      'https://navyoga.s3.ap-south-1.amazonaws.com/assets';
+  static const String liveApiBaseUrl = String.fromEnvironment(
+    'LIVE_API_BASE_URL',
+    defaultValue: prodLiveApiBaseUrl,
+  );
 
-  // ─────────────────────────────────────────────
-  // Dashboard
-  // ─────────────────────────────────────────────
+  static const String liveRecordingBaseUrl = String.fromEnvironment(
+    'LIVE_RECORDING_BASE_URL',
+    defaultValue: prodLiveRecordingBaseUrl,
+  );
+
 
   static const String studentDashboard =
       '/api/dashboard/student';
@@ -18,9 +25,6 @@ class ApiConstants {
   static String get studentDashboardUrl =>
       '$baseUrl$studentDashboard';
 
-  // ─────────────────────────────────────────────
-  // Authentication & Profile
-  // ─────────────────────────────────────────────
 
   static const String studentProfile =
       '/api/auth/student/me';
@@ -34,15 +38,9 @@ class ApiConstants {
   static const String downloadData =
       '/api/auth/student/export';
 
-  // ─────────────────────────────────────────────
-  // Platform
-  // ─────────────────────────────────────────────
 
   static const String platform = '/api/platform';
 
-  // ─────────────────────────────────────────────
-  // Live Yoga
-  // ─────────────────────────────────────────────
 
   static const String myClasses =
       '/api/live/my-classes';
@@ -59,6 +57,9 @@ class ApiConstants {
   static String get myEnrollmentUrl =>
       '$liveApiBaseUrl$myEnrollment';
 
+  static String attendClassUrl(String classId) =>
+      '$liveApiBaseUrl/api/live/$classId/attend';
+
   static String buildLiveMediaUrl(String path) {
     final value = path.trim();
     if (value.isEmpty) return '';
@@ -66,8 +67,7 @@ class ApiConstants {
       return value;
     }
 
-    // The live API returns paths such as `/live/<class-id>/recording.mp4`,
-    // while the actual recordings are stored below the S3 `/assets` prefix.
+
     final normalizedPath = value.startsWith('/') ? value : '/$value';
     if (normalizedPath.startsWith('/assets/')) {
       return 'https://navyoga.s3.ap-south-1.amazonaws.com$normalizedPath';
@@ -78,9 +78,6 @@ class ApiConstants {
   static const String studentClassAttendanceUrl =
       '$baseUrl/api/attendance/students/me/classes';
 
-  // ─────────────────────────────────────────────
-  // Self-Paced
-  // ─────────────────────────────────────────────
 
   static const String selfPacedPlans =
       '/api/self-paced/plans';
@@ -91,9 +88,6 @@ class ApiConstants {
   static const String selfPacedSubscription =
       '/api/self-paced/my-subscription';
 
-  // ─────────────────────────────────────────────
-  // YTT Live
-  // ─────────────────────────────────────────────
 
   static const String yttLivePlans =
       '/api/ytt-live/plans';
@@ -101,9 +95,6 @@ class ApiConstants {
   static const String yttLiveEnrollments =
       '/api/ytt-live/my-enrollments';
 
-  // ─────────────────────────────────────────────
-  // YTT Recorded
-  // ─────────────────────────────────────────────
 
   static const String yttRecordedPlans =
       '/api/ytt-recorded/plans';
@@ -111,16 +102,10 @@ class ApiConstants {
   static const String yttRecordedEnrollments =
       '/api/ytt-recorded/my-enrollments';
 
-  // ─────────────────────────────────────────────
-  // Subscriptions
-  // ─────────────────────────────────────────────
 
   static const String renewalPrompt =
       '/api/subscriptions/renewal-prompt';
 
-  // ─────────────────────────────────────────────
-  // Events
-  // ─────────────────────────────────────────────
 
   static const String upcomingEvents =
       '/api/events/upcoming';
@@ -150,9 +135,6 @@ class ApiConstants {
     return '/api/events/$eventId/enroll';
   }
 
-  // ─────────────────────────────────────────────
-  // Workshops
-  // ─────────────────────────────────────────────
 
   static const String upcomingWorkshops =
       '/api/workshops/upcoming';
@@ -169,9 +151,6 @@ class ApiConstants {
     return '$upcomingWorkshops?limit=$limit';
   }
 
-  // ─────────────────────────────────────────────
-  // Payments
-  // ─────────────────────────────────────────────
 
   static const String initiatePayment =
       '/api/payments/initiate';
@@ -179,9 +158,6 @@ class ApiConstants {
   static const String verifyPayment =
       '/api/payments/verify';
 
-  // ─────────────────────────────────────────────
-  // Existing admin/general endpoints
-  // ─────────────────────────────────────────────
 
   static const String leads = '/leads';
   static const String batches = '/api/batches';
@@ -192,9 +168,6 @@ class ApiConstants {
   static const String tutors = '/api/tutors';
   static const String workshops = '/api/workshops';
 
-  // ─────────────────────────────────────────────
-  // URL helpers
-  // ─────────────────────────────────────────────
 
   static String buildUrl(String endpoint) {
     if (endpoint.startsWith('http://') ||

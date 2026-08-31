@@ -17,12 +17,12 @@ class ClassDetailsScreen extends StatelessWidget {
     return AppScaffold(
       currentIndex: 0,
 
-      //backgroundColor: Colors.transparent,
+
       body: CustomScrollView(
         physics: const ClampingScrollPhysics(),
 
         slivers: [
-          /// 🔥 APP BAR
+
           SliverAppBar(
             expandedHeight: 260,
             pinned: true,
@@ -93,7 +93,7 @@ class ClassDetailsScreen extends StatelessWidget {
             ),
           ),
 
-          /// 🔥 CONTENT
+
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(20),
@@ -102,7 +102,7 @@ class ClassDetailsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  /// TAGS
+
                   AnimatedItem(
                     index: 2,
 
@@ -140,7 +140,7 @@ class ClassDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  /// DESCRIPTION CARD
+
                   AnimatedItem(
                     index: 3,
 
@@ -190,7 +190,7 @@ class ClassDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  /// SCHEDULE CARD
+
                   AnimatedItem(
                     index: 4,
 
@@ -234,7 +234,7 @@ class ClassDetailsScreen extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  /// BUTTONS
+
                   AnimatedItem(
                     index: 5,
 

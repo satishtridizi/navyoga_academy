@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-//import 'package:navyoga_academy/models/selfpaces_course_model.dart';
 import '../models/stat_model.dart';
 import '../models/event_model.dart';
 
 class AppData {
-  /// EVENT STATS
   static const List<StatModel> stats = [
     StatModel(
       label: "Total Events",
@@ -35,7 +33,6 @@ class AppData {
     ),
   ];
 
-  /// FEATURED EVENTS
   static const List<EventModel> featuredEvents = [
     EventModel(
       id: "1",
@@ -94,7 +91,6 @@ class AppData {
     ),
   ];
 
-  /// ALL EVENTS
   static const List<EventModel> allEvents = [
     EventModel(
       id: "1",
@@ -180,30 +176,4 @@ class AppData {
       occupancy: '',
     ),
   ];
-  // static final courses = [
-  //   CourseModel(
-  //     title: "Yoga Fundamentals\nfor Beginners",
-
-  //     description:
-  //         "Master the basic yoga poses, breathing techniques, and foundational",
-
-  //     instructor: "Priya Sharma",
-
-  //     duration: "6 hours",
-
-  //     lessons: "8 of 24 lessons",
-
-  //     level: "Beginner",
-
-  //     status: "Enrolled",
-
-  //     rating: "4.9",
-
-  //     progressLabel: "33%",
-
-  //     image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773",
-
-  //     progress: .33,
-  //   ),
-  // ];
 }

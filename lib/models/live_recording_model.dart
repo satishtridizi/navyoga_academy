@@ -66,9 +66,8 @@ class LiveRecording {
           'Recorded Live Class',
       yogaType: (json['yogaType'] ?? json['yoga_type'])?.toString() ?? 'Yoga',
       difficulty: (json['difficulty'] ?? json['level'])?.toString() ?? '',
-      // Do not use the scheduled class duration here. A 60-minute class can
-      // produce a much shorter recording. Only accept recording-specific
-      // duration metadata when the backend supplies it.
+
+
       duration: _recordingDurationMinutes(json, recordingMap),
       durationSeconds: _recordingDurationSeconds(json, recordingMap),
       tutorName: (tutor['name'] ?? json['tutorName'] ?? json['trainerName'])

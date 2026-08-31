@@ -12,7 +12,7 @@ Widget paymentHistoryCard(PaymentHistory p) {
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        /// LEFT
+
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -25,7 +25,7 @@ Widget paymentHistoryCard(PaymentHistory p) {
           ],
         ),
 
-        /// RIGHT
+
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [

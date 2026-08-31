@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ shows its own system splash screen (app icon on a
+         background) automatically before Flutter's first frame, on top of
+         the LaunchTheme background below. Without this, it defaults to a
+         white background behind the launcher icon, which reads as a
+         mismatched "logo flash" before the branded splash image
+         (Colors.white background in splash_screen.dart) takes over.
+         Matching the background color here makes that system splash and
+         the Dart splash feel like one continuous screen. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@android:color/white</item>
+    </style>
+
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

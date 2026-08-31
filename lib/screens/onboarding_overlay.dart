@@ -111,10 +111,7 @@ class OnboardingOverlayState extends State<OnboardingOverlay> {
       throw Exception("No response received while sending OTP.");
     }
 
-    /*
-     * MSG91 response may expose reqId directly or inside data.
-     * This handles the common response formats.
-     */
+
     final dynamic requestId =
         response["reqId"] ??
         response["requestId"] ??

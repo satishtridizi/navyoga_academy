@@ -26,7 +26,6 @@ class SettingsPaymentSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// 🔥 HEADER
           Row(
             children: const [
               Icon(Icons.credit_card, color: Colors.deepOrange),
@@ -44,18 +43,16 @@ class SettingsPaymentSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔥 MEMBERSHIP CARD (UPDATED)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xffF4F7F6), // ✅ soft bg
+              color: const Color(0xffF4F7F6),
               border: Border.all(color: Colors.green, width: 1.5),
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// TOP ROW
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -67,7 +64,6 @@ class SettingsPaymentSection extends StatelessWidget {
                       ),
                     ),
 
-                    /// 🔥 ACTIVE PILL
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -94,7 +90,6 @@ class SettingsPaymentSection extends StatelessWidget {
 
                 const SizedBox(height: 14),
 
-                /// 🔥 PRICE ROW (NEW)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -117,7 +112,6 @@ class SettingsPaymentSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔥 PAYMENT METHOD (UPDATED BUTTON)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -139,7 +133,6 @@ class SettingsPaymentSection extends StatelessWidget {
                   ],
                 ),
 
-                /// 🔥 ROUNDED BUTTON
                 OutlinedButton(
                   onPressed: onManagePayment,
                   style: OutlinedButton.styleFrom(
@@ -155,7 +148,6 @@ class SettingsPaymentSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔥 AUTO RENEW (UPDATED)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -164,7 +156,6 @@ class SettingsPaymentSection extends StatelessWidget {
             ),
             child: Row(
               children: [
-                /// TEXT BLOCK
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +173,6 @@ class SettingsPaymentSection extends StatelessWidget {
                   ),
                 ),
 
-                /// SWITCH
                 Switch(
                   value: paymentData["autoRenew"],
                   onChanged: onAutoRenewChanged,
@@ -194,7 +184,6 @@ class SettingsPaymentSection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔥 BOTTOM BUTTON (FULL WIDTH STYLE)
           GestureDetector(
             onTap: onViewPaymentDetails,
 

@@ -90,7 +90,7 @@ class _YttRecordedScreenState extends State<YttRecordedScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header Section
+
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(36, 60, 36, 40),
@@ -188,7 +188,7 @@ class _YttRecordedScreenState extends State<YttRecordedScreen> {
               ),
             ),
 
-            // Empty State
+
             Padding(
               padding: const EdgeInsets.all(20),
               child: Container(

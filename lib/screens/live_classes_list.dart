@@ -78,7 +78,7 @@ class _LiveClassesListScreenState extends State<LiveClassesListScreen> {
                       Navigator.pushNamed(
                         context,
                         AppRoutes.liveClass,
-                        arguments: c, // 🔥 VERY IMPORTANT
+                        arguments: c,
                       );
                     },
                   ),

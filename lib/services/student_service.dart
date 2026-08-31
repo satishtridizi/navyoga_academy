@@ -1,4 +1,4 @@
-// lib/services/student_service.dart
+
 
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
@@ -6,7 +6,7 @@ import '../api/api_service.dart';
 class StudentService {
   final ApiService _api = ApiService();
 
-  /// LIST ALL STUDENTS
+
   Future<dynamic> getStudents(String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.students}",
@@ -14,7 +14,7 @@ class StudentService {
     );
   }
 
-  /// GET SINGLE STUDENT
+
   Future<dynamic> getStudentById(String id, String token) async {
     return await _api.getRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.students}/$id",
@@ -22,7 +22,7 @@ class StudentService {
     );
   }
 
-  /// CREATE STUDENT
+
   Future<dynamic> createStudent(Map<String, dynamic> data, String token) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.students}",
@@ -31,7 +31,7 @@ class StudentService {
     );
   }
 
-  /// UPDATE STUDENT
+
   Future<dynamic> updateStudent(
     String id,
     Map<String, dynamic> data,
@@ -44,7 +44,7 @@ class StudentService {
     );
   }
 
-  /// DELETE STUDENT
+
   Future<dynamic> deleteStudent(String id, String token) async {
     return await _api.deleteRequest(
       url: "${ApiConstants.baseUrl}${ApiConstants.students}/$id",

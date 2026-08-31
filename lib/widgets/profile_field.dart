@@ -16,7 +16,7 @@ class ProfileField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// LABEL
+
           Text(
             item.label,
             style: const TextStyle(
@@ -28,7 +28,7 @@ class ProfileField extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          /// TEXT FIELD
+
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
 
@@ -48,7 +48,7 @@ class ProfileField extends StatelessWidget {
               controller: controller,
               maxLines: multi ? 3 : 1,
               decoration: InputDecoration(
-                hintText: item.helperText, // ✅ HERE
+                hintText: item.helperText,
                 prefixIcon: item.icon != null ? Icon(item.icon) : null,
 
                 filled: true,

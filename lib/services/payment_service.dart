@@ -4,7 +4,7 @@ import '../api/api_service.dart';
 class PaymentService {
   final ApiService _api = ApiService();
 
-  /// INITIATE PAYMENT
+
   Future<dynamic> initiatePayment(
     String token,
     Map<String, dynamic> body,
@@ -16,7 +16,7 @@ class PaymentService {
     );
   }
 
-  /// VERIFY PAYMENT
+
   Future<dynamic> verifyPayment(String token, Map<String, dynamic> body) async {
     return await _api.postRequest(
       url: "${ApiConstants.baseUrl}/api/payments/verify",

@@ -37,7 +37,7 @@ class _MyClassesScreenState extends State<MyClassesScreen> {
   String _searchQuery = '';
   String _selectedStatus = 'All Classes';
   String _selectedDifficulty = 'All Levels';
-  
+
   String? _studentName;
   Timer? _joinWindowTimer;
 

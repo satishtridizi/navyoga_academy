@@ -21,10 +21,10 @@ class RewardSummarySection extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFDF9), // lighter, cleaner
+        color: const Color(0xFFFFFDF9),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFFFE6CC), // lighter
+          color: const Color(0xFFFFE6CC),
           width: 1,
         ),
         boxShadow: [
@@ -38,7 +38,7 @@ class RewardSummarySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// 🔹 Header
+
           Row(
             children: const [
               Icon(Icons.workspace_premium_outlined, color: Colors.deepPurple),
@@ -56,7 +56,7 @@ class RewardSummarySection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔹 Balance Card
+
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -89,13 +89,13 @@ class RewardSummarySection extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// 🔹 Stats
+
           _rowItem("Total Earned", "₹ $totalEarned"),
           _rowItem("Redeemed", "₹ 0"),
           _rowItem("Pending", "₹ 0"),
           const SizedBox(height: 16),
 
-          /// 🔹 Button
+
           InkWell(
             borderRadius: BorderRadius.circular(20),
             onTap: () {
@@ -142,7 +142,7 @@ class RewardSummarySection extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          /// 🔹 Footer Note
+
           const Center(
             child: Text(
               "Rewards can be redeemed for subscription discounts or transferred to your account",
@@ -155,7 +155,7 @@ class RewardSummarySection extends StatelessWidget {
     );
   }
 
-  /// 🔹 Helper Row
+
   Widget _rowItem(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

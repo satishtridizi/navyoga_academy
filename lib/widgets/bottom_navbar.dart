@@ -10,10 +10,7 @@ class BottomNavbar extends StatelessWidget {
 
   final int currentIndex;
 
-  /// Optional custom navigation callback.
-  ///
-  /// When provided, the parent screen controls navigation.
-  /// Otherwise, this widget uses the registered named routes.
+
   final void Function(BuildContext context, int index)? onTap;
 
   static  List<String> _routes = [
@@ -28,17 +25,17 @@ class BottomNavbar extends StatelessWidget {
     BuildContext context,
     int selectedIndex,
   ) {
-    
+
     if (selectedIndex < 0 || selectedIndex >= _routes.length) {
       return;
     }
 
-    // Avoid reopening the screen that is already active.
+
     if (selectedIndex == currentIndex) {
       return;
     }
 
-    // Allow parent widgets to provide custom navigation.
+
     if (onTap != null) {
       onTap!(context, selectedIndex);
       return;

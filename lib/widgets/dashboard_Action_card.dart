@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 class ActionCard extends StatelessWidget {
   final String title, subtitle;
   final Color color;
-  final VoidCallback? onTap; // ✅ ADD THIS
+  final VoidCallback? onTap;
 
   const ActionCard(
     this.title,
     this.subtitle,
     this.color, {
     super.key,
-    this.onTap, // ✅ ADD THIS
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      // ✅ MAKE CLICKABLE
+
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
 

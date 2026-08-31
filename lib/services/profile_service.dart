@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
-
 import '../api/api_constants.dart';
 import '../api/api_service.dart';
 
@@ -38,7 +36,7 @@ class ProfileService {
       'yogaExperience': _clean(yogaExperience),
       'currentLevel': _clean(currentLevel),
       'areasOfInterest': _clean(areasOfInterest),
-    }..removeWhere((key, value) => value == null);
+    };
 
     return _api.patchRequest(
       url: '${ApiConstants.baseUrl}/api/auth/student/me',
@@ -90,16 +88,19 @@ class ProfileService {
       };
     }
 
-    final uploadResponse = await http.put(
-      Uri.parse(uploadUrl),
-      headers: {'Content-Type': contentType},
-      body: await imageFile.readAsBytes(),
+    final bytes = await imageFile.readAsBytes();
+    final uploadResponse = await _api.uploadBytesRequest(
+      url: uploadUrl,
+      contentType: contentType,
+      bytes: bytes,
     );
 
-    if (uploadResponse.statusCode < 200 || uploadResponse.statusCode >= 300) {
+    if (uploadResponse is! Map || uploadResponse['success'] != true) {
       return {
         'success': false,
-        'message': 'Profile image upload failed (${uploadResponse.statusCode}).',
+        'message': uploadResponse is Map && uploadResponse['message'] != null
+            ? uploadResponse['message'].toString()
+            : 'Profile image upload failed.',
       };
     }
 

@@ -20,9 +20,7 @@ class AppScaffold extends StatelessWidget {
   final Color? backgroundColor;
   final Widget? floatingActionButton;
 
-  /// Optional custom handler for bottom-navigation taps.
-  ///
-  /// When this is null, BottomNavbar handles navigation internally.
+
   final void Function(BuildContext context, int index)? onBottomNavTap;
 
   @override
@@ -31,6 +29,9 @@ class AppScaffold extends StatelessWidget {
       backgroundColor: backgroundColor ?? const Color(0xFFF7F7F7),
       appBar: appBar,
       drawer: drawer,
+
+
+      drawerEnableOpenDragGesture: false,
       body: body,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: BottomNavbar(

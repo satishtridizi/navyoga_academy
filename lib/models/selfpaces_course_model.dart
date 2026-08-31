@@ -44,7 +44,7 @@ class CourseModel {
       duration: json["duration"] ?? "Self-paced",
       level: json["level"] ?? "All Levels",
 
-      // ✅ THIS LINE FIXES YOUR CRASH
+
       rating:
           double.tryParse(
             json["rating"]?.toString().replaceAll(RegExp(r'[^0-9.]'), '') ??

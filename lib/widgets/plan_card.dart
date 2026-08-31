@@ -59,7 +59,7 @@ class PlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// TOP
+
           Row(
             children: [
               Container(
@@ -107,7 +107,7 @@ class PlanCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          /// PRICE
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -148,7 +148,7 @@ class PlanCard extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          /// FEATURES
+
           ...plan.features.map(
             (feature) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -168,7 +168,7 @@ class PlanCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          /// BUTTON
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

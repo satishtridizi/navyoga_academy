@@ -19,7 +19,7 @@ class AvailableClassCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
 
-        /// 🔥 TOP BORDER COLOR (IMPORTANT)
+
         border: Border(top: BorderSide(color: mainColor, width: 5)),
 
         boxShadow: [
@@ -34,7 +34,7 @@ class AvailableClassCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// TITLE
+
           Text(
             data.title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -42,12 +42,12 @@ class AvailableClassCard extends StatelessWidget {
 
           const SizedBox(height: 6),
 
-          /// TRAINER
+
           Text(data.trainer, style: const TextStyle(color: Colors.blueGrey)),
 
           const SizedBox(height: 12),
 
-          /// TAGS
+
           Wrap(
             spacing: 8,
             children: [
@@ -58,7 +58,7 @@ class AvailableClassCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          /// ENROLL BUTTON
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(

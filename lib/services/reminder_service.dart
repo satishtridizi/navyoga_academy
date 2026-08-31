@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../utils/auth_manager.dart';
+
 class ReminderService {
   ReminderService._internal();
   static final ReminderService _instance = ReminderService._internal();
@@ -17,8 +19,24 @@ class ReminderService {
   static const String _localNotifStorageKey = 'app_local_in_app_notifications';
   static const String _dismissedNotifStorageKey =
       'app_dismissed_notification_ids';
+  static const String _readNotifStorageKey = 'app_read_notification_ids';
   static const String _notificationsClearedAtKey =
       'app_notifications_cleared_at';
+
+  String? _cachedUserKey;
+
+
+  Future<String> _userKey() async {
+    final key = await AuthManager.getUserId() ?? 'anonymous';
+    if (_cachedUserKey != key) {
+      _cachedUserKey = key;
+      _readNotifIdsCache = null;
+      _dismissedNotifIdsCache = null;
+    }
+    return key;
+  }
+
+  Future<String> _scopedKey(String base) async => '${await _userKey()}::$base';
 
   Future<void> init() async {
     if (_initialized) return;
@@ -53,7 +71,7 @@ class ReminderService {
     }
   }
 
-  /// Request permissions on Android 13+ / iOS
+
   Future<void> requestPermissions() async {
     try {
       final androidPlatform = _notificationsPlugin
@@ -74,8 +92,7 @@ class ReminderService {
     }
   }
 
-  /// Immediately surface and persist a class-created notification. Persisting
-  /// here keeps the in-app inbox consistent with the system notification.
+
   Future<void> showNewClassNotification({
     required String classId,
     required String classTitle,
@@ -114,7 +131,7 @@ class ReminderService {
     );
   }
 
-  /// Schedule Class Reminders: 30 minutes and 15 minutes prior to class scheduled start
+
   Future<void> scheduleClassReminders({
     required String classId,
     required String classTitle,
@@ -129,7 +146,7 @@ class ReminderService {
     final inboxId30 = 'inapp_${classId}_30m';
     final inboxId15 = 'inapp_${classId}_15m';
 
-    // 1. 30 Minutes Reminder
+
     if (time30m.isAfter(now) && !dismissedIds.contains(inboxId30)) {
       final id30 = _generateNotifId('${classId}_30m');
       await _scheduleLocalNotification(
@@ -148,7 +165,7 @@ class ReminderService {
       );
     }
 
-    // 2. 15 Minutes Reminder
+
     if (time15m.isAfter(now) && !dismissedIds.contains(inboxId15)) {
       final id15 = _generateNotifId('${classId}_15m');
       await _scheduleLocalNotification(
@@ -168,7 +185,7 @@ class ReminderService {
     }
   }
 
-  /// Schedule Subscription Renewal Reminder: 7 days before renewal
+
   Future<void> scheduleSubscriptionRenewalReminder({
     required DateTime renewalDate,
     String? planName,
@@ -245,7 +262,7 @@ class ReminderService {
     }
   }
 
-  /// Store notification in SharedPreferences so it shows up in in-app list
+
   Future<void> _saveInAppNotification({
     required String id,
     required String title,
@@ -255,11 +272,12 @@ class ReminderService {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (await isNotificationDismissed(id)) return;
-      final existingRaw = prefs.getStringList(_localNotifStorageKey) ?? [];
+      final storageKey = await _scopedKey(_localNotifStorageKey);
+      final existingRaw = prefs.getStringList(storageKey) ?? [];
 
       final existingList = existingRaw.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
 
-      // Avoid duplicates
+
       if (existingList.any((item) => item['id'] == id)) return;
 
       existingList.insert(0, {
@@ -271,20 +289,38 @@ class ReminderService {
       });
 
       final updatedRaw = existingList.map((e) => jsonEncode(e)).toList();
-      await prefs.setStringList(_localNotifStorageKey, updatedRaw);
+      await prefs.setStringList(storageKey, updatedRaw);
     } catch (e) {
       debugPrint('Error saving in-app notification: $e');
     }
   }
 
-  /// Fetch all saved local in-app notifications
+
+  static const Duration _localNotifRetention = Duration(days: 3);
+
+
   Future<List<Map<String, dynamic>>> getLocalInAppNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final rawList = prefs.getStringList(_localNotifStorageKey) ?? [];
+      final storageKey = await _scopedKey(_localNotifStorageKey);
+      final rawList = prefs.getStringList(storageKey) ?? [];
       final dismissedIds = await getDismissedNotificationIds();
-      return rawList
-          .map((e) => jsonDecode(e) as Map<String, dynamic>)
+      final cutoff = DateTime.now().subtract(_localNotifRetention);
+
+      final decoded = rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+      final fresh = decoded.where((item) {
+        final createdAt = DateTime.tryParse(item['createdAt']?.toString() ?? '');
+        return createdAt == null || createdAt.isAfter(cutoff);
+      }).toList();
+
+      if (fresh.length != decoded.length) {
+        await prefs.setStringList(
+          storageKey,
+          fresh.map((e) => jsonEncode(e)).toList(),
+        );
+      }
+
+      return fresh
           .where((item) => !dismissedIds.contains(item['id']?.toString()))
           .toList();
     } catch (_) {
@@ -292,38 +328,80 @@ class ReminderService {
     }
   }
 
-  /// Mark local notification as read
-  Future<void> markAsRead(String id) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final rawList = prefs.getStringList(_localNotifStorageKey) ?? [];
-      final list = rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+  Set<String>? _readNotifIdsCache;
+  Set<String>? _dismissedNotifIdsCache;
 
-      for (var item in list) {
-        if (item['id'] == id) {
-          item['isRead'] = true;
+
+  Future<void> markAsRead(String id) async {
+    await markAllAsRead([id]);
+  }
+
+
+  Future<void> markAllAsRead(Iterable<String> ids) async {
+    final cleanIds = ids.map((id) => id.trim()).where((id) => id.isNotEmpty).toSet();
+    if (cleanIds.isEmpty) return;
+
+    try {
+      final current = await getReadNotificationIds();
+      current.addAll(cleanIds);
+      _readNotifIdsCache = current;
+
+      final prefs = await SharedPreferences.getInstance();
+
+      final localKey = await _scopedKey(_localNotifStorageKey);
+      final rawList = prefs.getStringList(localKey) ?? [];
+      if (rawList.isNotEmpty) {
+        final list = rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
+        bool changed = false;
+        for (var item in list) {
+          final itemId = item['id']?.toString();
+          if (itemId != null && cleanIds.contains(itemId)) {
+            item['isRead'] = true;
+            changed = true;
+          }
+        }
+        if (changed) {
+          await prefs.setStringList(
+            localKey,
+            list.map((e) => jsonEncode(e)).toList(),
+          );
         }
       }
 
-      await prefs.setStringList(
-        _localNotifStorageKey,
-        list.map((e) => jsonEncode(e)).toList(),
-      );
+      final values = current.toList();
+      final retained = values.length > 1000
+          ? values.sublist(values.length - 1000)
+          : values;
+      await prefs.setStringList(await _scopedKey(_readNotifStorageKey), retained);
     } catch (_) {}
   }
 
-  /// Delete local notification
+  Future<Set<String>> getReadNotificationIds() async {
+    final storageKey = await _scopedKey(_readNotifStorageKey);
+    if (_readNotifIdsCache != null) {
+      return Set<String>.from(_readNotifIdsCache!);
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final ids = (prefs.getStringList(storageKey) ?? const <String>[])
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    _readNotifIdsCache = ids;
+    return Set<String>.from(ids);
+  }
+
+
   Future<void> deleteNotification(String id) async {
     try {
       await dismissNotifications([id]);
       final prefs = await SharedPreferences.getInstance();
-      final rawList = prefs.getStringList(_localNotifStorageKey) ?? [];
+      final localKey = await _scopedKey(_localNotifStorageKey);
+      final rawList = prefs.getStringList(localKey) ?? [];
       final list = rawList.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
 
       list.removeWhere((item) => item['id'] == id);
 
       await prefs.setStringList(
-        _localNotifStorageKey,
+        localKey,
         list.map((e) => jsonEncode(e)).toList(),
       );
       await _notificationsPlugin.cancel(_systemNotificationIdForInboxId(id));
@@ -333,30 +411,41 @@ class ReminderService {
   Future<void> clearNotifications({Iterable<String> ids = const []}) async {
     final prefs = await SharedPreferences.getInstance();
     final stored = await getLocalInAppNotifications();
-    await dismissNotifications([
+    final clearedIds = {
       ...ids,
       ...stored.map((item) => item['id']?.toString() ?? ''),
-    ]);
-    await prefs.remove(_localNotifStorageKey);
+    }..removeWhere((id) => id.isEmpty);
+    await dismissNotifications(clearedIds);
+    await prefs.remove(await _scopedKey(_localNotifStorageKey));
     await prefs.setString(
-      _notificationsClearedAtKey,
+      await _scopedKey(_notificationsClearedAtKey),
       DateTime.now().toUtc().toIso8601String(),
     );
-    await _notificationsPlugin.cancelAll();
+
+
+    for (final id in clearedIds) {
+      await _notificationsPlugin.cancel(_systemNotificationIdForInboxId(id));
+    }
   }
 
   Future<DateTime?> getNotificationsClearedAt() async {
     final prefs = await SharedPreferences.getInstance();
     return DateTime.tryParse(
-      prefs.getString(_notificationsClearedAtKey) ?? '',
+      prefs.getString(await _scopedKey(_notificationsClearedAtKey)) ?? '',
     )?.toUtc();
   }
 
   Future<Set<String>> getDismissedNotificationIds() async {
+    final storageKey = await _scopedKey(_dismissedNotifStorageKey);
+    if (_dismissedNotifIdsCache != null) {
+      return Set<String>.from(_dismissedNotifIdsCache!);
+    }
     final prefs = await SharedPreferences.getInstance();
-    return (prefs.getStringList(_dismissedNotifStorageKey) ?? const <String>[])
+    final ids = (prefs.getStringList(storageKey) ?? const <String>[])
         .where((id) => id.isNotEmpty)
         .toSet();
+    _dismissedNotifIdsCache = ids;
+    return Set<String>.from(ids);
   }
 
   Future<bool> isNotificationDismissed(String id) async {
@@ -365,16 +454,19 @@ class ReminderService {
   }
 
   Future<void> dismissNotifications(Iterable<String> ids) async {
-    final cleanIds = ids.where((id) => id.trim().isNotEmpty).toSet();
+    final cleanIds = ids.map((id) => id.trim()).where((id) => id.isNotEmpty).toSet();
     if (cleanIds.isEmpty) return;
-    final prefs = await SharedPreferences.getInstance();
+
     final existing = await getDismissedNotificationIds();
     existing.addAll(cleanIds);
+    _dismissedNotifIdsCache = existing;
+
+    final prefs = await SharedPreferences.getInstance();
     final values = existing.toList();
     final retained = values.length > 1000
         ? values.sublist(values.length - 1000)
         : values;
-    await prefs.setStringList(_dismissedNotifStorageKey, retained);
+    await prefs.setStringList(await _scopedKey(_dismissedNotifStorageKey), retained);
   }
 
   int _systemNotificationIdForInboxId(String id) {

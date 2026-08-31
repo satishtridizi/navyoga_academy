@@ -15,7 +15,7 @@ class EnrollScreen extends StatelessWidget {
     return AppScaffold(
       currentIndex: 0,
 
-      //backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

@@ -56,7 +56,7 @@ class ReferralUserCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          /// AVATAR
+
           Container(
             width: 45,
             height: 45,
@@ -79,7 +79,7 @@ class ReferralUserCard extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          /// LEFT SIDE
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,7 +129,7 @@ class ReferralUserCard extends StatelessWidget {
             ),
           ),
 
-          /// RIGHT SIDE
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [

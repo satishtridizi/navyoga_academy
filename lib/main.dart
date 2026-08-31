@@ -73,8 +73,8 @@ class MyApp extends StatelessWidget {
 
       scrollBehavior: const NoGlowScrollBehavior(),
       onGenerateRoute: AppRoutes.onGenerateRoute,
-      // Flutter otherwise builds every prefix route for an initial route such
-      // as /login, which constructs the dashboard (`/`) behind the login page.
+
+
       onGenerateInitialRoutes: (initialRoute) => [
         MaterialPageRoute<void>(
           settings: const RouteSettings(name: AppRoutes.splash),

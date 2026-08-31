@@ -267,9 +267,7 @@ class SfuSocketService {
         _reconnectController.add(null);
       }
 
-      // The controller owns the full room/media rejoin. A socket reconnect
-      // invalidates the server-side mediasoup transports, so rejoining here
-      // alone would leave the UI connected to stale transports.
+
     });
 
     socket.on(
@@ -407,9 +405,7 @@ class SfuSocketService {
       }
     }
 
-    // The web client and backend have used different chat broadcast names over
-    // time. Socket.IO's catch-all listener lets the mobile client receive the
-    // active contract without registering the same payload multiple times.
+
     socket.onAny((String event, dynamic data) {
       final eventName = event.toLowerCase();
       if (eventName.contains('chat') || eventName.contains('message')) {

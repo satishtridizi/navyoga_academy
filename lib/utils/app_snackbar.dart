@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppSnackbar {
-  /// ✅ SUCCESS
+
   static void showSuccess(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -14,7 +14,7 @@ class AppSnackbar {
     );
   }
 
-  /// ❌ ERROR
+
   static void showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -27,7 +27,7 @@ class AppSnackbar {
     );
   }
 
-  /// ⚠️ WARNING
+
   static void showWarning(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

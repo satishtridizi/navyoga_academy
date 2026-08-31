@@ -12,12 +12,12 @@ class IconBox extends StatelessWidget {
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(10), // reduced from 12
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Icon(
         icon,
         color: color,
-        size: 14, // reduced from 18
+        size: 14,
       ),
     );
   }

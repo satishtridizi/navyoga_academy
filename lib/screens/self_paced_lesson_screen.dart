@@ -114,13 +114,7 @@ class _SelfPacedLessonScreenState extends State<SelfPacedLessonScreen> {
 
                   const SizedBox(height: 30),
 
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   child: ElevatedButton(
-                  //     onPressed: markLessonComplete,
-                  //     child: const Text("Mark Complete"),
-                  //   ),
-                  // ),
+
                 ],
               ),
             ),

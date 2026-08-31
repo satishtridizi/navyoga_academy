@@ -89,13 +89,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         return;
       }
 
-      /*
-       * These calls correspond to:
-       *
-       * GET /api/self-paced/my-subscription
-       * GET /api/self-paced/modules
-       * GET self-paced plans
-       */
+
       final responses = await Future.wait([
         _subscriptionService.getMySubscription(token),
         _selfPacedService.getCourses(token),
@@ -228,10 +222,7 @@ class _SelfPacedLearningScreenState extends State<SelfPacedLearningScreen> {
         )
         .toList();
 
-    /*
-     * Do not calculate progress when the user does not have a
-     * subscription unless the backend allows progress access.
-     */
+
     if (!hasActiveSubscription || courses.isEmpty) {
       totalClasses = 0;
       overallProgress = 0;
